@@ -2,26 +2,26 @@
 
 namespace webignition\Tests\CssValidatorWrapper;
 
-class GetSetJavaExecutablePathTest extends \PHPUnit_Framework_TestCase {
+class GetSetCssValidatorPathTest extends \PHPUnit_Framework_TestCase {
     
-    public function testDefaultJavaExecutablePath() {        
+    public function testDefaultCssValdiatorPath() {        
         $configuration = new \webignition\CssValidatorWrapper\Configuration();
-        $this->assertEquals(\webignition\CssValidatorWrapper\Configuration::DEFAULT_JAVA_EXECUTABLE_PATH, $configuration->getJavaExecutablePath());
+        $this->assertEquals(\webignition\CssValidatorWrapper\Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH, $configuration->getCssValidatorJarPath());
     }
     
     
     public function testSetReturnsSelf() {
         $configuration = new \webignition\CssValidatorWrapper\Configuration();
-        $this->assertEquals($configuration, $configuration->setJavaExecutablePath(null));
+        $this->assertEquals($configuration, $configuration->setCssValidatorJarPath(null));
     }
     
     
-    public function testSetGetDefaultJavaExecutablePath() {        
-        $javaExecutablePath = '/usr/bin/uncommon/java';
+    public function testSetGetCssValdiatorPath() {        
+        $cssValidatorPath = '/home/user/css-validator.jar';
         
         $configuration = new \webignition\CssValidatorWrapper\Configuration();
-        $configuration->setJavaExecutablePath($javaExecutablePath);
-        $this->assertEquals($javaExecutablePath, $configuration->getJavaExecutablePath());
+        $configuration->setCssValidatorJarPath($cssValidatorPath);
+        $this->assertEquals($cssValidatorPath, $configuration->getCssValidatorJarPath());
     }    
     
 }

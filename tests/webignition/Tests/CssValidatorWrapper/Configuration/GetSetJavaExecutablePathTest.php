@@ -16,7 +16,7 @@ class GetSetJavaExecutablePathTest extends \PHPUnit_Framework_TestCase {
     }
     
     
-    public function testSetGetDefaultJavaExecutablePath() {        
+    public function testSetGetJavaExecutablePath() {        
         $javaExecutablePath = '/usr/bin/uncommon/java';
         
         $configuration = new \webignition\CssValidatorWrapper\Configuration();
