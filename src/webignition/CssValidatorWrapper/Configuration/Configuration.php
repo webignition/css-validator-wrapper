@@ -138,36 +138,16 @@ class Configuration {
             throw new \InvalidArgumentException('URL to validate has not been set', 2);
         }
         
-        $preparedUrl = str_replace('"', '\"', $this->getUrlToValidate());
-        
-        $command = $this->getJavaExecutablePath().' '.self::JAVA_JAR_FLAG.' '.$this->getCssValidatorJarPath().' '.$this->getCommandOptionsString().' "'.$preparedUrl.'" 2>&1';
-        
-        var_dump($command);
-        exit();
-        
-/**
-        $commandOptions = array(
-            'output' => 'ucn'
+        $commandParts = array(
+            $this->getJavaExecutablePath(),
+            self::JAVA_JAR_FLAG,
+            $this->getCssValidatorJarPath(),
+            $this->getCommandOptionsString(),
+            '"'.str_replace('"', '\"', $this->getUrlToValidate()).'"',
+            '2>&1'
         );
         
-        if ($this->task->getParameter('vendor-extensions') == 'warn') {
-            $commandOptions['vextwarning'] = 'true';
-        }
-        
-        if ($this->task->getParameter('vendor-extensions') == 'error') {
-            $commandOptions['vextwarning'] = 'false';
-        }        
-        
-        $commandOptionsStrings = '';
-        foreach ($commandOptions as $key => $value) {
-            $commandOptionsStrings[] = '-'.$key.' '.$value;
-        }
-        
-        $preparedUrl = str_replace('"', '\"', $this->webResource->getUrl());        
-        
-        $validationOutputLines = array();
-        $command = "java -jar ".$this->getProperty('jar-path')." ".  implode(' ', $commandOptionsStrings)." \"" . $preparedUrl ."\" 2>&1";               
- */        
+        return implode(' ', $commandParts); 
     }
     
     
