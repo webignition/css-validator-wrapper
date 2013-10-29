@@ -1,17 +1,19 @@
 <?php
 
-namespace webignition\Tests\CssValidatorWrapper;
+namespace webignition\Tests\CssValidatorWrapper\Configuration;
+
+use \webignition\CssValidatorWrapper\Configuration\Configuration;
 
 class GetSetJavaExecutablePathTest extends \PHPUnit_Framework_TestCase {
     
     public function testDefaultJavaExecutablePath() {        
-        $configuration = new \webignition\CssValidatorWrapper\Configuration();
-        $this->assertEquals(\webignition\CssValidatorWrapper\Configuration::DEFAULT_JAVA_EXECUTABLE_PATH, $configuration->getJavaExecutablePath());
+        $configuration = new Configuration();
+        $this->assertEquals(Configuration::DEFAULT_JAVA_EXECUTABLE_PATH, $configuration->getJavaExecutablePath());
     }
     
     
     public function testSetReturnsSelf() {
-        $configuration = new \webignition\CssValidatorWrapper\Configuration();
+        $configuration = new Configuration();
         $this->assertEquals($configuration, $configuration->setJavaExecutablePath(null));
     }
     
@@ -19,7 +21,7 @@ class GetSetJavaExecutablePathTest extends \PHPUnit_Framework_TestCase {
     public function testSetGetJavaExecutablePath() {        
         $javaExecutablePath = '/usr/bin/uncommon/java';
         
-        $configuration = new \webignition\CssValidatorWrapper\Configuration();
+        $configuration = new Configuration();
         $configuration->setJavaExecutablePath($javaExecutablePath);
         $this->assertEquals($javaExecutablePath, $configuration->getJavaExecutablePath());
     }    

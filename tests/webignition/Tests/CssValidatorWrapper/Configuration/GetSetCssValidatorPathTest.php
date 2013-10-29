@@ -1,17 +1,19 @@
 <?php
 
-namespace webignition\Tests\CssValidatorWrapper;
+namespace webignition\Tests\CssValidatorWrapper\Configuration;
+
+use \webignition\CssValidatorWrapper\Configuration\Configuration;
 
 class GetSetCssValidatorPathTest extends \PHPUnit_Framework_TestCase {
     
     public function testDefaultCssValdiatorPath() {        
-        $configuration = new \webignition\CssValidatorWrapper\Configuration();
-        $this->assertEquals(\webignition\CssValidatorWrapper\Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH, $configuration->getCssValidatorJarPath());
+        $configuration = new Configuration();
+        $this->assertEquals(Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH, $configuration->getCssValidatorJarPath());
     }
     
     
     public function testSetReturnsSelf() {
-        $configuration = new \webignition\CssValidatorWrapper\Configuration();
+        $configuration = new Configuration();
         $this->assertEquals($configuration, $configuration->setCssValidatorJarPath(null));
     }
     
@@ -19,7 +21,7 @@ class GetSetCssValidatorPathTest extends \PHPUnit_Framework_TestCase {
     public function testSetGetCssValdiatorPath() {        
         $cssValidatorPath = '/home/user/css-validator.jar';
         
-        $configuration = new \webignition\CssValidatorWrapper\Configuration();
+        $configuration = new Configuration();
         $configuration->setCssValidatorJarPath($cssValidatorPath);
         $this->assertEquals($cssValidatorPath, $configuration->getCssValidatorJarPath());
     }    
