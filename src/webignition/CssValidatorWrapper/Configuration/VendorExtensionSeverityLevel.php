@@ -4,6 +4,7 @@ namespace webignition\CssValidatorWrapper\Configuration;
 
 class VendorExtensionSeverityLevel {
     
+    const LEVEL_IGNORE = 'ignore';
     const LEVEL_ERROR = 'error';
     const LEVEL_WARN = 'warn';    
     
@@ -12,9 +13,10 @@ class VendorExtensionSeverityLevel {
      *
      * @var array
      */
-    private static $validValues = array(
+    private static $validValues = array(        
         self::LEVEL_ERROR,
-        self::LEVEL_WARN
+        self::LEVEL_WARN,
+        self::LEVEL_IGNORE
     );
     
     
