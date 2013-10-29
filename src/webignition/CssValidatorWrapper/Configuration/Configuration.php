@@ -33,6 +33,13 @@ class Configuration {
     
     
     /**
+     *
+     * @var string
+     */
+    private $urlToValidate = null;
+    
+    
+    /**
      * 
      * @param string $javaExecutablePath
      * @return \webignition\CssValidatorWrapper\Configuration
@@ -103,6 +110,95 @@ class Configuration {
      */
     public function getVendorExtensionSeverityLevel() {
         return (is_null($this->vendorExtensionSeverityLevel)) ? self::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL : $this->vendorExtensionSeverityLevel;
+    }
+    
+    
+    /**
+     * 
+     * @param string $url
+     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     */
+    public function setUrlToValidate($url) {
+        $this->urlToValidate = trim($url);
+        return $this;
+    }
+    
+    
+    /**
+     * 
+     * @return string
+     */
+    public function getUrlToValidate() {
+        return (is_null($this->urlToValidate)) ? '' : $this->urlToValidate;
+    }
+    
+    
+    public function getExecutableCommand() {
+        if (!$this->hasUrlToValidate()) {
+            throw new \InvalidArgumentException('URL to validate has not been set', 2);
+        }
+        
+        $preparedUrl = str_replace('"', '\"', $this->getUrlToValidate());
+        
+        $command = $this->getJavaExecutablePath().' '.self::JAVA_JAR_FLAG.' '.$this->getCssValidatorJarPath().' '.$this->getCommandOptionsString().' "'.$preparedUrl.'" 2>&1';
+        
+        var_dump($command);
+        exit();
+        
+/**
+        $commandOptions = array(
+            'output' => 'ucn'
+        );
+        
+        if ($this->task->getParameter('vendor-extensions') == 'warn') {
+            $commandOptions['vextwarning'] = 'true';
+        }
+        
+        if ($this->task->getParameter('vendor-extensions') == 'error') {
+            $commandOptions['vextwarning'] = 'false';
+        }        
+        
+        $commandOptionsStrings = '';
+        foreach ($commandOptions as $key => $value) {
+            $commandOptionsStrings[] = '-'.$key.' '.$value;
+        }
+        
+        $preparedUrl = str_replace('"', '\"', $this->webResource->getUrl());        
+        
+        $validationOutputLines = array();
+        $command = "java -jar ".$this->getProperty('jar-path')." ".  implode(' ', $commandOptionsStrings)." \"" . $preparedUrl ."\" 2>&1";               
+ */        
+    }
+    
+    
+    public function hasUrlToValidate() {
+        return $this->getUrlToValidate() != '';
+    }
+    
+    
+    
+    private function getCommandOptionsString() {
+        $commandOptionsStrings = array();
+        foreach ($this->getCommandOptions() as $key => $value) {
+            $commandOptionsStrings[] = '-'.$key.' '.$value;
+        }  
+        
+        return implode(' ', $commandOptionsStrings);
+    }
+    
+    
+    private function getCommandOptions() {
+        $commandOptions = array(
+            'output' => $this->getOutputFormat(),            
+        );
+        
+        if ($this->getVendorExtensionSeverityLevel() == VendorExtensionSeverityLevel::LEVEL_WARN) {
+            $commandOptions['vextwarning'] = 'true';
+        } else {
+            $commandOptions['vextwarning'] = 'false';
+        }
+        
+        return $commandOptions;
     }
     
 }
