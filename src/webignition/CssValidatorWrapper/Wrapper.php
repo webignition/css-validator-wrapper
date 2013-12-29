@@ -9,6 +9,8 @@ use webignition\CssValidatorOutput\Parser as CssValidatorOutputParser;
 
 class Wrapper {
     
+    const INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET = 1;
+    const INVALID_ARGUMENT_EXCEPTION_URL_TO_VALIDATE_NOT_SET = 2;
     
     /**
      *
@@ -46,6 +48,50 @@ class Wrapper {
     }
     
     
+    /**
+     * 
+     * @param array $configurationValues
+     * @return \webignition\CssValidatorWrapper\Wrapper
+     * @throws \InvalidArgumentException
+     */
+    public function createConfiguration($configurationValues) {
+        if (!is_array($configurationValues) || empty($configurationValues)) {
+            throw new \InvalidArgumentException('A non-empty array of configuration values must be passed to create configuration', 2);
+        }
+        
+        if (!isset($configurationValues['url-to-validate'])) {
+            throw new \InvalidArgumentException('Configruation value "url-to-validate" not set', self::INVALID_ARGUMENT_EXCEPTION_URL_TO_VALIDATE_NOT_SET);
+        }
+        
+        $configuration = new Configuration();
+        $configuration->setUrlToValidate($configurationValues['url-to-validate']);
+        
+        if (isset($configurationValues['java-executable-path'])) {
+            $configuration->setJavaExecutablePath($configurationValues['java-executable-path']);
+        }
+        
+        if (isset($configurationValues['css-validator-jar-path'])) {
+            $configuration->setCssValidatorJarPath($configurationValues['css-validator-jar-path']);
+        }
+        
+        if (isset($configurationValues['vendor-extension-severity-level'])) {
+            $configuration->setVendorExtensionSeverityLevel($configurationValues['vendor-extension-severity-level']);
+        }
+        
+        if (isset($configurationValues['flags']) && is_array($configurationValues['flags'])) {
+            foreach ($configurationValues['flags'] as $flag) {
+                $configuration->setFlag($flag);
+            }
+        }
+        
+        if (isset($configurationValues['domains-to-ignore']) && is_array($configurationValues['domains-to-ignore'])) {
+            $configuration->setDomainsToIgnore($configurationValues['domains-to-ignore']);
+        }       
+        
+        $this->setConfiguration($configuration);
+        return $this;
+    }    
+    
     
     /**
      * 
@@ -54,7 +100,7 @@ class Wrapper {
      */
     public function validate() {
         if (!$this->hasConfiguration()) {
-            throw new \InvalidArgumentException('Unable to validate; configuration not set', 1);
+            throw new \InvalidArgumentException('Unable to validate; configuration not set', self::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET);
         }
         
         $cssValidatorOutputParser = new CssValidatorOutputParser();
