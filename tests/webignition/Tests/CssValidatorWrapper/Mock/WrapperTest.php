@@ -1,8 +1,7 @@
 <?php
 
-namespace webignition\Tests\CssValidatorWrapper;
+namespace webignition\Tests\CssValidatorWrapper\Mock;
 
-use webignition\CssValidatorWrapper\Wrapper as BaseCssValidatorWrapper;
 use webignition\CssValidatorWrapper\Mock\Wrapper as MockCssValidatorWrapper;
 
 
