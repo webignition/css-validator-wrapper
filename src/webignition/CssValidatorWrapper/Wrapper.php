@@ -7,7 +7,7 @@ use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\CssValidatorOutput\Parser as CssValidatorOutputParser;
 
-class CssValidatorWrapper {
+class Wrapper {
     
     
     /**
@@ -20,7 +20,7 @@ class CssValidatorWrapper {
     /**
      * 
      * @param \webignition\CssValidatorWrapper\Configuration\Configuration $configuration
-     * @return \webignition\CssValidatorWrapper\CssValidatorWrapper
+     * @return \webignition\CssValidatorWrapper\Wrapper
      */
     public function setConfiguration(Configuration $configuration) {
         $this->configuration = $configuration;

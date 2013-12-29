@@ -2,8 +2,8 @@
 
 namespace webignition\Tests\CssValidatorWrapper;
 
-use webignition\CssValidatorWrapper\CssValidatorWrapper as BaseCssValidatorWrapper;
-use webignition\Tests\Mock\CssValidatorWrapper\CssValidatorWrapper as MockCssValidatorWrapper;
+use webignition\CssValidatorWrapper\Wrapper as BaseCssValidatorWrapper;
+use webignition\CssValidatorWrapper\Mock\Wrapper as MockCssValidatorWrapper;
 
 
 /**
@@ -15,7 +15,7 @@ class MockCssValidatorWrapperTest extends \PHPUnit_Framework_TestCase {
     
     public function testMockWrapperIsInstanceOfActualWrapper() {
         $mockWrapper = new MockCssValidatorWrapper();
-        $this->assertInstanceOf('\webignition\CssValidatorWrapper\CssValidatorWrapper', $mockWrapper);
+        $this->assertInstanceOf('\webignition\CssValidatorWrapper\Wrapper', $mockWrapper);
     }
     
 }

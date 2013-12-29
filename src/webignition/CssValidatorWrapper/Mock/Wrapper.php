@@ -1,10 +1,10 @@
 <?php
 
-namespace webignition\Tests\Mock\CssValidatorWrapper;
+namespace webignition\CssValidatorWrapper\Mock;
 
-use webignition\CssValidatorWrapper\CssValidatorWrapper as BaseCssValidatorWrapper;
+use webignition\CssValidatorWrapper\Wrapper as BaseCssValidatorWrapper;
 
-class CssValidatorWrapper extends BaseCssValidatorWrapper {    
+class Wrapper extends BaseCssValidatorWrapper {    
     
     /**
      *

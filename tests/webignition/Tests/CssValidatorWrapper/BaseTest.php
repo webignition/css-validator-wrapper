@@ -2,14 +2,14 @@
 
 namespace webignition\Tests\CssValidatorWrapper;
 
-use webignition\Tests\Mock\CssValidatorWrapper\CssValidatorWrapper as MockCssValidatorWrapper;
+use webignition\CssValidatorWrapper\Mock\Wrapper as MockCssValidatorWrapper;
 
 abstract class BaseTest extends \PHPUnit_Framework_TestCase {
     
     
     /**
      * 
-     * @return \webignition\Tests\Mock\CssValidatorWrapper\CssValidatorWrapper
+     * @return \webignition\CssValidatorWrapper\Mock\Wrapper
      */
     public function getNewCssValidatorWrapper() {
         return new MockCssValidatorWrapper();

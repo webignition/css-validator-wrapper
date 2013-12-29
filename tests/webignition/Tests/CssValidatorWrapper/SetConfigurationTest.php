@@ -3,7 +3,7 @@
 namespace webignition\Tests\CssValidatorWrapper;
 
 use webignition\CssValidatorWrapper\Configuration\Configuration;
-use webignition\CssValidatorWrapper\CssValidatorWrapper;
+use webignition\CssValidatorWrapper\Wrapper as CssValidatorWrapper;
 
 class SetConfigurationTest extends \PHPUnit_Framework_TestCase {
     
