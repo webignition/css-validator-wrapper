@@ -40,6 +40,20 @@ class Configuration {
     
     
     /**
+     *
+     * @var array
+     */
+    private $flags = array();
+    
+    
+    /**
+     *
+     * @var array
+     */
+    private $domainsToIgnore = array();
+    
+    
+    /**
      * 
      * @param string $javaExecutablePath
      * @return \webignition\CssValidatorWrapper\Configuration
@@ -179,6 +193,67 @@ class Configuration {
         }
         
         return $commandOptions;
+    }
+    
+    
+    
+    /**
+     * 
+     * @param string $flag
+     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     * @throws \InvalidArgumentException
+     */
+    public function setFlag($flag) {
+        if (!Flags::isValid($flag)) {
+            throw new \InvalidArgumentException('Invalid flag, must be one of ['.  implode(', ', VendorExtensionSeverityLevel::getValidValues()).']', 2);
+        }
+        
+        $this->flags[$flag] = true;
+        return $this;
+    }
+    
+    
+    /**
+     * 
+     * @param string $flag
+     * @return boolean
+     */
+    public function hasFlag($flag) {
+        return isset($this->flags[$flag]);
+    }
+        
+    
+    /**
+     * 
+     * @param string $flag
+     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     */
+    public function clearFlag($flag) {
+        if ($this->hasFlag($flag)) {
+            unset($this->flags[$flag]);
+        }
+        
+        return $this;
+    }
+    
+    
+    /**
+     * 
+     * @param array $domainsToIgnore
+     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     */
+    public function setDomainsToIgnore($domainsToIgnore) {
+        $this->domainsToIgnore = $domainsToIgnore;
+        return $this;
+    }
+    
+    
+    /**
+     * 
+     * @return array
+     */
+    public function getDomainsToIgnore() {
+        return $this->domainsToIgnore;
     }
     
 }
