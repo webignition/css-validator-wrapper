@@ -1,0 +1,18 @@
+{vextwarning=false, output=ucn, lang=en, warning=2, medium=all, profile=css3}
+<?xml version="1.0" encoding="UTF-8"?>
+<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="http://example.com/" date="2013-12-29T02:14:03Z" xml:lang="en">
+
+<message type="warning" level="0" ref="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap.no-icons.min.css">
+	<context line="13"/>
+	<title>Property -webkit-box-sizing is an unknown vendor extension</title>
+</message>
+<message type="warning" level="0" ref="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap.no-icons.min.css">
+	<context line="13"/>
+	<title>Property -moz-box-sizing is an unknown vendor extension</title>
+</message>
+<message type="warning" level="0" ref="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap.no-icons.min.css">
+	<context line="17"/>
+	<title>Property -webkit-text-size-adjust is an unknown vendor extension</title>
+</message>
+
+</observationresponse>

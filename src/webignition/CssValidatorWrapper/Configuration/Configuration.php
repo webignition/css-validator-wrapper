@@ -256,4 +256,13 @@ class Configuration {
         return $this->domainsToIgnore;
     }
     
+    
+    /**
+     * 
+     * @return boolean
+     */
+    public function hasDomainsToIgnore() {        
+        return is_array($this->getDomainsToIgnore()) && count($this->getDomainsToIgnore()) > 0;
+    }
+    
 }

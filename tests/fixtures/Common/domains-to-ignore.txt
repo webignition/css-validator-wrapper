@@ -1,0 +1,80 @@
+{vextwarning=false, output=ucn, lang=en, warning=2, medium=all, profile=css3}
+<?xml version="1.0" encoding="UTF-8"?>
+<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="http://example.com/" date="2013-12-29T02:14:03Z" xml:lang="en">
+
+<message type="error" ref="http://example.com/style.css">
+	<context line="10">.clearfix</context>
+	<title>
+		Parse Error
+		{*zoom:1;
+	</title>
+</message>
+ 
+<message type="error" ref="http://example.com/style.css">
+	<context line="10">.clearfix</context>
+	<title>
+		Parse Error
+		;}
+	</title>
+</message>
+
+<message type="error" ref="http://example.com/style.css">
+	<context line="12">.hide-text</context>
+	<title>
+		Value Error :  font (nullfonts.html#propdef-font)
+		0 is not a font-weight value : 
+		0 / 0 a
+	</title>
+</message>
+
+<message type="error" ref="http://one.cdn.example.com/style.css">
+	<context line="10">.clearfix</context>
+	<title>
+		Parse Error
+		{*zoom:1;
+	</title>
+</message>
+ 
+<message type="error" ref="http://one.cdn.example.com/style.css">
+	<context line="10">.clearfix</context>
+	<title>
+		Parse Error
+		;}
+	</title>
+</message>
+
+<message type="error" ref="http://one.cdn.example.com/style.css">
+	<context line="12">.hide-text</context>
+	<title>
+		Value Error :  font (nullfonts.html#propdef-font)
+		0 is not a font-weight value : 
+		0 / 0 a
+	</title>
+</message> 
+   
+<message type="error" ref="http://two.cdn.example.com/style.css">
+	<context line="10">.clearfix</context>
+	<title>
+		Parse Error
+		{*zoom:1;
+	</title>
+</message>
+ 
+<message type="error" ref="http://two.cdn.example.com/style.css">
+	<context line="10">.clearfix</context>
+	<title>
+		Parse Error
+		;}
+	</title>
+</message>
+
+<message type="error" ref="http://two.cdn.example.com/style.css">
+	<context line="12">.hide-text</context>
+	<title>
+		Value Error :  font (nullfonts.html#propdef-font)
+		0 is not a font-weight value : 
+		0 / 0 a
+	</title>
+</message> 
+
+</observationresponse>
