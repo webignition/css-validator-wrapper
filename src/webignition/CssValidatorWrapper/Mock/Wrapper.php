@@ -14,6 +14,13 @@ class Wrapper extends BaseCssValidatorWrapper {
     
     
     /**
+     *
+     * @var boolean
+     */
+    private $deferToParentIfNoRawOutput = false;    
+    
+    
+    /**
      * 
      * @param string $rawOutput
      * @return \webignition\Tests\Mock\CssValidatorWrapper\CssValidatorWrapper
@@ -29,7 +36,34 @@ class Wrapper extends BaseCssValidatorWrapper {
      * @return array
      */
     protected function getRawValidatorOutputLines() {
+        if (is_null($this->cssValidatorRawOutput)) {
+            if ($this->deferToParentIfNoRawOutput) {
+                return parent::getRawValidatorOutputLines();
+            } 
+            
+            return null;
+        }      
+        
         return explode("\n", $this->cssValidatorRawOutput);
-    }    
+    }  
+    
+    /**
+     * 
+     * @return \webignition\HtmlValidator\Mock\Wrapper\Wrapper
+     */
+    public function enableDeferToParentIfNoRawOutput() {
+        $this->deferToParentIfNoRawOutput = true;
+        return $this;
+    }
+    
+    
+    /**
+     * 
+     * @return \webignition\HtmlValidator\Mock\Wrapper\Wrapper
+     */
+    public function disableDeferToParentIfNoRawOutput() {
+        $this->deferToParentIfNoRawOutput = false;
+        return $this;
+    }     
     
 }
