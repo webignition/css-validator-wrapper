@@ -87,11 +87,11 @@ class CreateConfigurationTest extends \PHPUnit_Framework_TestCase {
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://example.com/',
             'flags' => array(
-                Flags::FLAG_IGNORE_FALSE_BACKGROUND_IMAGE_DATA_URL_MESSAGES
+                Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES
             )
         ));         
         
-        $this->assertTrue($wrapper->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_FALSE_BACKGROUND_IMAGE_DATA_URL_MESSAGES));        
+        $this->assertTrue($wrapper->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES));        
     }      
     
     public function testCreateConfigurationSetDomainsToIgnore() {

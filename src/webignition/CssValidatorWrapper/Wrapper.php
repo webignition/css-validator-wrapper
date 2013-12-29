@@ -106,8 +106,8 @@ class Wrapper {
         $cssValidatorOutputParser = new CssValidatorOutputParser();
         $cssValidatorOutputParser->setRawOutput(implode("\n", $this->getRawValidatorOutputLines()));     
         
-        if ($this->configuration->hasFlag(Flags::FLAG_IGNORE_FALSE_BACKGROUND_IMAGE_DATA_URL_MESSAGES)) {
-            $cssValidatorOutputParser->setIgnoreFalseBackgroundImageDataUrlMessages(true);            
+        if ($this->configuration->hasFlag(Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES)) {
+            $cssValidatorOutputParser->setIgnoreFalseImageDataUrlMessages(true);
         }
         
         if ($this->configuration->hasFlag(Flags::FLAG_IGNORE_WARNINGS)) {

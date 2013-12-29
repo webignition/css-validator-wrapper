@@ -5,7 +5,7 @@ namespace webignition\CssValidatorWrapper\Configuration;
 class Flags {
     
     const FLAG_IGNORE_WARNINGS = 'ignore-warnings';
-    const FLAG_IGNORE_FALSE_BACKGROUND_IMAGE_DATA_URL_MESSAGES = 'ignore-false-background-data-url-messages';    
+    const FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES = 'ignore-false-background-data-url-messages';    
     
     /**
      *
@@ -13,7 +13,7 @@ class Flags {
      */
     private static $validValues = array(        
         self::FLAG_IGNORE_WARNINGS,
-        self::FLAG_IGNORE_FALSE_BACKGROUND_IMAGE_DATA_URL_MESSAGES,
+        self::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES,
     );
     
     

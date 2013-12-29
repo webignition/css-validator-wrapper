@@ -27,7 +27,7 @@ class IgnoreIncorrectDataUrlBackgroundImageIssuesTest extends BaseTest {
     public function testEnabled() {        
         $configuration = new Configuration();
         $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setFlag(Flags::FLAG_IGNORE_FALSE_BACKGROUND_IMAGE_DATA_URL_MESSAGES);
+        $configuration->setFlag(Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES);
         
         $wrapper = $this->getNewCssValidatorWrapper(); 
         $wrapper->setConfiguration($configuration);
