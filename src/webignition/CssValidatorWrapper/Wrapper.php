@@ -86,6 +86,16 @@ class Wrapper {
         
         if (isset($configurationValues['domains-to-ignore']) && is_array($configurationValues['domains-to-ignore'])) {
             $configuration->setDomainsToIgnore($configurationValues['domains-to-ignore']);
+        } 
+        
+        if (isset($configurationValues['http-auth']) && is_array($configurationValues['http-auth'])) {
+            if (isset($configurationValues['http-auth']['user'])) {
+                $configuration->setHttpAuthUser($configurationValues['http-auth']['user']);
+            }
+            
+            if (isset($configurationValues['http-auth']['password'])) {
+                $configuration->setHttpAuthPassword($configurationValues['http-auth']['password']);
+            }
         }       
         
         $this->setConfiguration($configuration);

@@ -107,5 +107,35 @@ class CreateConfigurationTest extends \PHPUnit_Framework_TestCase {
         ));         
         
         $this->assertEquals($domainsToIgnore, $wrapper->getConfiguration()->getDomainsToIgnore());        
+    }   
+    
+    
+    public function testCreateConfigurationSetHttpAuthUser() {
+        $httpAuthUser = 'foo';
+        
+        $wrapper = new Wrapper();
+        $wrapper->createConfiguration(array(
+            'url-to-validate' => 'http://example.com/',
+            'http-auth' => array(
+                'user' => 'foo'
+            )
+        ));         
+        
+        $this->assertEquals($httpAuthUser, $wrapper->getConfiguration()->getHttpAuthUser());        
     }     
+    
+    
+    public function testCreateConfigurationSetHttpAuthPassword() {
+        $httpAuthPassword = 'foo';
+        
+        $wrapper = new Wrapper();
+        $wrapper->createConfiguration(array(
+            'url-to-validate' => 'http://example.com/',
+            'http-auth' => array(
+                'password' => 'foo'
+            )
+        ));         
+        
+        $this->assertEquals($httpAuthPassword, $wrapper->getConfiguration()->getHttpAuthPassword());        
+    }      
 }
