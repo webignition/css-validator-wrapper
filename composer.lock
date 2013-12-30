@@ -1,0 +1,675 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "7ca66bc229121cc392c482c4fb1d67ac",
+    "packages": [
+        {
+            "name": "etechnika/idna-convert",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/etechnika/idna-convert.git",
+                "reference": "450db86f2fa58dffa81534fa9826136bcb03d692"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/etechnika/idna-convert/zipball/450db86f2fa58dffa81534fa9826136bcb03d692",
+                "reference": "450db86f2fa58dffa81534fa9826136bcb03d692",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "fabpot/php-cs-fixer": "dev-master",
+                "pdepend/pdepend": "1.1.*",
+                "phploc/phploc": "2.0.*",
+                "phpmd/phpmd": "1.5.*",
+                "phpunit/php-code-coverage": "1.2.*",
+                "phpunit/phpcov": "dev-master",
+                "phpunit/phpunit": "3.7.*",
+                "satooshi/php-coveralls": "dev-master",
+                "sebastian/phpcpd": "2.0.*",
+                "squizlabs/php_codesniffer": "1.4.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Etechnika\\IdnaConvert": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.1"
+            ],
+            "authors": [
+                {
+                    "name": "Tomasz Rutkowski",
+                    "email": "tomasz@etechnika.eu",
+                    "homepage": "http://etechnika.eu",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Etechnika.eu idna-convert",
+            "homepage": "https://github.com/etechnika/idna-convert",
+            "keywords": [
+                "lib"
+            ],
+            "time": "2013-12-05 21:37:00"
+        },
+        {
+            "name": "webignition/css-validator-output-parser",
+            "version": "1.8.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/css-validator-output-parser.git",
+                "reference": "dacd5cfb0e897c915ec29842489ba1699fd93283"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/dacd5cfb0e897c915ec29842489ba1699fd93283",
+                "reference": "dacd5cfb0e897c915ec29842489ba1699fd93283",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0",
+                "webignition/url": ">=1.0,<2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Parser for output from the W3C CSS validator",
+            "homepage": "https://github.com/webignition/css-validator-output-parser",
+            "keywords": [
+                "css",
+                "parser",
+                "validator"
+            ],
+            "time": "2013-12-30 11:30:53"
+        },
+        {
+            "name": "webignition/url",
+            "version": "1.9.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/url.git",
+                "reference": "9cf53198c2d148b4069a373da65d3ff933580eb3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/url/zipball/9cf53198c2d148b4069a373da65d3ff933580eb3",
+                "reference": "9cf53198c2d148b4069a373da65d3ff933580eb3",
+                "shasum": ""
+            },
+            "require": {
+                "etechnika/idna-convert": "1.0.*",
+                "php": ">=5.3.0",
+                "xrstf/ip-utils": "v1.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Represents a URL, a library to be used in many other places. Applies semantically-lossless normalisation for comparisons.",
+            "homepage": "https://github.com/webignition/url",
+            "keywords": [
+                "url"
+            ],
+            "time": "2013-12-20 13:32:17"
+        },
+        {
+            "name": "xrstf/ip-utils",
+            "version": "v1.0.0",
+            "source": {
+                "type": "hg",
+                "url": "https://bitbucket.org/xrstf/ip-utils",
+                "reference": "d7469bb0c407e423c9d1b49ff2e8980c800871e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://bitbucket.org/xrstf/ip-utils/get/d7469bb0c407e423c9d1b49ff2e8980c800871e2.zip",
+                "reference": "d7469bb0c407e423c9d1b49ff2e8980c800871e2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-default": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "IpUtils\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Christoph Mewes",
+                    "homepage": "http://www.xrstf.de/"
+                }
+            ],
+            "description": "small library to deal with IPv4 & IPv6 addresses and subnets",
+            "keywords": [
+                "IP",
+                "ipv4",
+                "ipv6",
+                "matching",
+                "subnet"
+            ],
+            "time": "2013-02-27 03:27:30"
+        }
+    ],
+    "packages-dev": [
+        {
+            "name": "phpunit/php-code-coverage",
+            "version": "1.2.13",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
+                "reference": "466e7cd2554b4e264c9e3f31216d25ac0e5f3d94"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/466e7cd2554b4e264c9e3f31216d25ac0e5f3d94",
+                "reference": "466e7cd2554b4e264c9e3f31216d25ac0e5f3d94",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "phpunit/php-file-iterator": ">=1.3.0@stable",
+                "phpunit/php-text-template": ">=1.1.1@stable",
+                "phpunit/php-token-stream": ">=1.1.3@stable"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*@dev"
+            },
+            "suggest": {
+                "ext-dom": "*",
+                "ext-xdebug": ">=2.0.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.2.x-dev"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "PHP/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "include-path": [
+                ""
+            ],
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sb@sebastian-bergmann.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "Library that provides collection, processing, and rendering functionality for PHP code coverage information.",
+            "homepage": "https://github.com/sebastianbergmann/php-code-coverage",
+            "keywords": [
+                "coverage",
+                "testing",
+                "xunit"
+            ],
+            "time": "2013-09-10 08:14:32"
+        },
+        {
+            "name": "phpunit/php-file-iterator",
+            "version": "1.3.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/php-file-iterator.git",
+                "reference": "acd690379117b042d1c8af1fafd61bde001bf6bb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-file-iterator/zipball/acd690379117b042d1c8af1fafd61bde001bf6bb",
+                "reference": "acd690379117b042d1c8af1fafd61bde001bf6bb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "File/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "include-path": [
+                ""
+            ],
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sb@sebastian-bergmann.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "FilterIterator implementation that filters files based on a list of suffixes.",
+            "homepage": "https://github.com/sebastianbergmann/php-file-iterator/",
+            "keywords": [
+                "filesystem",
+                "iterator"
+            ],
+            "time": "2013-10-10 15:34:57"
+        },
+        {
+            "name": "phpunit/php-text-template",
+            "version": "1.1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/php-text-template.git",
+                "reference": "5180896f51c5b3648ac946b05f9ec02be78a0b23"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-text-template/zipball/5180896f51c5b3648ac946b05f9ec02be78a0b23",
+                "reference": "5180896f51c5b3648ac946b05f9ec02be78a0b23",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "Text/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "include-path": [
+                ""
+            ],
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sb@sebastian-bergmann.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "Simple template engine.",
+            "homepage": "https://github.com/sebastianbergmann/php-text-template/",
+            "keywords": [
+                "template"
+            ],
+            "time": "2012-10-31 18:15:28"
+        },
+        {
+            "name": "phpunit/php-timer",
+            "version": "1.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/php-timer.git",
+                "reference": "19689d4354b295ee3d8c54b4f42c3efb69cbc17c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-timer/zipball/19689d4354b295ee3d8c54b4f42c3efb69cbc17c",
+                "reference": "19689d4354b295ee3d8c54b4f42c3efb69cbc17c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "PHP/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "include-path": [
+                ""
+            ],
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sb@sebastian-bergmann.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "Utility class for timing",
+            "homepage": "https://github.com/sebastianbergmann/php-timer/",
+            "keywords": [
+                "timer"
+            ],
+            "time": "2013-08-02 07:42:54"
+        },
+        {
+            "name": "phpunit/php-token-stream",
+            "version": "1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/php-token-stream.git",
+                "reference": "5220af2a7929aa35cf663d97c89ad3d50cf5fa3e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/5220af2a7929aa35cf663d97c89ad3d50cf5fa3e",
+                "reference": "5220af2a7929aa35cf663d97c89ad3d50cf5fa3e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "php": ">=5.3.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.2-dev"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "PHP/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "include-path": [
+                ""
+            ],
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sb@sebastian-bergmann.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "Wrapper around PHP's tokenizer extension.",
+            "homepage": "https://github.com/sebastianbergmann/php-token-stream/",
+            "keywords": [
+                "tokenizer"
+            ],
+            "time": "2013-09-13 04:58:23"
+        },
+        {
+            "name": "phpunit/phpunit",
+            "version": "3.7.28",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/phpunit.git",
+                "reference": "3b97c8492bcafbabe6b6fbd2ab35f2f04d932a8d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/3b97c8492bcafbabe6b6fbd2ab35f2f04d932a8d",
+                "reference": "3b97c8492bcafbabe6b6fbd2ab35f2f04d932a8d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-pcre": "*",
+                "ext-reflection": "*",
+                "ext-spl": "*",
+                "php": ">=5.3.3",
+                "phpunit/php-code-coverage": "~1.2.1",
+                "phpunit/php-file-iterator": ">=1.3.1",
+                "phpunit/php-text-template": ">=1.1.1",
+                "phpunit/php-timer": ">=1.0.4",
+                "phpunit/phpunit-mock-objects": "~1.2.0",
+                "symfony/yaml": "~2.0"
+            },
+            "require-dev": {
+                "pear-pear/pear": "1.9.4"
+            },
+            "suggest": {
+                "ext-json": "*",
+                "ext-simplexml": "*",
+                "ext-tokenizer": "*",
+                "phpunit/php-invoker": ">=1.1.0,<1.2.0"
+            },
+            "bin": [
+                "composer/bin/phpunit"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.7.x-dev"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "PHPUnit/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "include-path": [
+                "",
+                "../../symfony/yaml/"
+            ],
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sebastian@phpunit.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "The PHP Unit Testing framework.",
+            "homepage": "http://www.phpunit.de/",
+            "keywords": [
+                "phpunit",
+                "testing",
+                "xunit"
+            ],
+            "time": "2013-10-17 07:27:40"
+        },
+        {
+            "name": "phpunit/phpunit-mock-objects",
+            "version": "1.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/phpunit-mock-objects.git",
+                "reference": "5794e3c5c5ba0fb037b11d8151add2a07fa82875"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit-mock-objects/zipball/5794e3c5c5ba0fb037b11d8151add2a07fa82875",
+                "reference": "5794e3c5c5ba0fb037b11d8151add2a07fa82875",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "phpunit/php-text-template": ">=1.1.1@stable"
+            },
+            "suggest": {
+                "ext-soap": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "PHPUnit/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "include-path": [
+                ""
+            ],
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sb@sebastian-bergmann.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "Mock Object library for PHPUnit",
+            "homepage": "https://github.com/sebastianbergmann/phpunit-mock-objects/",
+            "keywords": [
+                "mock",
+                "xunit"
+            ],
+            "time": "2013-01-13 10:24:48"
+        },
+        {
+            "name": "symfony/class-loader",
+            "version": "v2.4.0",
+            "target-dir": "Symfony/Component/ClassLoader",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/ClassLoader.git",
+                "reference": "6a2ebedbc780130f07b3a15363743d08eb46820c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/ClassLoader/zipball/6a2ebedbc780130f07b3a15363743d08eb46820c",
+                "reference": "6a2ebedbc780130f07b3a15363743d08eb46820c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "symfony/finder": "~2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\ClassLoader\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony ClassLoader Component",
+            "homepage": "http://symfony.com",
+            "time": "2013-11-26 16:40:27"
+        },
+        {
+            "name": "symfony/yaml",
+            "version": "v2.4.0",
+            "target-dir": "Symfony/Component/Yaml",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/Yaml.git",
+                "reference": "1ae235a1b9d3ad3d9f3860ff20acc072df95b7f5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/1ae235a1b9d3ad3d9f3860ff20acc072df95b7f5",
+                "reference": "1ae235a1b9d3ad3d9f3860ff20acc072df95b7f5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\Yaml\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Yaml Component",
+            "homepage": "http://symfony.com",
+            "time": "2013-11-26 16:40:27"
+        }
+    ],
+    "aliases": [
+
+    ],
+    "minimum-stability": "stable",
+    "stability-flags": [
+
+    ],
+    "platform": {
+        "php": ">=5.3.2"
+    },
+    "platform-dev": [
+
+    ]
+}
