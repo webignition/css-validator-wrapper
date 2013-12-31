@@ -1,6 +1,6 @@
 <?php
 
-namespace webignition\Tests\CssValidatorWrapper;
+namespace webignition\Tests\CssValidatorWrapper\Validate;
 
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 

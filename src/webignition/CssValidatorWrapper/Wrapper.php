@@ -5,7 +5,8 @@ namespace webignition\CssValidatorWrapper;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Configuration\Flags;
-use webignition\CssValidatorOutput\Parser as CssValidatorOutputParser;
+use webignition\CssValidatorOutput\Parser\Parser as CssValidatorOutputParser;
+use webignition\CssValidatorOutput\Parser\Configuration as CssValidatorOutputParserConfiguration;
 
 class Wrapper {
     
@@ -17,6 +18,44 @@ class Wrapper {
      * @var Configuration
      */
     private $configuration;
+    
+    
+    /**
+     *
+     * @var \Guzzle\Http\Message\Request
+     */
+    private $baseRequest = null;
+
+    
+    /**
+     *
+     * @var LocalProxyResource
+     */
+    protected $localProxyResource = null;
+    
+    
+    /**
+     * 
+     * @param \Guzzle\Http\Message\Request $request
+     */
+    public function setBaseRequest(\Guzzle\Http\Message\Request $request) {
+        $this->baseRequest = $request;
+    }
+    
+    
+    
+    /**
+     * 
+     * @return \Guzzle\Http\Message\Request $request
+     */
+    public function getBaseRequest() {
+        if (is_null($this->baseRequest)) {
+            $client = new \Guzzle\Http\Client;            
+            $this->baseRequest = $client->get();
+        }
+        
+        return $this->baseRequest;
+    }    
     
     
     /**
@@ -113,26 +152,75 @@ class Wrapper {
             throw new \InvalidArgumentException('Unable to validate; configuration not set', self::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET);
         }
         
-        $cssValidatorOutputParser = new CssValidatorOutputParser();
-        $cssValidatorOutputParser->setRawOutput(implode("\n", $this->getRawValidatorOutputLines()));     
-        
-        if ($this->configuration->hasFlag(Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES)) {
-            $cssValidatorOutputParser->setIgnoreFalseImageDataUrlMessages(true);
+        if ($this->getConfiguration()->hasHttpAuthCredentials()) {
+            try { 
+                $this->createLocalProxyResource();                         
+                $this->getLocalProxyResource()->prepare();
+            } catch (\webignition\WebResource\Exception\Exception $webResourceException) {
+                var_dump("webResourceException");
+                exit();
+            } catch (\Guzzle\Http\Exception\CurlException $curlException) {
+                var_dump("curlException");
+                exit();                
+            }
         }
         
-        if ($this->configuration->hasFlag(Flags::FLAG_IGNORE_WARNINGS)) {
-            $cssValidatorOutputParser->setIgnoreWarnings(true);            
+        $cssValidatorOutputParserConfiguration = new CssValidatorOutputParserConfiguration();
+        $validatorOutput = implode("\n", $this->getRawValidatorOutputLines());
+        
+        if ($this->hasLocalProxyResource()) {
+            $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths($validatorOutput);
+        }        
+        
+        $cssValidatorOutputParserConfiguration->setRawOutput($validatorOutput);
+        
+        if ($this->hasLocalProxyResource()) {
+            $this->localProxyResource->clear();
+        }
+        
+        if ($this->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES)) {
+            $cssValidatorOutputParserConfiguration->setIgnoreFalseImageDataUrlMessages(true);
+        }
+        
+        if ($this->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_WARNINGS)) {
+            $cssValidatorOutputParserConfiguration->setIgnoreWarnings(true);            
         } 
         
-        if ($this->configuration->getVendorExtensionSeverityLevel() === VendorExtensionSeverityLevel::LEVEL_IGNORE) {
-            $cssValidatorOutputParser->setIgnoreVendorExtensionIssues(true);
+        if ($this->getConfiguration()->getVendorExtensionSeverityLevel() === VendorExtensionSeverityLevel::LEVEL_IGNORE) {
+            $cssValidatorOutputParserConfiguration->setIgnoreVendorExtensionIssues(true);
         }
         
-        if ($this->configuration->hasDomainsToIgnore()) {
-            $cssValidatorOutputParser->setRefDomainsToIgnore($this->configuration->getDomainsToIgnore());
-        }
+        if ($this->getConfiguration()->hasDomainsToIgnore()) {
+            $cssValidatorOutputParserConfiguration->setRefDomainsToIgnore($this->getConfiguration()->getDomainsToIgnore());
+        }        
+        
+        $cssValidatorOutputParser = new CssValidatorOutputParser();
+        $cssValidatorOutputParser->setConfiguration($cssValidatorOutputParserConfiguration);
         
         return $cssValidatorOutputParser->getOutput();       
+    }
+    
+    
+    protected function createLocalProxyResource() {
+        $this->localProxyResource = new LocalProxyResource($this->getConfiguration(), $this->getBaseRequest());
+    }
+    
+    
+    /**
+     * 
+     * @return LocalProxyResource
+     */
+    protected function getLocalProxyResource() {
+        return $this->localProxyResource;
+    }
+    
+    
+    /**
+     * 
+     * @return boolean
+     */
+    private function hasLocalProxyResource() {
+        return !is_null($this->localProxyResource);
     }
     
     
@@ -142,9 +230,39 @@ class Wrapper {
      */
     protected function getRawValidatorOutputLines() {
         $validatorOutputLines = array();
-        exec($this->getConfiguration()->getExecutableCommand(), $validatorOutputLines);
         
+        $executableCommand = $this->hasLocalProxyResource() 
+            ? $this->getLocalProxyResource()->getConfiguration()->getExecutableCommand()
+            : $this->getConfiguration()->getExecutableCommand();
+        
+        exec($executableCommand, $validatorOutputLines);        
         return $validatorOutputLines;
     }
+    
+    
+    
+    /**
+     * 
+     * @param string $validatorOutputLines
+     * @return string
+     */
+    private function replaceLocalFilePathsWithOriginalFilePaths($validatorOutput) {        
+        $refMatches = array();
+        preg_match_all('/ref="file:\/tmp\/[^"]*"/', $validatorOutput, $refMatches);        
+        
+        if (count($refMatches) > 0) {
+            $refAttributes = $refMatches[0];
+            
+            foreach ($refAttributes as $refAttribute) {                
+                $originalUrl = $this->localProxyResource->getWebResourceUrlFromPath(str_replace(array('ref="file:', '"'), '', $refAttribute));
+                $validatorOutput = str_replace($refAttribute, 'ref="' . $originalUrl . '"', $validatorOutput);
+            }
+        }
+        
+        return $validatorOutput;
+    }
+    
+    
+  
     
 }

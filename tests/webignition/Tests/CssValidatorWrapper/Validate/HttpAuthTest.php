@@ -10,19 +10,65 @@ class HttpAuthTest extends BaseTest {
     public function setUp() {
         $this->setTestFixturePath(__CLASS__, $this->getName());
     }
-
-    public function testNotSet() {
-        $configuration = new Configuration();
-        $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setCssValidatorJarPath('/home/jon/tools/css-validator/2002/css-validator/css-validator.jar');
+    
+//    /**
+//     * test with curl error retrieving root web resource
+//     * test with http client error ...
+//     * test with http server error ...
+//     */
+//
+//    public function testNotSet() {
+//        $configuration = new Configuration();
+//        $configuration->setUrlToValidate('http://example.com/');
+//        $configuration->setCssValidatorJarPath('/home/jon/tools/css-validator/2002/css-validator/css-validator.jar');
+//        
+//        $wrapper = $this->getNewCssValidatorWrapper(); 
+//        $wrapper->setCssValidatorRawOutput($this->getFixture('http-auth-protocol-exception.txt'));
+//        $wrapper->setConfiguration($configuration);
+//        
+//        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
+//        $output = $wrapper->validate();
+//        $this->assertTrue($output->hasException());
+//        $this->assertTrue($output->getException()->isHttp401());
+//    }
+    
+    
+    public function testSet() { 
+        // java -jar /home/jon/tools/css-validator/2002/css-validator/css-validator.jar -output ucn -vextwarning true "file:/home/jon/www/lib/webignition/css-validator-wrapper/test.html"
+        
+//        $configuration = new Configuration();
+//        $configuration->setUrlToValidate('http://example.com/');
+//        //$configuration->setUrlToValidate('http://http-auth-01.simplytestable.com/');
+//        $configuration->setCssValidatorJarPath('/home/jon/tools/css-validator/2002/css-validator/css-validator.jar');
+//        
+//        $wrapper = new \webignition\CssValidatorWrapper\Wrapper();
+        
+//        $this->setHttpFixtures($this->buildHttpFixtureSet($this->getHttpFixtures($this->getCommonFixturesDataPath(), array(
+//            '404.httpresponse'
+//        ))));        
         
         $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('http-auth-protocol-exception.txt'));
-        $wrapper->setConfiguration($configuration);
+        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
+        
+        $wrapper->enableDeferToParentIfNoRawOutput();
+        $wrapper->createConfiguration(array(
+            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'css-validator-jar-path' => '/home/jon/tools/css-validator/2002/css-validator/css-validator.jar',
+            'http-auth' => array(
+                'user' => 'example',
+                'password' => 'password'
+            )
+        ));
         
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
-        $this->assertTrue($output->getIsHttpAuthProtocolErrorOutput());
-    }
+        $this->assertFalse($output->hasException());
+        $this->assertEquals(3, $output->getErrorCount());
+        
+        foreach ($output->getMessages() as $message) {
+            /* @var $message \webignition\CssValidatorOutput\Message\Error */
+            $this->assertTrue(substr_count($message->getRef(), 'file:/') === 0);
+        }
+    }    
     
 }

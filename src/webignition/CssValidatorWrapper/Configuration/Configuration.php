@@ -319,4 +319,13 @@ class Configuration {
         return $this->httpAuthPassword;
     }
     
+    
+    /**
+     * 
+     * @return boolean
+     */
+    public function hasHttpAuthCredentials() {
+        return is_string($this->getHttpAuthUser()) || is_string($this->getHttpAuthPassword());
+    }
+    
 }
