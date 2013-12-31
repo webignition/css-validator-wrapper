@@ -1,6 +1,6 @@
 <?php
 
-namespace webignition\Tests\CssValidatorWrapper\Validate;
+namespace webignition\Tests\CssValidatorWrapper\Validate\HttpAuth;
 
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
@@ -60,6 +60,6 @@ class HttpAuthTest extends BaseTest {
             /* @var $message \webignition\CssValidatorOutput\Message\Error */
             $this->assertTrue(substr_count($message->getRef(), 'file:/') === 0);
         }
-    }    
+    }
     
 }
