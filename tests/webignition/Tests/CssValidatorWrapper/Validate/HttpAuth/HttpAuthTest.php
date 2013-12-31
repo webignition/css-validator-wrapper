@@ -10,12 +10,6 @@ class HttpAuthTest extends BaseTest {
     public function setUp() {
         $this->setTestFixturePath(__CLASS__, $this->getName());
     }
-    
-    /**
-     * test with curl error retrieving root web resource
-     * test with http client error ...
-     * test with http server error ...
-     */
 
     public function testNotSet() {
         $configuration = new Configuration();
