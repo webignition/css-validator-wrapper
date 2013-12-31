@@ -3,6 +3,7 @@
 namespace webignition\Tests\CssValidatorWrapper;
 
 use webignition\CssValidatorWrapper\Mock\Wrapper as MockCssValidatorWrapper;
+use Guzzle\Http\Client as HttpClient;
 
 abstract class BaseTest extends \PHPUnit_Framework_TestCase {
     
@@ -23,6 +24,13 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase {
      * @var string
      */
     private $fixturePath = null;    
+    
+    
+    /**
+     *
+     * @var \Guzzle\Http\Client 
+     */
+    private $httpClient = null;    
 
     /**
      * 
@@ -95,5 +103,62 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase {
         }
         
         return $fixtures;
+    }
+    
+    protected function getHttpFixtures($path, $filter = null) {
+        $items = array();
+
+        $fixturesDirectory = new \DirectoryIterator($path);
+        $fixturePaths = array();
+        foreach ($fixturesDirectory as $directoryItem) {
+            if ($directoryItem->isFile() && ((!is_array($filter)) || (is_array($filter) && in_array($directoryItem->getFilename(), $filter)))) {                
+                $fixturePaths[] = $directoryItem->getPathname();
+            }
+        }
+        
+        sort($fixturePaths);        
+        
+        foreach ($fixturePaths as $fixturePath) {
+            $items[] = file_get_contents($fixturePath);
+        }
+        
+        return $this->buildHttpFixtureSet($items);
+    }
+    
+    
+    /**
+     * 
+     * @param string $item
+     * @return string
+     */
+    private function getHttpFixtureItemType($item) {
+        if (substr($item, 0, strlen('HTTP')) == 'HTTP') {
+            return 'httpMessage';
+        }
+        
+        return 'curlException';
+    }    
+    
+    
+    /**
+     *
+     * @param string $testName
+     * @return string
+     */
+    protected function getFixturesDataPath($testName) {
+        return __DIR__ . self::FIXTURES_BASE_PATH . '/' . str_replace('\\', DIRECTORY_SEPARATOR, get_class($this)) . '/' . $testName;
+    } 
+    
+    
+    /**
+     * 
+     * @return \Guzzle\Http\Client
+     */
+    protected function getHttpClient() {
+        if (is_null($this->httpClient)) {
+            $this->httpClient = new HttpClient();
+        }
+        
+        return $this->httpClient;
     }    
 }
