@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+Content-Type: text/html
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Test</title>    
+    <link href="/style.css" rel="stylesheet">
+    <script type="text/javascript" src="/assets/js/app.js"></script> 
+  </head>
+  <body>
+  </body>
+</html>

@@ -8,60 +8,42 @@ use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class VendorExtensionSeverityLevelTest extends BaseTest {
     
+    private $wrapper;       
+    
     public function setUp() {
-        $this->setTestFixturePath(__CLASS__, $this->getName());
-    }
-
-    public function testNotSet() {        
+        $this->setTestFixturePath(__CLASS__);        
+        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath() . '/HttpResponses'));        
+        
         $configuration = new Configuration();
         $configuration->setUrlToValidate('http://example.com/');
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setConfiguration($configuration);
-        $wrapper->setCssValidatorRawOutput($this->getFixture('three-vendor-extension-warnings.txt'));
-        
-        $output = $wrapper->validate();
-        $this->assertEquals(3, $output->getWarningCount());        
+        $this->wrapper = $this->getNewCssValidatorWrapper();
+        $this->wrapper->setBaseRequest($this->getHttpClient()->get());
+        $this->wrapper->setConfiguration($configuration);
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('three-vendor-extension-warnings.txt'));
+    }
+
+    public function testNotSet() {        
+        $this->assertEquals(3, $this->wrapper->validate()->getWarningCount());        
     } 
     
     
     public function testIgnore() {
-        $configuration = new Configuration();
-        $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setVendorExtensionSeverityLevel(VendorExtensionSeverityLevel::LEVEL_IGNORE);
-        
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setConfiguration($configuration);
-        $wrapper->setCssValidatorRawOutput($this->getFixture('three-vendor-extension-warnings.txt'));
-        
-        $output = $wrapper->validate();
-        $this->assertEquals(0, $output->getWarningCount());        
+        $this->wrapper->getConfiguration()->setVendorExtensionSeverityLevel(VendorExtensionSeverityLevel::LEVEL_IGNORE);
+        $this->assertEquals(0, $this->wrapper->validate()->getWarningCount());   
     }
     
     public function testWarning() {
-        $configuration = new Configuration();
-        $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setVendorExtensionSeverityLevel(VendorExtensionSeverityLevel::LEVEL_WARN);
-        
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setConfiguration($configuration);
-        $wrapper->setCssValidatorRawOutput($this->getFixture('three-vendor-extension-warnings.txt'));
-        
-        $output = $wrapper->validate();
-        $this->assertEquals(3, $output->getWarningCount());            
+        $this->wrapper->getConfiguration()->setVendorExtensionSeverityLevel(VendorExtensionSeverityLevel::LEVEL_WARN);
+        $this->assertEquals(3, $this->wrapper->validate()->getWarningCount());                    
     }    
     
     public function testError() {
-        $configuration = new Configuration();
-        $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setVendorExtensionSeverityLevel(VendorExtensionSeverityLevel::LEVEL_ERROR);
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('three-vendor-extension-errors.txt'));
+        $output = $this->wrapper->validate();
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setConfiguration($configuration);
-        $wrapper->setCssValidatorRawOutput($this->getFixture('three-vendor-extension-errors.txt'));
-        
-        $output = $wrapper->validate();
-        $this->assertEquals(0, $output->getWarningCount());
+        $this->wrapper->getConfiguration()->setVendorExtensionSeverityLevel(VendorExtensionSeverityLevel::LEVEL_WARN);
+        $this->assertEquals(0, $output->getWarningCount());      
         $this->assertEquals(3, $output->getErrorCount());
     }
     

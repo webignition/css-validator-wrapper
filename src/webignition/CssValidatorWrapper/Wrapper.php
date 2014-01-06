@@ -153,27 +153,25 @@ class Wrapper {
     public function validate() {
         if (!$this->hasConfiguration()) {
             throw new \InvalidArgumentException('Unable to validate; configuration not set', self::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET);
-        }
-        
-        if ($this->getConfiguration()->hasHttpAuthCredentials()) {
-            try { 
-                $this->createLocalProxyResource();                         
-                $this->getLocalProxyResource()->prepare();
-            } catch (\webignition\WebResource\Exception\Exception $webResourceException) {                
-                $cssValidatorOutput = new CssValidatorOutput();
-                $cssValidatorOutputException = new ExceptionOutput();
-                $cssValidatorOutputException->setType(new ExceptionOutputType('http' . $webResourceException->getResponse()->getStatusCode()));
-                
-                $cssValidatorOutput->setException($cssValidatorOutputException);
-                return $cssValidatorOutput;
-            } catch (\Guzzle\Http\Exception\CurlException $curlException) {                
-                $cssValidatorOutput = new CssValidatorOutput();
-                $cssValidatorOutputException = new ExceptionOutput();
-                $cssValidatorOutputException->setType(new ExceptionOutputType('curl' . $curlException->getErrorNo()));
-                
-                $cssValidatorOutput->setException($cssValidatorOutputException);
-                return $cssValidatorOutput;            
-            }
+        }        
+
+        try { 
+            $this->createLocalProxyResource();                         
+            $this->getLocalProxyResource()->prepare();
+        } catch (\webignition\WebResource\Exception\Exception $webResourceException) {                
+            $cssValidatorOutput = new CssValidatorOutput();
+            $cssValidatorOutputException = new ExceptionOutput();
+            $cssValidatorOutputException->setType(new ExceptionOutputType('http' . $webResourceException->getResponse()->getStatusCode()));
+
+            $cssValidatorOutput->setException($cssValidatorOutputException);
+            return $cssValidatorOutput;
+        } catch (\Guzzle\Http\Exception\CurlException $curlException) {                
+            $cssValidatorOutput = new CssValidatorOutput();
+            $cssValidatorOutputException = new ExceptionOutput();
+            $cssValidatorOutputException->setType(new ExceptionOutputType('curl' . $curlException->getErrorNo()));
+
+            $cssValidatorOutput->setException($cssValidatorOutputException);
+            return $cssValidatorOutput;            
         }
         
         $cssValidatorOutputParserConfiguration = new CssValidatorOutputParserConfiguration();

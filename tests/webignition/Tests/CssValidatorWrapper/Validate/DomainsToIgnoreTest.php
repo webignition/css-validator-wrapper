@@ -9,70 +9,52 @@ use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class DomainsToIgnoreTest extends BaseTest {
     
-    public function setUp() {
-        $this->setTestFixturePath(__CLASS__, $this->getName());
+    private $wrapper;
+    
+    public function setUp() {        
+        $this->setTestFixturePath(__CLASS__);        
+        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath() . '/HttpResponses'));        
+        
+        $configuration = new Configuration();
+        $configuration->setUrlToValidate('http://example.com/');
+        
+        $this->wrapper = $this->getNewCssValidatorWrapper();
+        $this->wrapper->setBaseRequest($this->getHttpClient()->get());
+        $this->wrapper->setConfiguration($configuration);
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('domains-to-ignore.txt'));
     }
 
-    public function testNotSet() {        
-        $configuration = new Configuration();
-        $configuration->setUrlToValidate('http://example.com/');
-        
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setConfiguration($configuration);
-        $wrapper->setCssValidatorRawOutput($this->getFixture('domains-to-ignore.txt'));
-        
-        $output = $wrapper->validate();
-        $this->assertEquals(9, $output->getErrorCount());
+    public function testNotSet() {      
+        $this->assertEquals(9, $this->wrapper->validate()->getErrorCount());
     }        
     
-    public function testOneDomainOfThreeIgnored() {        
-        $configuration = new Configuration();
-        $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setDomainsToIgnore(array(
+    public function testOneDomainOfThreeIgnored() {
+        $this->wrapper->getConfiguration()->setDomainsToIgnore(array(
             'one.cdn.example.com'
         ));
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setConfiguration($configuration);
-        $wrapper->setCssValidatorRawOutput($this->getFixture('domains-to-ignore.txt'));
-        
-        $output = $wrapper->validate();
-        $this->assertEquals(6, $output->getErrorCount());
+        $this->assertEquals(6, $this->wrapper->validate()->getErrorCount());
     }     
     
     
-    public function testTwoDomainsOfThreeIgnored() {        
-        $configuration = new Configuration();
-        $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setDomainsToIgnore(array(
+    public function testTwoDomainsOfThreeIgnored() {
+        $this->wrapper->getConfiguration()->setDomainsToIgnore(array(
             'one.cdn.example.com',
             'two.cdn.example.com'
-        ));
-        
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setConfiguration($configuration);
-        $wrapper->setCssValidatorRawOutput($this->getFixture('domains-to-ignore.txt'));
-        
-        $output = $wrapper->validate();
-        $this->assertEquals(3, $output->getErrorCount());
+        ));        
+
+        $this->assertEquals(3, $this->wrapper->validate()->getErrorCount());
     }
     
     
-    public function testThreeDomainsOfThreeIgnored() {        
-        $configuration = new Configuration();
-        $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setDomainsToIgnore(array(
+    public function testThreeDomainsOfThreeIgnored() {
+        $this->wrapper->getConfiguration()->setDomainsToIgnore(array(
             'one.cdn.example.com',
             'two.cdn.example.com',
             'example.com'
-        ));
-        
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setConfiguration($configuration);
-        $wrapper->setCssValidatorRawOutput($this->getFixture('domains-to-ignore.txt'));
-        
-        $output = $wrapper->validate();
-        $this->assertEquals(0, $output->getErrorCount());
+        ));        
+
+        $this->assertEquals(0, $this->wrapper->validate()->getErrorCount());        
     }
     
 }

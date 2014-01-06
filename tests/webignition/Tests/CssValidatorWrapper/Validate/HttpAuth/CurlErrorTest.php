@@ -6,17 +6,15 @@ use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class CurlErrorTest extends BaseTest {
     
+    private $wrapper;
+    
     public function setUp() {
         $this->setTestFixturePath(__CLASS__, $this->getName());
-    }
-    
-    
-    public function testCurlCouldNotResolveHostWhenRetrievingRootWebResource() {        
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
+        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath() . '/HttpResponses'));        
         
-        $wrapper = $this->getNewCssValidatorWrapper();        
+        $this->wrapper = $this->getNewCssValidatorWrapper();        
         
-        $wrapper->createConfiguration(array(
+        $this->wrapper->createConfiguration(array(
             'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
@@ -24,56 +22,29 @@ class CurlErrorTest extends BaseTest {
             )
         ));
         
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
+        $this->wrapper->setBaseRequest($this->getHttpClient()->get());
+    }
+    
+    
+    public function testCurlCouldNotResolveHostWhenRetrievingRootWebResource() {
+        $output = $this->wrapper->validate();
         
         $this->assertTrue($output->hasException());
         $this->assertTrue($output->getException()->isCurl6());        
     }   
     
-    public function testCurlTimeoutWhenRetrievingRootWebResource() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
-        
-        $wrapper = $this->getNewCssValidatorWrapper();        
-        
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
+    public function testCurlTimeoutWhenRetrievingRootWebResource() {        
+        $output = $this->wrapper->validate();
         
         $this->assertTrue($output->hasException());
         $this->assertTrue($output->getException()->isCurl28());    
     } 
     
     
-    public function testCurlCouldNotResolveHostWhenRetrievingCssResourceOneOfTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
+    public function testCurlCouldNotResolveHostWhenRetrievingCssResourceOneOfTwo() {        
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1')); 
+        $output = $this->wrapper->validate();        
         
-        $wrapper = $this->getNewCssValidatorWrapper();     
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1')); 
-
-        $wrapper->createConfiguration(array(           
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
         $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');        
         
         $this->assertFalse($output->hasException());
@@ -82,23 +53,9 @@ class CurlErrorTest extends BaseTest {
     }   
     
     public function testCurlTimeoutWhenRetrievingCssResourceOneOfTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1')); 
+        $output = $this->wrapper->validate(); 
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
-
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
         $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');        
         
         $this->assertFalse($output->hasException());
@@ -106,24 +63,10 @@ class CurlErrorTest extends BaseTest {
         $this->assertEquals('curl-error-28', $errorsForExceptionedUrl[0]->getMessage());
     }
     
-    public function testCurlCouldNotResolveHostWhenRetrievingCssResourceTwoOfTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
+    public function testCurlCouldNotResolveHostWhenRetrievingCssResourceTwoOfTwo() { 
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1')); 
+        $output = $this->wrapper->validate(); 
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
-
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
         $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');        
         
         $this->assertFalse($output->hasException());
@@ -132,23 +75,9 @@ class CurlErrorTest extends BaseTest {
     }   
     
     public function testCurlTimeoutWhenRetrievingCssResourceTwoOfTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1')); 
+        $output = $this->wrapper->validate(); 
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
-
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
         $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');        
         
         $this->assertFalse($output->hasException());

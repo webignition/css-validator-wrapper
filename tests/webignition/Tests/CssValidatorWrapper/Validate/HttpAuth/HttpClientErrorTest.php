@@ -2,77 +2,42 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Validate\HttpAuth;
 
-use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class HttpClientErrorTest extends BaseTest {
     
+    private $wrapper;
+    
     public function setUp() {
         $this->setTestFixturePath(__CLASS__, $this->getName());
+        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath() . '/HttpResponses'));
+        
+        $this->wrapper = $this->getNewCssValidatorWrapper();
+        $this->wrapper->createConfiguration(array(
+            'url-to-validate' => 'http://example.com/'
+        ));
+        
+        $this->wrapper->setBaseRequest($this->getHttpClient()->get());         
     }    
     
     public function testHttp401WhenRetrievingRootWebResource() {        
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
-        
-        $wrapper = $this->getNewCssValidatorWrapper();        
-        
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
+        $output = $this->wrapper->validate();
         
         $this->assertTrue($output->hasException());
         $this->assertTrue($output->getException()->isHttp401());
     }
     
     public function testHttp404WhenRetrievingRootWebResource() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
-        
-        $wrapper = $this->getNewCssValidatorWrapper();       
-        
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
+        $output = $this->wrapper->validate();
         
         $this->assertTrue($output->hasException());
-        $this->assertTrue($output->getException()->isHttp401());
+        $this->assertTrue($output->getException()->isHttp404());
     }    
     
     public function testHttp401WhenRetrievingCssResourceOneOfTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
+        $output = $this->wrapper->validate();
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
-        
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
         $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');        
         
         $this->assertFalse($output->hasException());
@@ -81,23 +46,9 @@ class HttpClientErrorTest extends BaseTest {
     }       
     
     public function testHttp404WhenRetrievingCssResourceOneOfTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
+        $output = $this->wrapper->validate();
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
-        
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();        
         $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');        
         
         $this->assertFalse($output->hasException());
@@ -106,23 +57,9 @@ class HttpClientErrorTest extends BaseTest {
     }     
     
     public function testHttp401WhenRetrievingCssResourceTwoOfTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
+        $output = $this->wrapper->validate();
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
-        
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
         $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');
         
         $this->assertFalse($output->hasException());
@@ -131,24 +68,9 @@ class HttpClientErrorTest extends BaseTest {
     }       
     
     public function testHttp404WhenRetrievingCssResourceTwoOfTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
+        $output = $this->wrapper->validate();
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
-        
-        $wrapper->enableDeferToParentIfNoRawOutput();
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
         $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');        
         
         $this->assertFalse($output->hasException());
@@ -158,23 +80,8 @@ class HttpClientErrorTest extends BaseTest {
     
     
     public function testHttp401WhenRetrievingCssResourcesOneAndTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
-        
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
-
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
+        $output = $this->wrapper->validate();
         
         $errorsForStylesheet1 = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');                
         $this->assertFalse($output->hasException());
@@ -189,24 +96,8 @@ class HttpClientErrorTest extends BaseTest {
     
     
    public function testHttp404WhenRetrievingCssResourcesOneAndTwo() {
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
-        
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
-        
-        $wrapper->enableDeferToParentIfNoRawOutput();
-        $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/',
-            'http-auth' => array(
-                'user' => 'example',
-                'password' => 'password'
-            )
-        ));
-        
-        $wrapper->setBaseRequest($this->getHttpClient()->get());
-        
-        /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
-        $output = $wrapper->validate();
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
+        $output = $this->wrapper->validate();
         
         $errorsForStylesheet1 = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');                
         $this->assertFalse($output->hasException());

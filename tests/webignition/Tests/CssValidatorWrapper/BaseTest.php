@@ -37,8 +37,12 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase {
      * @param string $testClass
      * @param string $testMethod
      */
-    protected function setTestFixturePath($testClass, $testMethod) {
-        $this->fixturePath = __DIR__ . self::FIXTURES_BASE_PATH . '/' . str_replace('\\', '/', $testClass) . '/' . $testMethod;       
+    protected function setTestFixturePath($testClass, $testMethod = null) {
+        $this->fixturePath = __DIR__ . self::FIXTURES_BASE_PATH . '/' . str_replace('\\', '/', $testClass);       
+        
+        if (!is_null($testMethod)) {
+            $this->fixturePath .= '/' . $testMethod;
+        }
     }    
     
     
@@ -145,7 +149,14 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase {
      * @param string $testName
      * @return string
      */
-    protected function getFixturesDataPath($testName) {
+    protected function getFixturesDataPath($testName = null) {
+        return (is_null($testName))
+            ? $this->fixturePath
+            : $this->fixturePath . '/' . $testName;
+        
+        var_dump($this->fixturePath);
+        exit();
+        
         return __DIR__ . self::FIXTURES_BASE_PATH . '/' . str_replace('\\', DIRECTORY_SEPARATOR, get_class($this)) . '/' . $testName;
     } 
     
