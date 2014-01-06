@@ -2,7 +2,6 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Validate\HttpAuth;
 
-use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class HttpAuthTest extends BaseTest {
@@ -30,10 +29,12 @@ class HttpAuthTest extends BaseTest {
     }
     
     
-    public function testSet() {         
-        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));
-        $this->wrapper->getConfiguration()->setHttpAuthUser('user');
-        $this->wrapper->getConfiguration()->setHttpAuthPassword('password');
+    public function testSet() {
+        $baseRequest = $this->getHttpClient()->get();
+        $baseRequest->setAuth('example', 'password', 'any');
+        $this->wrapper->setBaseRequest($baseRequest);
+        
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));#
 
         $output = $this->wrapper->validate();
         $this->assertFalse($output->hasException());

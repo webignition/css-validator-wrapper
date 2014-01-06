@@ -54,20 +54,6 @@ class Configuration {
     
     
     /**
-     *
-     * @var string
-     */
-    private $httpAuthUser = null;
-    
-    
-    /**
-     *
-     * @var string
-     */
-    private $httpAuthPassword = null;
-    
-    
-    /**
      * 
      * @param string $javaExecutablePath
      * @return \webignition\CssValidatorWrapper\Configuration
@@ -277,55 +263,6 @@ class Configuration {
      */
     public function hasDomainsToIgnore() {        
         return is_array($this->getDomainsToIgnore()) && count($this->getDomainsToIgnore()) > 0;
-    }
-    
-    
-    /**
-     * 
-     * @param string $httpAuthUser
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
-     */
-    public function setHttpAuthUser($httpAuthUser) {
-        $this->httpAuthUser = $httpAuthUser;
-        return $this;
-    }
-    
-    
-    /**
-     * 
-     * @return string|null
-     */
-    public function getHttpAuthUser() {
-        return $this->httpAuthUser;
-    }
-    
-    
-    /**
-     * 
-     * @param string $httpAuthPassword
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
-     */
-    public function setHttpAuthPassword($httpAuthPassword) {
-        $this->httpAuthPassword = $httpAuthPassword;
-        return $this;
-    }
-    
-    
-    /**
-     * 
-     * @return string|null
-     */    
-    public function getHttpAuthPassword() {
-        return $this->httpAuthPassword;
-    }
-    
-    
-    /**
-     * 
-     * @return boolean
-     */
-    public function hasHttpAuthCredentials() {
-        return is_string($this->getHttpAuthUser()) || is_string($this->getHttpAuthPassword());
     }
     
 }

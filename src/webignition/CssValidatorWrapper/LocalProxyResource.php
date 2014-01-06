@@ -420,7 +420,6 @@ class LocalProxyResource {
             if (!isset($this->webResources[$this->getUrlHash($url)])) {
                 $request = clone $this->getBaseRequest();            
                 $request->setUrl($url);
-                $request->setAuth($this->getConfiguration()->getHttpAuthUser(), $this->getConfiguration()->getHttpAuthPassword(), 'any');
 
                 $this->webResources[$this->getUrlHash($url)] = $this->getWebResourceService()->get($request);            
             }            
