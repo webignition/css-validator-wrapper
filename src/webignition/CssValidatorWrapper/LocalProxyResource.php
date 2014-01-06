@@ -34,13 +34,6 @@ class LocalProxyResource {
     
     /**
      *
-     * @var \webignition\WebResource\Service\Service
-     */
-    private $webResourceService;
-    
-    
-    /**
-     *
      * @var \webignition\WebResource\WebResource[]
      */
     private $webResources = array();
@@ -396,7 +389,7 @@ class LocalProxyResource {
                 $request = clone $this->getConfiguration()->getBaseRequest();            
                 $request->setUrl($url);
 
-                $this->webResources[$this->getUrlHash($url)] = $this->getWebResourceService()->get($request);            
+                $this->webResources[$this->getUrlHash($url)] = $this->getConfiguration()->getWebResourceService()->get($request);            
             }            
         } catch (\webignition\WebResource\Exception\Exception $webResourceException) {
             if ($url === $this->getRootWebResourceUrl()) {
@@ -418,23 +411,6 @@ class LocalProxyResource {
         }
         
         return $this->webResources[$this->getUrlHash($url)];
-    }
-    
-    
-    /**
-     * 
-     * @return \webignition\WebResource\Service\Service
-     */
-    private function getWebResourceService() {
-        if (is_null($this->webResourceService)) {
-            $this->webResourceService = new \webignition\WebResource\Service\Service(array(
-                'text/html' => 'webignition\WebResource\WebPage\WebPage',
-                'application/xhtml+xml' =>'webignition\WebResource\WebPage\WebPage',
-                'application/json' => 'webignition\WebResource\JsonDocument\JsonDocument'            
-            ));
-        }
-        
-        return $this->webResourceService;
     }
     
     

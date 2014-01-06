@@ -60,6 +60,41 @@ class Configuration {
     private $baseRequest = null;
     
     
+    /**
+     *
+     * @var \webignition\WebResource\Service\Service
+     */
+    private $webResourceService;    
+    
+    
+    
+    
+    /**
+     * 
+     * @return \webignition\WebResource\Service\Service
+     */
+    public function getWebResourceService() {
+        if (is_null($this->webResourceService)) {
+            $this->webResourceService = new \webignition\WebResource\Service\Service(array(
+                'text/html' => 'webignition\WebResource\WebPage\WebPage',
+                'application/xhtml+xml' =>'webignition\WebResource\WebPage\WebPage',
+                'application/json' => 'webignition\WebResource\JsonDocument\JsonDocument'            
+            ));
+        }
+        
+        return $this->webResourceService;
+    }    
+    
+    
+    /**
+     * 
+     * @param \webignition\WebResource\Service\Service $webResourceService
+     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     */
+    public function setWebResourceService(\webignition\WebResource\Service\Service $webResourceService) {
+        $this->webResourceService = $webResourceService;
+        return $this;
+    }
     
     
     /**
