@@ -138,17 +138,11 @@ class Wrapper {
         }
         
         $cssValidatorOutputParserConfiguration = new CssValidatorOutputParserConfiguration();
-        $validatorOutput = implode("\n", $this->getRawValidatorOutputLines());
-        
-        if ($this->hasLocalProxyResource()) {
-            $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths($validatorOutput);           
-        }        
+        $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths(implode("\n", $this->getRawValidatorOutputLines()));                  
         
         $cssValidatorOutputParserConfiguration->setRawOutput($validatorOutput);
         
-        if ($this->hasLocalProxyResource()) {
-            $this->localProxyResource->clear();
-        }
+        $this->localProxyResource->clear();
         
         if ($this->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES)) {
             $cssValidatorOutputParserConfiguration->setIgnoreFalseImageDataUrlMessages(true);
@@ -169,33 +163,31 @@ class Wrapper {
         $cssValidatorOutputParser = new CssValidatorOutputParser();
         $cssValidatorOutputParser->setConfiguration($cssValidatorOutputParserConfiguration);
         
-        $output = $cssValidatorOutputParser->getOutput();
-        
-        if ($this->hasLocalProxyResource()) {           
-            if ($this->getLocalProxyResource()->hasWebResourceExceptions()) {
-                foreach ($this->getLocalProxyResource()->getWebResourceExceptions() as $webResourceException) {
-                    $error = new \webignition\CssValidatorOutput\Message\Error();
-                    $error->setContext('');
-                    $error->setLineNumber(0);
-                    $error->setMessage('http-error-' . $webResourceException->getResponse()->getStatusCode());
-                    $error->setRef($webResourceException->getRequest()->getUrl());
-                    
-                    $output->addMessage($error);
-                }
-            } 
-            
-            if ($this->getLocalProxyResource()->hasCurlExceptions()) {
-                foreach ($this->getLocalProxyResource()->getCurlExceptions() as $curlExceptionDetails) {
-                    $error = new \webignition\CssValidatorOutput\Message\Error();
-                    $error->setContext('');
-                    $error->setLineNumber(0);
-                    $error->setMessage('curl-error-' . $curlExceptionDetails['exception']->getErrorNo());
-                    $error->setRef($curlExceptionDetails['url']);
-                    
-                    $output->addMessage($error);
-                }
+        $output = $cssValidatorOutputParser->getOutput();        
+     
+        if ($this->getLocalProxyResource()->hasWebResourceExceptions()) {
+            foreach ($this->getLocalProxyResource()->getWebResourceExceptions() as $webResourceException) {
+                $error = new \webignition\CssValidatorOutput\Message\Error();
+                $error->setContext('');
+                $error->setLineNumber(0);
+                $error->setMessage('http-error-' . $webResourceException->getResponse()->getStatusCode());
+                $error->setRef($webResourceException->getRequest()->getUrl());
+
+                $output->addMessage($error);
             }
         } 
+
+        if ($this->getLocalProxyResource()->hasCurlExceptions()) {
+            foreach ($this->getLocalProxyResource()->getCurlExceptions() as $curlExceptionDetails) {
+                $error = new \webignition\CssValidatorOutput\Message\Error();
+                $error->setContext('');
+                $error->setLineNumber(0);
+                $error->setMessage('curl-error-' . $curlExceptionDetails['exception']->getErrorNo());
+                $error->setRef($curlExceptionDetails['url']);
+
+                $output->addMessage($error);
+            }
+        }
         
         return $cssValidatorOutputParser->getOutput();       
     }
@@ -217,25 +209,11 @@ class Wrapper {
     
     /**
      * 
-     * @return boolean
-     */
-    private function hasLocalProxyResource() {
-        return !is_null($this->localProxyResource);
-    }
-    
-    
-    /**
-     * 
      * @return array
      */
     protected function getRawValidatorOutputLines() {
-        $validatorOutputLines = array();
-        
-        $executableCommand = $this->hasLocalProxyResource() 
-            ? $this->getLocalProxyResource()->getConfiguration()->getExecutableCommand()
-            : $this->getConfiguration()->getExecutableCommand();
-        
-        exec($executableCommand, $validatorOutputLines);        
+        $validatorOutputLines = array();        
+        exec($this->getLocalProxyResource()->getConfiguration()->getExecutableCommand(), $validatorOutputLines);        
         return $validatorOutputLines;
     }
     
