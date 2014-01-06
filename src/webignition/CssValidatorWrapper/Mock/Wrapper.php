@@ -69,7 +69,7 @@ class Wrapper extends BaseCssValidatorWrapper {
     
     
     protected function createLocalProxyResource() {
-        $this->localProxyResource = new LocalProxyResource($this->getConfiguration(), $this->getBaseRequest());
+        $this->localProxyResource = new LocalProxyResource($this->getConfiguration());
     }    
     
 }

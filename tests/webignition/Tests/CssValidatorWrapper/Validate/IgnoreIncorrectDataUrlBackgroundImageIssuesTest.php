@@ -16,9 +16,9 @@ class IgnoreIncorrectDataUrlBackgroundImageIssuesTest extends BaseTest {
         
         $configuration = new Configuration();
         $configuration->setUrlToValidate('http://example.com/');
+        $configuration->setBaseRequest($this->getHttpClient()->get());
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
-        $this->wrapper->setBaseRequest($this->getHttpClient()->get());
         $this->wrapper->setConfiguration($configuration);
         $this->wrapper->setCssValidatorRawOutput($this->getFixture('incorrect-data-url-background-image-errors.txt'));
     }

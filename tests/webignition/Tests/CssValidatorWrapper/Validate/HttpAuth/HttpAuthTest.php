@@ -14,10 +14,9 @@ class HttpAuthTest extends BaseTest {
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
         $this->wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/'
-        ));
-        
-        $this->wrapper->setBaseRequest($this->getHttpClient()->get());        
+            'url-to-validate' => 'http://example.com/',
+            'base-request' => $this->getHttpClient()->get()
+        )); 
     }
 
     public function testNotSet() {
@@ -32,7 +31,7 @@ class HttpAuthTest extends BaseTest {
     public function testSet() {
         $baseRequest = $this->getHttpClient()->get();
         $baseRequest->setAuth('example', 'password', 'any');
-        $this->wrapper->setBaseRequest($baseRequest);
+        $this->wrapper->getConfiguration()->setBaseRequest($baseRequest);
         
         $this->wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));#
 

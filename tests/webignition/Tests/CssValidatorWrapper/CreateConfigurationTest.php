@@ -2,11 +2,12 @@
 
 namespace webignition\Tests\HtmlValidator\Wrapper;
 
+use webignition\Tests\CssValidatorWrapper\BaseTest;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\CssValidatorWrapper\Wrapper;
 
-class CreateConfigurationTest extends \PHPUnit_Framework_TestCase {
+class CreateConfigurationTest extends BaseTest {
     
     public function testPassNonArrayArgumentThrowsInvalidArgumentException() {
         $this->setExpectedException('InvalidArgumentException');
@@ -107,5 +108,19 @@ class CreateConfigurationTest extends \PHPUnit_Framework_TestCase {
         ));         
         
         $this->assertEquals($domainsToIgnore, $wrapper->getConfiguration()->getDomainsToIgnore());        
-    }   
+    } 
+    
+    
+    public function testCreateConfigurationSetBaseRequest() {
+        $baseRequest = $this->getHttpClient()->get();
+        $baseRequest->setAuth('example_username');
+        
+        $wrapper = new Wrapper();
+        $wrapper->createConfiguration(array(
+            'url-to-validate' => 'http://example.com/',
+            'base-request' => $baseRequest
+        ));         
+        
+        $this->assertEquals('example_username', $wrapper->getConfiguration()->getBaseRequest()->getUsername());
+    }
 }

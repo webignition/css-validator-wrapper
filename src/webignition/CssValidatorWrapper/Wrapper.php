@@ -21,13 +21,6 @@ class Wrapper {
      * @var Configuration
      */
     private $configuration;
-    
-    
-    /**
-     *
-     * @var \Guzzle\Http\Message\Request
-     */
-    private $baseRequest = null;
 
     
     /**
@@ -35,30 +28,6 @@ class Wrapper {
      * @var LocalProxyResource
      */
     protected $localProxyResource = null;
-    
-    
-    /**
-     * 
-     * @param \Guzzle\Http\Message\Request $request
-     */
-    public function setBaseRequest(\Guzzle\Http\Message\Request $request) {
-        $this->baseRequest = $request;
-    }
-    
-    
-    
-    /**
-     * 
-     * @return \Guzzle\Http\Message\Request $request
-     */
-    public function getBaseRequest() {
-        if (is_null($this->baseRequest)) {
-            $client = new \Guzzle\Http\Client;            
-            $this->baseRequest = $client->get();
-        }
-        
-        return $this->baseRequest;
-    }    
     
     
     /**
@@ -128,7 +97,11 @@ class Wrapper {
         
         if (isset($configurationValues['domains-to-ignore']) && is_array($configurationValues['domains-to-ignore'])) {
             $configuration->setDomainsToIgnore($configurationValues['domains-to-ignore']);
-        }     
+        }  
+        
+        if (isset($configurationValues['base-request']) && $configurationValues['base-request'] instanceof \Guzzle\Http\Message\Request) {
+            $configuration->setBaseRequest($configurationValues['base-request']);
+        }
         
         $this->setConfiguration($configuration);
         return $this;
@@ -229,7 +202,7 @@ class Wrapper {
     
     
     protected function createLocalProxyResource() {
-        $this->localProxyResource = new LocalProxyResource($this->getConfiguration(), $this->getBaseRequest());
+        $this->localProxyResource = new LocalProxyResource($this->getConfiguration());
     }
     
     

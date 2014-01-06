@@ -14,10 +14,9 @@ class HttpServerErrorTest extends BaseTest {
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
         $this->wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/'
-        ));
-        
-        $this->wrapper->setBaseRequest($this->getHttpClient()->get());            
+            'url-to-validate' => 'http://example.com/',
+            'base-request' => $this->getHttpClient()->get()
+        ));            
     }
     
     

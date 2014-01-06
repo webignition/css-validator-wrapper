@@ -13,13 +13,6 @@ class LocalProxyResource {
     
     /**
      *
-     * @var \Guzzle\Http\Message\Request
-     */
-    private $baseRequest = null;
-    
-    
-    /**
-     *
      * @var Configuration
      */
     private $configuration;
@@ -70,13 +63,10 @@ class LocalProxyResource {
     /**
      * 
      * @param \webignition\CssValidatorWrapper\Configuration\Configuration $sourceConfiguration
-     * @param \Guzzle\Http\Message\Request $baseRequest
      */
-    public function __construct(Configuration $sourceConfiguration, \Guzzle\Http\Message\Request $baseRequest) {
+    public function __construct(Configuration $sourceConfiguration) {
         $this->sourceConfiguration = $sourceConfiguration;
         $this->configuration = clone $this->sourceConfiguration;
-        
-        $this->baseRequest = $baseRequest;
     }
     
     
@@ -369,22 +359,7 @@ class LocalProxyResource {
      */
     public function getConfiguration() {
         return $this->configuration;
-    }
-    
-    
-    
-    /**
-     * 
-     * @return \Guzzle\Http\Message\Request $request
-     */
-    public function getBaseRequest() {
-        if (is_null($this->baseRequest)) {
-            $client = new \Guzzle\Http\Client;            
-            $this->baseRequest = $client->get();
-        }
-        
-        return $this->baseRequest;
-    }     
+    }   
     
     
     /**
@@ -418,7 +393,7 @@ class LocalProxyResource {
     private function getWebResource($url) {        
         try {
             if (!isset($this->webResources[$this->getUrlHash($url)])) {
-                $request = clone $this->getBaseRequest();            
+                $request = clone $this->getConfiguration()->getBaseRequest();            
                 $request->setUrl($url);
 
                 $this->webResources[$this->getUrlHash($url)] = $this->getWebResourceService()->get($request);            

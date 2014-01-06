@@ -19,10 +19,9 @@ class CurlErrorTest extends BaseTest {
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
-            )
+            ),
+            'base-request' => $this->getHttpClient()->get()
         ));
-        
-        $this->wrapper->setBaseRequest($this->getHttpClient()->get());
     }
     
     

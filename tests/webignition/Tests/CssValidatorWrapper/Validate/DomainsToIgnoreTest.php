@@ -11,15 +11,15 @@ class DomainsToIgnoreTest extends BaseTest {
     
     private $wrapper;
     
-    public function setUp() {        
+    public function setUp() {                       
         $this->setTestFixturePath(__CLASS__);        
         $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath() . '/HttpResponses'));        
         
         $configuration = new Configuration();
         $configuration->setUrlToValidate('http://example.com/');
+        $configuration->setBaseRequest($this->getHttpClient()->get());
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
-        $this->wrapper->setBaseRequest($this->getHttpClient()->get());
         $this->wrapper->setConfiguration($configuration);
         $this->wrapper->setCssValidatorRawOutput($this->getFixture('domains-to-ignore.txt'));
     }

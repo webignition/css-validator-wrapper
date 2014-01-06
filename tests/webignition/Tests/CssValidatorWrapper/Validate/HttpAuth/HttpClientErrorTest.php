@@ -14,10 +14,9 @@ class HttpClientErrorTest extends BaseTest {
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
         $this->wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://example.com/'
+            'url-to-validate' => 'http://example.com/',
+            'base-request' => $this->getHttpClient()->get()
         ));
-        
-        $this->wrapper->setBaseRequest($this->getHttpClient()->get());         
     }    
     
     public function testHttp401WhenRetrievingRootWebResource() {        
