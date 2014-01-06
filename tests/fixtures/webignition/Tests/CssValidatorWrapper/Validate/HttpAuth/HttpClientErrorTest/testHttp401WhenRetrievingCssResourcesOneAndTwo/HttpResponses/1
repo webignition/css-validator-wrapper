@@ -1,0 +1,15 @@
+HTTP/1.1 200 OK
+Content-Type: text/html
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Http Auth Test Suite</title>    
+    <link href="/assets/css/style1.css" rel="stylesheet">
+    <link href="/assets/css/style2.css" rel="stylesheet">
+    <script type="text/javascript" src="/assets/js/app.js"></script> 
+  </head>
+  <body>
+  </body>
+</html>

@@ -36,7 +36,6 @@ class HttpAuthTest extends BaseTest {
         $wrapper->enableDeferToParentIfNoRawOutput();
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
-            'css-validator-jar-path' => '/home/jon/tools/css-validator/2002/css-validator/css-validator.jar',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'

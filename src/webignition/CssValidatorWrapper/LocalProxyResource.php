@@ -51,6 +51,13 @@ class LocalProxyResource {
      * @var \webignition\WebResource\WebResource[]
      */
     private $webResources = array();
+    
+
+    /**
+     *
+     * @var \webignition\WebResource\Exception\Exception[]
+     */    
+    private $webResourceExceptions = array();
         
     
     /**
@@ -63,6 +70,24 @@ class LocalProxyResource {
         $this->configuration = clone $this->sourceConfiguration;
         
         $this->baseRequest = $baseRequest;
+    }
+    
+    
+    /**
+     * 
+     * @return boolean
+     */
+    public function hasWebResourceExceptions() {
+        return count($this->webResourceExceptions) > 0;
+    }
+    
+    
+    /**
+     * 
+     * @return \webignition\WebResource\Exception\Exception[]
+     */
+    public function getWebResourceExceptions() {
+        return $this->webResourceExceptions;
     }
     
     
@@ -87,12 +112,27 @@ class LocalProxyResource {
             $this->retrieveStylesheetResources();
         }
         
-        foreach ($this->getStylesheetResources() as $stylesheetResource) {
+        foreach ($this->getStylesheetResources() as $stylesheetResource) {            
             $this->storeWebResource($stylesheetResource);
             $this->updateRootWebResourceStylesheetReference($stylesheetResource, 'file:' . $this->getPath($stylesheetResource));
         }
         
+        $this->clearHrefUrlsForExceptionedStylesheets();        
         $this->getConfiguration()->setUrlToValidate('file:' . $this->getPath($rootWebResource));
+    }
+    
+    
+    /**
+     * Update the href attributes for stylesheets that generated exceptions
+     * when being retrieved so that they are ignored by the W3C CSS validator.
+     * The W3C CSS validator cannot validate these and will generate unclear
+     * errors. We will instead append to the validator output more specific
+     * errors.
+     */
+    private function clearHrefUrlsForExceptionedStylesheets() {        
+        foreach ($this->webResourceExceptions as $webResourceException) {
+            $this->updateRootWebResourceStylesheetUrl($webResourceException->getRequest()->getUrl(), 'about:blank');
+        }        
     }
     
     
@@ -130,6 +170,15 @@ class LocalProxyResource {
             return;
         }
         
+        if (!$this->isHtmlResource($this->getRootWebResource())) {
+            return;
+        }
+        
+        $this->updateRootWebResourceStylesheetUrl($stylesheetResource->getUrl(), $localPath);
+    }
+    
+    
+    private function updateRootWebResourceStylesheetUrl($sourceUrl, $newUrl) {
         /* @var $rootWebResource \webignition\WebResource\WebPage\WebPage */
         $rootWebResource = $this->getRootWebResource();
         
@@ -152,14 +201,16 @@ class LocalProxyResource {
                 
                 $stylesheetUrl = (string)$absoluteUrlDeriver->getAbsoluteUrl();
                 
-                if ($stylesheetUrl == $stylesheetResource->getUrl()) {              
-                    $linkElement->setAttribute('href', $localPath);
+                if ($stylesheetUrl == $sourceUrl) {
+                    $rootWebResource->setContent(str_replace(array(
+                        'href="'.$hrefAttribute.'"',
+                        'href=\''.$hrefAttribute.'\''
+                    ), 'href="'.$newUrl.'"', $rootWebResource->getContent()));
                 }
             }
         }
-        
-        $rootWebResource->setContent($rootDom->saveHTML());
-        $this->storeWebResource($rootWebResource);
+
+        $this->storeWebResource($rootWebResource);        
     }
     
     
@@ -270,7 +321,16 @@ class LocalProxyResource {
      * @return \webignition\WebResource\WebResource
      */
     public function getRootWebResource() {
-        return $this->getWebResource($this->sourceConfiguration->getUrlToValidate());
+        return $this->getWebResource($this->getRootWebResourceUrl());
+    }
+    
+    
+    /**
+     * 
+     * @return string
+     */
+    public function getRootWebResourceUrl() {
+        return $this->sourceConfiguration->getUrlToValidate();
     }
     
     
@@ -326,17 +386,26 @@ class LocalProxyResource {
      * 
      * @return \webignition\WebResource\WebResource
      */
-    private function getWebResource($url) {
-        if (!isset($this->webResources[$this->getUrlHash($url)])) {
-            $request = clone $this->getBaseRequest();
-            $request->setUrl($url);
-            $request->setAuth($this->getConfiguration()->getHttpAuthUser(), $this->getConfiguration()->getHttpAuthPassword(), 'any');
+    private function getWebResource($url) {        
+        try {
+            if (!isset($this->webResources[$this->getUrlHash($url)])) {
+                $request = clone $this->getBaseRequest();            
+                $request->setUrl($url);
+                $request->setAuth($this->getConfiguration()->getHttpAuthUser(), $this->getConfiguration()->getHttpAuthPassword(), 'any');
 
-            $this->webResources[$this->getUrlHash($url)] = $this->getWebResourceService()->get($request);            
+                $this->webResources[$this->getUrlHash($url)] = $this->getWebResourceService()->get($request);            
+            }            
+        } catch (\webignition\WebResource\Exception\Exception $webResourceException) {
+            if ($url === $this->getRootWebResourceUrl()) {
+                throw $webResourceException;
+            }
+            
+            $this->webResourceExceptions[$this->getUrlHash($url)] = $webResourceException;
+            return null;
         }
         
         return $this->webResources[$this->getUrlHash($url)];
-    }  
+    }
     
     
     /**

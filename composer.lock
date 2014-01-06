@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "647813efa2f07a3fbb94d2c5bed30f3b",
+    "hash": "84f2297e7c774b22ceda8d936813abab",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -290,16 +290,16 @@
         },
         {
             "name": "webignition/css-validator-output-parser",
-            "version": "2.0",
+            "version": "2.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/css-validator-output-parser.git",
-                "reference": "72a303587809ffcb7f419a5b1b09aa3472a24401"
+                "reference": "1dc7e76410196dce6cc0b88321fa2df4690016e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/72a303587809ffcb7f419a5b1b09aa3472a24401",
-                "reference": "72a303587809ffcb7f419a5b1b09aa3472a24401",
+                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/1dc7e76410196dce6cc0b88321fa2df4690016e0",
+                "reference": "1dc7e76410196dce6cc0b88321fa2df4690016e0",
                 "shasum": ""
             },
             "require": {
@@ -334,7 +334,7 @@
                 "parser",
                 "validator"
             ],
-            "time": "2013-12-31 14:38:31"
+            "time": "2014-01-03 15:55:37"
         },
         {
             "name": "webignition/internet-media-type",

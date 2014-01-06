@@ -7,6 +7,9 @@ use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\CssValidatorOutput\Parser\Parser as CssValidatorOutputParser;
 use webignition\CssValidatorOutput\Parser\Configuration as CssValidatorOutputParserConfiguration;
+use webignition\CssValidatorOutput\CssValidatorOutput;
+use webignition\CssValidatorOutput\ExceptionOutput\ExceptionOutput;
+use webignition\CssValidatorOutput\ExceptionOutput\Type\Type as ExceptionOutputType;
 
 class Wrapper {
     
@@ -156,9 +159,13 @@ class Wrapper {
             try { 
                 $this->createLocalProxyResource();                         
                 $this->getLocalProxyResource()->prepare();
-            } catch (\webignition\WebResource\Exception\Exception $webResourceException) {
-                var_dump("webResourceException");
-                exit();
+            } catch (\webignition\WebResource\Exception\Exception $webResourceException) {                
+                $cssValidatorOutput = new CssValidatorOutput();
+                $cssValidatorOutputException = new ExceptionOutput();
+                $cssValidatorOutputException->setType(new ExceptionOutputType('http' . $webResourceException->getResponse()->getStatusCode()));
+                
+                $cssValidatorOutput->setException($cssValidatorOutputException);
+                return $cssValidatorOutput;
             } catch (\Guzzle\Http\Exception\CurlException $curlException) {
                 var_dump("curlException");
                 exit();                
@@ -169,7 +176,7 @@ class Wrapper {
         $validatorOutput = implode("\n", $this->getRawValidatorOutputLines());
         
         if ($this->hasLocalProxyResource()) {
-            $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths($validatorOutput);
+            $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths($validatorOutput);           
         }        
         
         $cssValidatorOutputParserConfiguration->setRawOutput($validatorOutput);
@@ -196,6 +203,22 @@ class Wrapper {
         
         $cssValidatorOutputParser = new CssValidatorOutputParser();
         $cssValidatorOutputParser->setConfiguration($cssValidatorOutputParserConfiguration);
+        
+        $output = $cssValidatorOutputParser->getOutput();
+        
+        if ($this->hasLocalProxyResource()) {           
+            if ($this->getLocalProxyResource()->hasWebResourceExceptions()) {
+                foreach ($this->getLocalProxyResource()->getWebResourceExceptions() as $webResourceException) {
+                    $error = new \webignition\CssValidatorOutput\Message\Error();
+                    $error->setContext('');
+                    $error->setLineNumber(0);
+                    $error->setMessage('http-error-' . $webResourceException->getResponse()->getStatusCode());
+                    $error->setRef($webResourceException->getRequest()->getUrl());
+                    
+                    $output->addMessage($error);
+                }
+            }          
+        } 
         
         return $cssValidatorOutputParser->getOutput();       
     }
@@ -261,8 +284,5 @@ class Wrapper {
         
         return $validatorOutput;
     }
-    
-    
-  
     
 }
