@@ -9,7 +9,7 @@
     "require": {
         "php": ">=5.3.2",
         "webignition/css-validator-output-parser": ">=2.1.2",
-        "webignition/web-resource-service":">=0.1",
+        "webignition/web-resource-service":">=0.2",
         "webignition/absolute-url-deriver":">=1.4.1"
     },
 
