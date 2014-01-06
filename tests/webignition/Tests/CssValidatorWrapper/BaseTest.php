@@ -160,5 +160,20 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase {
         }
         
         return $this->httpClient;
+    }
+    
+    
+    /**
+     * 
+     * @param string $curlMessage
+     * @return \Guzzle\Http\Exception\CurlException
+     */
+    private function getCurlExceptionFromCurlMessage($curlMessage) {
+        $curlMessageParts = explode(' ', $curlMessage, 2);
+        
+        $curlException = new \Guzzle\Http\Exception\CurlException();
+        $curlException->setError($curlMessageParts[1], (int)  str_replace('CURL/', '', $curlMessageParts[0]));
+        
+        return $curlException;
     }    
 }

@@ -58,6 +58,13 @@ class LocalProxyResource {
      * @var \webignition\WebResource\Exception\Exception[]
      */    
     private $webResourceExceptions = array();
+    
+    
+    /**
+     *
+     * @var \Guzzle\Http\Exception\CurlException[]
+     */    
+    private $curlExceptions = array();    
         
     
     /**
@@ -88,6 +95,24 @@ class LocalProxyResource {
      */
     public function getWebResourceExceptions() {
         return $this->webResourceExceptions;
+    }
+    
+    
+    /**
+     * 
+     * @return array
+     */
+    public function hasCurlExceptions() {
+        return count($this->curlExceptions) > 0;
+    }
+    
+    
+    /**
+     * 
+     * @return \Guzzle\Http\Exception\CurlException[]
+     */
+    public function getCurlExceptions() {
+        return $this->curlExceptions;
     }
     
     
@@ -133,6 +158,10 @@ class LocalProxyResource {
         foreach ($this->webResourceExceptions as $webResourceException) {
             $this->updateRootWebResourceStylesheetUrl($webResourceException->getRequest()->getUrl(), 'about:blank');
         }        
+        
+        foreach ($this->curlExceptions as $curlExceptionDetails) {            
+            $this->updateRootWebResourceStylesheetUrl($curlExceptionDetails['url'], 'about:blank');
+        }          
     }
     
     
@@ -402,6 +431,16 @@ class LocalProxyResource {
             
             $this->webResourceExceptions[$this->getUrlHash($url)] = $webResourceException;
             return null;
+        } catch (\Guzzle\Http\Exception\CurlException $curlException) {
+            if ($url === $this->getRootWebResourceUrl()) {
+                throw $curlException;
+            }
+            
+            $this->curlExceptions[$this->getUrlHash($url)] = array(
+                'url' => $url,
+                'exception' => $curlException
+            );
+            return null;            
         }
         
         return $this->webResources[$this->getUrlHash($url)];

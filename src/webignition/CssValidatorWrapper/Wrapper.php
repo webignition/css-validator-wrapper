@@ -166,9 +166,13 @@ class Wrapper {
                 
                 $cssValidatorOutput->setException($cssValidatorOutputException);
                 return $cssValidatorOutput;
-            } catch (\Guzzle\Http\Exception\CurlException $curlException) {
-                var_dump("curlException");
-                exit();                
+            } catch (\Guzzle\Http\Exception\CurlException $curlException) {                
+                $cssValidatorOutput = new CssValidatorOutput();
+                $cssValidatorOutputException = new ExceptionOutput();
+                $cssValidatorOutputException->setType(new ExceptionOutputType('curl' . $curlException->getErrorNo()));
+                
+                $cssValidatorOutput->setException($cssValidatorOutputException);
+                return $cssValidatorOutput;            
             }
         }
         
@@ -217,7 +221,19 @@ class Wrapper {
                     
                     $output->addMessage($error);
                 }
-            }          
+            } 
+            
+            if ($this->getLocalProxyResource()->hasCurlExceptions()) {
+                foreach ($this->getLocalProxyResource()->getCurlExceptions() as $curlExceptionDetails) {
+                    $error = new \webignition\CssValidatorOutput\Message\Error();
+                    $error->setContext('');
+                    $error->setLineNumber(0);
+                    $error->setMessage('curl-error-' . $curlExceptionDetails['exception']->getErrorNo());
+                    $error->setRef($curlExceptionDetails['url']);
+                    
+                    $output->addMessage($error);
+                }
+            }
         } 
         
         return $cssValidatorOutputParser->getOutput();       
