@@ -119,7 +119,7 @@ class Wrapper {
         }        
 
         try { 
-            $this->createLocalProxyResource();                         
+            $this->localProxyResource = new LocalProxyResource($this->getConfiguration());
             $this->getLocalProxyResource()->prepare();
         } catch (\webignition\WebResource\Exception\Exception $webResourceException) {                
             $cssValidatorOutput = new CssValidatorOutput();
@@ -193,16 +193,11 @@ class Wrapper {
     }
     
     
-    protected function createLocalProxyResource() {
-        $this->localProxyResource = new LocalProxyResource($this->getConfiguration());
-    }
-    
-    
     /**
      * 
      * @return LocalProxyResource
      */
-    protected function getLocalProxyResource() {
+    private function getLocalProxyResource() {
         return $this->localProxyResource;
     }
     

@@ -3,7 +3,6 @@
 namespace webignition\CssValidatorWrapper\Mock;
 
 use webignition\CssValidatorWrapper\Wrapper as BaseCssValidatorWrapper;
-use webignition\CssValidatorWrapper\Mock\LocalProxyResource;
 
 class Wrapper extends BaseCssValidatorWrapper {    
     
@@ -65,11 +64,6 @@ class Wrapper extends BaseCssValidatorWrapper {
     public function disableDeferToParentIfNoRawOutput() {
         $this->deferToParentIfNoRawOutput = false;
         return $this;
-    } 
-    
-    
-    protected function createLocalProxyResource() {
-        $this->localProxyResource = new LocalProxyResource($this->getConfiguration());
-    }    
+    }   
     
 }
