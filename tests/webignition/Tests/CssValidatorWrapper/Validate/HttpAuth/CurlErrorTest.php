@@ -17,7 +17,7 @@ class CurlErrorTest extends BaseTest {
         $wrapper = $this->getNewCssValidatorWrapper();        
         
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -39,7 +39,7 @@ class CurlErrorTest extends BaseTest {
         $wrapper = $this->getNewCssValidatorWrapper();        
         
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -63,7 +63,7 @@ class CurlErrorTest extends BaseTest {
         $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1')); 
 
         $wrapper->createConfiguration(array(           
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -74,7 +74,7 @@ class CurlErrorTest extends BaseTest {
         
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
-        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style1.css');        
+        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');        
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
@@ -88,7 +88,7 @@ class CurlErrorTest extends BaseTest {
         $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
 
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -99,7 +99,7 @@ class CurlErrorTest extends BaseTest {
         
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
-        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style1.css');        
+        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');        
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
@@ -113,7 +113,7 @@ class CurlErrorTest extends BaseTest {
         $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
 
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -124,7 +124,7 @@ class CurlErrorTest extends BaseTest {
         
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
-        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style2.css');        
+        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');        
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
@@ -138,7 +138,7 @@ class CurlErrorTest extends BaseTest {
         $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
 
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -149,7 +149,7 @@ class CurlErrorTest extends BaseTest {
         
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
-        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style2.css');        
+        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');        
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));

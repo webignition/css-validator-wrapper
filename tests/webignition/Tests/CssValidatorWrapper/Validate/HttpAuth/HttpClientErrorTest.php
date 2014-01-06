@@ -17,7 +17,7 @@ class HttpClientErrorTest extends BaseTest {
         $wrapper = $this->getNewCssValidatorWrapper();        
         
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -39,7 +39,7 @@ class HttpClientErrorTest extends BaseTest {
         $wrapper = $this->getNewCssValidatorWrapper();       
         
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -62,7 +62,7 @@ class HttpClientErrorTest extends BaseTest {
         $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
         
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -73,7 +73,7 @@ class HttpClientErrorTest extends BaseTest {
         
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
-        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style1.css');        
+        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');        
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
@@ -87,7 +87,7 @@ class HttpClientErrorTest extends BaseTest {
         $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
         
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -98,7 +98,7 @@ class HttpClientErrorTest extends BaseTest {
         
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();        
-        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style1.css');        
+        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');        
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
@@ -112,7 +112,7 @@ class HttpClientErrorTest extends BaseTest {
         $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
         
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -123,7 +123,7 @@ class HttpClientErrorTest extends BaseTest {
         
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
-        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style2.css');
+        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
@@ -138,8 +138,7 @@ class HttpClientErrorTest extends BaseTest {
         
         $wrapper->enableDeferToParentIfNoRawOutput();
         $wrapper->createConfiguration(array(
-            //'css-validator-jar-path' => '/home/jon/tools/css-validator/2002/css-validator/css-validator.jar',
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -150,7 +149,7 @@ class HttpClientErrorTest extends BaseTest {
         
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
-        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style2.css');        
+        $errorsForExceptionedUrl = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');        
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
@@ -165,7 +164,7 @@ class HttpClientErrorTest extends BaseTest {
         $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
 
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -177,12 +176,12 @@ class HttpClientErrorTest extends BaseTest {
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
         
-        $errorsForStylesheet1 = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style1.css');                
+        $errorsForStylesheet1 = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');                
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForStylesheet1));
         $this->assertEquals('http-error-401', $errorsForStylesheet1[0]->getMessage());
         
-        $errorsForStylesheet2 = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style2.css');                
+        $errorsForStylesheet2 = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');                
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForStylesheet2));
         $this->assertEquals('http-error-401', $errorsForStylesheet2[0]->getMessage());        
@@ -197,7 +196,7 @@ class HttpClientErrorTest extends BaseTest {
         
         $wrapper->enableDeferToParentIfNoRawOutput();
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
@@ -209,12 +208,12 @@ class HttpClientErrorTest extends BaseTest {
         /* @var $output \webignition\CssValidatorOutput\CssValidatorOutput */
         $output = $wrapper->validate();
         
-        $errorsForStylesheet1 = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style1.css');                
+        $errorsForStylesheet1 = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');                
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForStylesheet1));
         $this->assertEquals('http-error-404', $errorsForStylesheet1[0]->getMessage());
         
-        $errorsForStylesheet2 = $output->getErrorsByUrl('http://http-auth-01.simplytestable.com/assets/css/style2.css');                
+        $errorsForStylesheet2 = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');                
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForStylesheet2));
         $this->assertEquals('http-error-404', $errorsForStylesheet2[0]->getMessage());        

@@ -35,7 +35,7 @@ class HttpAuthTest extends BaseTest {
         
         $wrapper->enableDeferToParentIfNoRawOutput();
         $wrapper->createConfiguration(array(
-            'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
+            'url-to-validate' => 'http://example.com/',
             'http-auth' => array(
                 'user' => 'example',
                 'password' => 'password'
