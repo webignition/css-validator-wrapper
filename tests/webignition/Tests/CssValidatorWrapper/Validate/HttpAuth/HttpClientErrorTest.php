@@ -14,8 +14,7 @@ class HttpClientErrorTest extends BaseTest {
     public function testHttp401WhenRetrievingRootWebResource() {        
         $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
+        $wrapper = $this->getNewCssValidatorWrapper();        
         
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
@@ -37,8 +36,7 @@ class HttpClientErrorTest extends BaseTest {
     public function testHttp404WhenRetrievingRootWebResource() {
         $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath(__FUNCTION__ . '/HttpResponses')));        
         
-        $wrapper = $this->getNewCssValidatorWrapper(); 
-        $wrapper->setCssValidatorRawOutput($this->getFixture('CssValidatorResponse/1'));        
+        $wrapper = $this->getNewCssValidatorWrapper();       
         
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://http-auth-01.simplytestable.com/',
