@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "a293c19a5700197e26aec7065ff3afaf",
+    "hash": "3a780d88f0ef3398ca76e8bebbe003d0",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -636,16 +636,16 @@
         },
         {
             "name": "webignition/web-resource-service",
-            "version": "0.2.4",
+            "version": "0.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-resource-service.git",
-                "reference": "f8f8afb8a520de1531bca7b7318941d3d48a521e"
+                "reference": "b12577aed5ef4079f6746aa59952a9ce43ba0e16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-resource-service/zipball/f8f8afb8a520de1531bca7b7318941d3d48a521e",
-                "reference": "f8f8afb8a520de1531bca7b7318941d3d48a521e",
+                "url": "https://api.github.com/repos/webignition/web-resource-service/zipball/b12577aed5ef4079f6746aa59952a9ce43ba0e16",
+                "reference": "b12577aed5ef4079f6746aa59952a9ce43ba0e16",
                 "shasum": ""
             },
             "require": {
@@ -678,7 +678,7 @@
                 "service",
                 "web"
             ],
-            "time": "2014-01-07 13:28:34"
+            "time": "2014-01-07 16:52:38"
         },
         {
             "name": "xrstf/ip-utils",
