@@ -48,7 +48,7 @@ class CurlErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('curl-error-6', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('curl-error:6', $errorsForExceptionedUrl[0]->getMessage());
     }   
     
     public function testCurlTimeoutWhenRetrievingCssResourceOneOfTwo() {
@@ -59,7 +59,7 @@ class CurlErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('curl-error-28', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('curl-error:28', $errorsForExceptionedUrl[0]->getMessage());
     }
     
     public function testCurlCouldNotResolveHostWhenRetrievingCssResourceTwoOfTwo() { 
@@ -70,7 +70,7 @@ class CurlErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('curl-error-6', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('curl-error:6', $errorsForExceptionedUrl[0]->getMessage());
     }   
     
     public function testCurlTimeoutWhenRetrievingCssResourceTwoOfTwo() {
@@ -81,7 +81,7 @@ class CurlErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('curl-error-28', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('curl-error:28', $errorsForExceptionedUrl[0]->getMessage());
     }   
 
     

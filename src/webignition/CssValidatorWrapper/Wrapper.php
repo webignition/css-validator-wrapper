@@ -103,6 +103,10 @@ class Wrapper {
             $configuration->setBaseRequest($configurationValues['base-request']);
         }
         
+        if (isset($configurationValues['web-resource-service']) && $configurationValues['web-resource-service'] instanceof \webignition\WebResource\Service\Service) {
+            $configuration->setWebResourceService($configurationValues['web-resource-service']);
+        }        
+        
         $this->setConfiguration($configuration);
         return $this;
     }    
@@ -121,6 +125,13 @@ class Wrapper {
         try { 
             $this->localProxyResource = new LocalProxyResource($this->getConfiguration());
             $this->getLocalProxyResource()->prepare();
+        } catch (\webignition\WebResource\Exception\InvalidContentTypeException $invalidContentTypeException) {  
+            $cssValidatorOutput = new CssValidatorOutput();
+            $cssValidatorOutputException = new ExceptionOutput();
+            $cssValidatorOutputException->setType(new ExceptionOutputType('invalid-content-type:' . $invalidContentTypeException->getResponseContentType()));
+
+            $cssValidatorOutput->setException($cssValidatorOutputException);
+            return $cssValidatorOutput;            
         } catch (\webignition\WebResource\Exception\Exception $webResourceException) {                
             $cssValidatorOutput = new CssValidatorOutput();
             $cssValidatorOutputException = new ExceptionOutput();
@@ -166,11 +177,17 @@ class Wrapper {
         $output = $cssValidatorOutputParser->getOutput();        
      
         if ($this->getLocalProxyResource()->hasWebResourceExceptions()) {
-            foreach ($this->getLocalProxyResource()->getWebResourceExceptions() as $webResourceException) {
+            foreach ($this->getLocalProxyResource()->getWebResourceExceptions() as $webResourceException) {               
                 $error = new \webignition\CssValidatorOutput\Message\Error();
                 $error->setContext('');
                 $error->setLineNumber(0);
-                $error->setMessage('http-error-' . $webResourceException->getResponse()->getStatusCode());
+                
+                if ($webResourceException instanceof \webignition\WebResource\Exception\InvalidContentTypeException) {
+                    $error->setMessage('invalid-content-type:' . (string)$webResourceException->getResponseContentType());
+                } else {
+                    $error->setMessage('http-error:' . $webResourceException->getResponse()->getStatusCode());
+                }
+                
                 $error->setRef($webResourceException->getRequest()->getUrl());
 
                 $output->addMessage($error);
@@ -182,7 +199,7 @@ class Wrapper {
                 $error = new \webignition\CssValidatorOutput\Message\Error();
                 $error->setContext('');
                 $error->setLineNumber(0);
-                $error->setMessage('curl-error-' . $curlExceptionDetails['exception']->getErrorNo());
+                $error->setMessage('curl-error:' . $curlExceptionDetails['exception']->getErrorNo());
                 $error->setRef($curlExceptionDetails['url']);
 
                 $output->addMessage($error);

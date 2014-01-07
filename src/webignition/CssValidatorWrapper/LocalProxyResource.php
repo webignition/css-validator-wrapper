@@ -109,7 +109,7 @@ class LocalProxyResource {
     
     
     public function prepare() {
-        $rootWebResource = $this->getRootWebResource();
+        $rootWebResource = $this->getRootWebResource();        
         $this->storeWebResource($rootWebResource);
         
         if (!$this->isHtmlResource($rootWebResource)) {
@@ -375,7 +375,17 @@ class LocalProxyResource {
      * @return string
      */
     protected function generatePath(\webignition\WebResource\WebResource $webResource) {
-        return sys_get_temp_dir() . '/' . md5($webResource->getUrl() . microtime(true)) . '.' . $webResource->getContentType()->getSubtype();
+        return sys_get_temp_dir() . '/' . md5($webResource->getUrl() . microtime(true)) . '.' . $this->getPathExtension($webResource);
+    }
+    
+    
+    /**
+     * 
+     * @param \webignition\WebResource\WebResource $webResource
+     * @return string
+     */
+    protected function getPathExtension(\webignition\WebResource\WebResource $webResource) {
+        return (string)$webResource->getContentType()->getSubtype();
     }
     
     
@@ -388,8 +398,8 @@ class LocalProxyResource {
             if (!isset($this->webResources[$this->getUrlHash($url)])) {
                 $request = clone $this->getConfiguration()->getBaseRequest();            
                 $request->setUrl($url);
-
-                $this->webResources[$this->getUrlHash($url)] = $this->getConfiguration()->getWebResourceService()->get($request);            
+                
+                $this->webResources[$this->getUrlHash($url)] = $this->getConfiguration()->getWebResourceService()->get($request);     
             }            
         } catch (\webignition\WebResource\Exception\Exception $webResourceException) {
             if ($url === $this->getRootWebResourceUrl()) {

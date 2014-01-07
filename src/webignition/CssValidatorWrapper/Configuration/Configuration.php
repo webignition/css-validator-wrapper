@@ -77,9 +77,10 @@ class Configuration {
         if (is_null($this->webResourceService)) {
             $this->webResourceService = new \webignition\WebResource\Service\Service(array(
                 'text/html' => 'webignition\WebResource\WebPage\WebPage',
-                'application/xhtml+xml' =>'webignition\WebResource\WebPage\WebPage',
-                'application/json' => 'webignition\WebResource\JsonDocument\JsonDocument'            
+                'text/css' => 'webignition\WebResource\WebResource'
             ));
+            
+            $this->webResourceService->disableAllowUnknownResourceTypes();
         }
         
         return $this->webResourceService;

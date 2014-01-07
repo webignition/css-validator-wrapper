@@ -35,7 +35,7 @@ class HttpServerErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('http-error-500', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('http-error:500', $errorsForExceptionedUrl[0]->getMessage());
     }   
     
     public function testHttp500WhenRetrievingCssResourceTwoOfTwo() {
@@ -46,7 +46,7 @@ class HttpServerErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('http-error-500', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('http-error:500', $errorsForExceptionedUrl[0]->getMessage());
     }   
     
 }

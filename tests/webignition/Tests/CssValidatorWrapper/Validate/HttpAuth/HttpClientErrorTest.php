@@ -41,7 +41,7 @@ class HttpClientErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('http-error-401', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('http-error:401', $errorsForExceptionedUrl[0]->getMessage());
     }       
     
     public function testHttp404WhenRetrievingCssResourceOneOfTwo() {
@@ -52,7 +52,7 @@ class HttpClientErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('http-error-404', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('http-error:404', $errorsForExceptionedUrl[0]->getMessage());
     }     
     
     public function testHttp401WhenRetrievingCssResourceTwoOfTwo() {
@@ -63,7 +63,7 @@ class HttpClientErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('http-error-401', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('http-error:401', $errorsForExceptionedUrl[0]->getMessage());
     }       
     
     public function testHttp404WhenRetrievingCssResourceTwoOfTwo() {
@@ -74,7 +74,7 @@ class HttpClientErrorTest extends BaseTest {
         
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForExceptionedUrl));
-        $this->assertEquals('http-error-404', $errorsForExceptionedUrl[0]->getMessage());
+        $this->assertEquals('http-error:404', $errorsForExceptionedUrl[0]->getMessage());
     }    
     
     
@@ -85,12 +85,12 @@ class HttpClientErrorTest extends BaseTest {
         $errorsForStylesheet1 = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');                
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForStylesheet1));
-        $this->assertEquals('http-error-401', $errorsForStylesheet1[0]->getMessage());
+        $this->assertEquals('http-error:401', $errorsForStylesheet1[0]->getMessage());
         
         $errorsForStylesheet2 = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');                
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForStylesheet2));
-        $this->assertEquals('http-error-401', $errorsForStylesheet2[0]->getMessage());        
+        $this->assertEquals('http-error:401', $errorsForStylesheet2[0]->getMessage());        
     } 
     
     
@@ -101,11 +101,11 @@ class HttpClientErrorTest extends BaseTest {
         $errorsForStylesheet1 = $output->getErrorsByUrl('http://example.com/assets/css/style1.css');                
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForStylesheet1));
-        $this->assertEquals('http-error-404', $errorsForStylesheet1[0]->getMessage());
+        $this->assertEquals('http-error:404', $errorsForStylesheet1[0]->getMessage());
         
         $errorsForStylesheet2 = $output->getErrorsByUrl('http://example.com/assets/css/style2.css');                
         $this->assertFalse($output->hasException());
         $this->assertEquals(1, count($errorsForStylesheet2));
-        $this->assertEquals('http-error-404', $errorsForStylesheet2[0]->getMessage());        
+        $this->assertEquals('http-error:404', $errorsForStylesheet2[0]->getMessage());        
     }     
 }

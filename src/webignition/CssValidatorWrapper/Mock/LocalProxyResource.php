@@ -12,6 +12,6 @@ class LocalProxyResource extends BaseLocalProxyResource {
      * @return string
      */
     protected function generatePath(\webignition\WebResource\WebResource $webResource) {
-        return sys_get_temp_dir() . '/' . md5($webResource->getUrl()) . '.' . $webResource->getContentType()->getSubtype();
+        return sys_get_temp_dir() . '/' . md5($webResource->getUrl()) . '.' . $this->getPathExtension($webResource);
     }    
 }
