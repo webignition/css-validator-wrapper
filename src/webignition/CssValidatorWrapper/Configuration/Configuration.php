@@ -41,6 +41,13 @@ class Configuration {
     
     /**
      *
+     * @var string
+     */
+    private $contentToValidate = null;
+    
+    
+    /**
+     *
      * @var array
      */
     private $flags = array();
@@ -64,9 +71,36 @@ class Configuration {
      *
      * @var \webignition\WebResource\Service\Service
      */
-    private $webResourceService;    
+    private $webResourceService; 
     
     
+    /**
+     * 
+     * @param string $content
+     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     */
+    public function setContentToValidate($content) {
+        $this->contentToValidate = $content;
+        return $this;
+    }
+    
+    
+    /**
+     * 
+     * @return string
+     */
+    public function getContentToValidate() {
+        return $this->contentToValidate;
+    }
+    
+    
+    /**
+     * 
+     * @return boolean
+     */
+    public function hasContentToValidate() {
+        return is_string($this->contentToValidate);
+    }
     
     
     /**
