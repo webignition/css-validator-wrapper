@@ -132,7 +132,7 @@ class Wrapper {
         } catch (\webignition\WebResource\Exception\InvalidContentTypeException $invalidContentTypeException) {  
             $cssValidatorOutput = new CssValidatorOutput();
             $cssValidatorOutputException = new ExceptionOutput();
-            $cssValidatorOutputException->setType(new ExceptionOutputType('invalid-content-type:' . $invalidContentTypeException->getResponseContentType()));
+            $cssValidatorOutputException->setType(new ExceptionOutputType('invalid-content-type:' . $invalidContentTypeException->getResponseContentType()->getTypeSubtypeString()));
 
             $cssValidatorOutput->setException($cssValidatorOutputException);
             return $cssValidatorOutput;            

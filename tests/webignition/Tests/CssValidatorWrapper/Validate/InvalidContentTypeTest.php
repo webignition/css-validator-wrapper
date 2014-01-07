@@ -3,8 +3,6 @@
 namespace webignition\Tests\CssValidatorWrapper\Validate;
 
 use webignition\CssValidatorWrapper\Configuration\Configuration;
-use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
-use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class InvalidContentTypeTest extends BaseTest {
@@ -24,7 +22,7 @@ class InvalidContentTypeTest extends BaseTest {
         $this->wrapper->setCssValidatorRawOutput($this->getFixture('no-messages.txt'));
     }
 
-    public function testApplicationPdfRootWebResource() {
+    public function testApplicationPdfRootWebResourceIsInvalid() {
         $output = $this->wrapper->validate();
         
         $this->assertTrue($output->hasException());
@@ -32,7 +30,7 @@ class InvalidContentTypeTest extends BaseTest {
     }
     
     
-    public function testTextPlainRootWebResource() {
+    public function testTextPlainRootWebResourceIsInvalid() {
         $output = $this->wrapper->validate();
         
         $this->assertTrue($output->hasException());
@@ -40,13 +38,30 @@ class InvalidContentTypeTest extends BaseTest {
     }
 
     
-    public function testTextPlainStylesheetResource() {
+    public function testTextPlainStylesheetResourceIsInvalid() {
         $output = $this->wrapper->validate();
         
         $errorsForExceptionedStylesheet = $output->getErrorsByUrl('http://one.cdn.example.com/style.css');
         
         $this->assertEquals(1, count($errorsForExceptionedStylesheet));
         $this->assertEquals('invalid-content-type:text/plain', $errorsForExceptionedStylesheet[0]->getMessage());        
+    }
+    
+    
+    public function testTextHtmlRootWebResourceIsValid() {
+        $output = $this->wrapper->validate();
+        $this->assertEquals(0, $output->getErrorCount());      
+    }    
+    
+    public function testTextHtmlRootWebResourceWithCharsetAttributeIsValid() {
+        $output = $this->wrapper->validate();
+        $this->assertEquals(0, $output->getErrorCount());      
+    }
+    
+    
+    public function testMangledMarkupWithValidContentTypeDoesNotGenerateInvalidContentTypeError() {
+        $output = $this->wrapper->validate();        
+        $this->assertFalse($output->hasException());        
     }
      
 }

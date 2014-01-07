@@ -196,7 +196,7 @@ class LocalProxyResource {
         }
         
         $rootDom = new \DOMDocument();
-        $rootDom->loadHTML($rootWebResource->getContent());
+        @$rootDom->loadHTML($rootWebResource->getContent());
         
         $linkElements = $rootDom->getElementsByTagName('link');
         foreach ($linkElements as $linkElement) {
