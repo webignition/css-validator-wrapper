@@ -112,20 +112,17 @@ class LocalProxyResource {
         $rootWebResource = $this->getRootWebResource();        
         $this->storeWebResource($rootWebResource);
         
-        if (!$this->isHtmlResource($rootWebResource)) {
-            return;
-        }
-        
         if ($this->isHtmlResource($rootWebResource)) {
             $this->retrieveStylesheetResources();
+            
+            foreach ($this->getStylesheetResources() as $stylesheetResource) {            
+                $this->storeWebResource($stylesheetResource);
+                $this->updateRootWebResourceStylesheetReference($stylesheetResource, 'file:' . $this->getPath($stylesheetResource));
+            }
+            
+            $this->clearHrefUrlsForExceptionedStylesheets(); 
         }
-        
-        foreach ($this->getStylesheetResources() as $stylesheetResource) {            
-            $this->storeWebResource($stylesheetResource);
-            $this->updateRootWebResourceStylesheetReference($stylesheetResource, 'file:' . $this->getPath($stylesheetResource));
-        }
-        
-        $this->clearHrefUrlsForExceptionedStylesheets();        
+                
         $this->getConfiguration()->setUrlToValidate('file:' . $this->getPath($rootWebResource));
     }
     
@@ -326,14 +323,42 @@ class LocalProxyResource {
     }
     
     
+    /**
+     * 
+     * @return \webignition\WebResource\WebResource
+     */
+    public function getRootWebResource() {
+        if ($this->getConfiguration()->hasContentToValidate()) {
+            $this->webResources[$this->getUrlHash($this->getRootWebResourceUrl())] = $this->deriveRootWebResourceFromContentToValidate();
+        }
+        
+        return $this->getWebResource($this->getRootWebResourceUrl());
+    }
     
     
     /**
      * 
      * @return \webignition\WebResource\WebResource
      */
-    public function getRootWebResource() {
-        return $this->getWebResource($this->getRootWebResourceUrl());
+    private function deriveRootWebResourceFromContentToValidate() {       
+        return $this->getConfiguration()->getWebResourceService()->create(
+            $this->getConfiguration()->getUrlToValidate(),
+            $this->getConfiguration()->getContentToValidate(),
+            $this->deriveRootWebResourceContentTypeFromContentToValidate()
+        );
+    }
+    
+    
+    /**
+     * 
+     * @return string
+     */
+    private function deriveRootWebResourceContentTypeFromContentToValidate() {
+        if (strip_tags($this->getConfiguration()->getContentToValidate()) !== $this->getConfiguration()->getContentToValidate()) {
+            return 'text/html';
+        }
+        
+        return 'text/css';
     }
     
     
