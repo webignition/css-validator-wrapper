@@ -105,7 +105,11 @@ class Wrapper {
         
         if (isset($configurationValues['web-resource-service']) && $configurationValues['web-resource-service'] instanceof \webignition\WebResource\Service\Service) {
             $configuration->setWebResourceService($configurationValues['web-resource-service']);
-        }        
+        }
+        
+        if (isset($configurationValues['content-to-validate'])) {
+            $configuration->setContentToValidate($configurationValues['content-to-validate']);
+        }
         
         $this->setConfiguration($configuration);
         return $this;

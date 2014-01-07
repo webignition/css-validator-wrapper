@@ -41,7 +41,7 @@ class CreateConfigurationTest extends BaseTest {
     }
     
     
-    public function testCreateConfigurationSetJavaExecutablePath() {
+    public function testSetJavaExecutablePath() {
         $wrapper = new Wrapper();
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://example.com/',
@@ -51,7 +51,7 @@ class CreateConfigurationTest extends BaseTest {
         $this->assertEquals('foo', $wrapper->getConfiguration()->getJavaExecutablePath());        
     }
     
-    public function testCreateConfigurationSetCssValidatorJarPath() {
+    public function testSetCssValidatorJarPath() {
         $wrapper = new Wrapper();
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://example.com/',
@@ -61,7 +61,7 @@ class CreateConfigurationTest extends BaseTest {
         $this->assertEquals('foo.jar', $wrapper->getConfiguration()->getCssValidatorJarPath());        
     }    
     
-    public function testCreateConfigurationSetVendorExtensionSeverityLevel() {
+    public function testSetVendorExtensionSeverityLevel() {
         $wrapper = new Wrapper();
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://example.com/',
@@ -71,7 +71,7 @@ class CreateConfigurationTest extends BaseTest {
         $this->assertEquals(VendorExtensionSeverityLevel::LEVEL_ERROR, $wrapper->getConfiguration()->getVendorExtensionSeverityLevel());        
     }
     
-    public function testCreateConfigurationSetIgnoreWarningsFlag() {
+    public function testSetIgnoreWarningsFlag() {
         $wrapper = new Wrapper();
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://example.com/',
@@ -83,7 +83,7 @@ class CreateConfigurationTest extends BaseTest {
         $this->assertTrue($wrapper->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_WARNINGS));        
     }    
     
-    public function testCreateConfigurationSetIgnoreFalseBackgroundImageDataUrlMessagesFlag() {
+    public function testSetIgnoreFalseBackgroundImageDataUrlMessagesFlag() {
         $wrapper = new Wrapper();
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://example.com/',
@@ -95,7 +95,7 @@ class CreateConfigurationTest extends BaseTest {
         $this->assertTrue($wrapper->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES));        
     }      
     
-    public function testCreateConfigurationSetDomainsToIgnore() {
+    public function testSetDomainsToIgnore() {
         $domainsToIgnore = array(
             'foo',
             'bar'
@@ -111,7 +111,7 @@ class CreateConfigurationTest extends BaseTest {
     } 
     
     
-    public function testCreateConfigurationSetBaseRequest() {
+    public function testSetBaseRequest() {
         $baseRequest = $this->getHttpClient()->get();
         $baseRequest->setAuth('example_username');
         
@@ -123,4 +123,17 @@ class CreateConfigurationTest extends BaseTest {
         
         $this->assertEquals('example_username', $wrapper->getConfiguration()->getBaseRequest()->getUsername());
     }
+    
+    
+    public function testSetContentToValidate() {        
+        $content = 'foo';
+        
+        $wrapper = new Wrapper();
+        $wrapper->createConfiguration(array(
+            'url-to-validate' => 'http://example.com/',
+            'content-to-validate' => $content
+        ));         
+        
+        $this->assertEquals($content, $wrapper->getConfiguration()->getContentToValidate());
+    }    
 }
