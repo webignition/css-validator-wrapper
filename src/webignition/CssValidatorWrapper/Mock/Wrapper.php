@@ -64,6 +64,10 @@ class Wrapper extends BaseCssValidatorWrapper {
     public function disableDeferToParentIfNoRawOutput() {
         $this->deferToParentIfNoRawOutput = false;
         return $this;
-    }   
+    }  
+    
+    protected function createLocalProxyResource() {
+        return new LocalProxyResource($this->getConfiguration());
+    }    
     
 }

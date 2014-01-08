@@ -121,7 +121,7 @@ class LocalProxyResource {
             }
             
             $this->clearHrefUrlsForExceptionedStylesheets(); 
-        }
+        }       
                 
         $this->getConfiguration()->setUrlToValidate('file:' . $this->getPath($rootWebResource));
     }
@@ -219,6 +219,7 @@ class LocalProxyResource {
             }
         }
 
+        $this->getConfiguration()->setContentToValidate($rootWebResource->getContent());
         $this->storeWebResource($rootWebResource);        
     }
     
@@ -328,7 +329,7 @@ class LocalProxyResource {
      * @return \webignition\WebResource\WebResource
      */
     public function getRootWebResource() {
-        if ($this->getConfiguration()->hasContentToValidate()) {
+        if (!$this->hasRootWebResource() && $this->getConfiguration()->hasContentToValidate()) {
             $this->webResources[$this->getUrlHash($this->getRootWebResourceUrl())] = $this->deriveRootWebResourceFromContentToValidate();
         }
         
@@ -420,7 +421,7 @@ class LocalProxyResource {
      */
     private function getWebResource($url) {        
         try {
-            if (!isset($this->webResources[$this->getUrlHash($url)])) {
+            if (!$this->hasWebResource($url)) {
                 $request = clone $this->getConfiguration()->getBaseRequest();            
                 $request->setUrl($url);
                 
@@ -446,6 +447,25 @@ class LocalProxyResource {
         }
         
         return $this->webResources[$this->getUrlHash($url)];
+    }
+    
+    
+    /**
+     * 
+     * @param string $url
+     * @return boolean
+     */
+    private function hasWebResource($url) {
+        return isset($this->webResources[$this->getUrlHash($url)]);
+    }
+    
+    
+    /**
+     * 
+     * @return boolean
+     */
+    private function hasRootWebResource() {
+        return isset($this->webResources[$this->getUrlHash($this->getRootWebResourceUrl())]);
     }
     
     

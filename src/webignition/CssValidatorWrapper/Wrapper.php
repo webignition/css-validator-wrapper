@@ -127,7 +127,6 @@ class Wrapper {
         }        
 
         try { 
-            $this->localProxyResource = new LocalProxyResource($this->getConfiguration());
             $this->getLocalProxyResource()->prepare();
         } catch (\webignition\WebResource\Exception\InvalidContentTypeException $invalidContentTypeException) {  
             $cssValidatorOutput = new CssValidatorOutput();
@@ -218,8 +217,17 @@ class Wrapper {
      * 
      * @return LocalProxyResource
      */
-    private function getLocalProxyResource() {
+    public function getLocalProxyResource() {
+        if (is_null($this->localProxyResource)) {
+            $this->localProxyResource = $this->createLocalProxyResource();
+        }
+        
         return $this->localProxyResource;
+    }
+    
+    
+    protected function createLocalProxyResource() {
+        return new LocalProxyResource($this->getConfiguration());
     }
     
     
@@ -229,7 +237,7 @@ class Wrapper {
      */
     protected function getRawValidatorOutputLines() {
         $validatorOutputLines = array();        
-        exec($this->getLocalProxyResource()->getConfiguration()->getExecutableCommand(), $validatorOutputLines);        
+        exec($this->getLocalProxyResource()->getConfiguration()->getExecutableCommand(), $validatorOutputLines);                
         return $validatorOutputLines;
     }
     
