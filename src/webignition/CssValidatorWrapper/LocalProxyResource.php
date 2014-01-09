@@ -152,7 +152,17 @@ class LocalProxyResource {
      */
     public function getWebResourceUrlFromPath($path) {
         $webResource = $this->getWebResourceFromLocalPath($path);
-        return is_null($webResource) ? null : $webResource->getUrl();
+        if (!is_null($webResource)) {
+            return $webResource->getUrl();
+        }
+            
+        foreach ($this->webResources as $webResource) {
+            if ($this->getPath($webResource) === $path) {
+                return $webResource->getUrl();
+            }
+        }
+
+        return null;
     }
     
     
