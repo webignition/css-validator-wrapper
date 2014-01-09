@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "3a780d88f0ef3398ca76e8bebbe003d0",
+    "hash": "327750b0561508daab234c82e792dd94",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -248,21 +248,21 @@
         },
         {
             "name": "webignition/absolute-url-deriver",
-            "version": "1.4.1",
+            "version": "1.4.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/absolute-url-deriver.git",
-                "reference": "41e20da72e2e8e33c91c44403a20e486baa36692"
+                "reference": "ea9e63504a812cb27d87f7dda6eff5fb787271af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/absolute-url-deriver/zipball/41e20da72e2e8e33c91c44403a20e486baa36692",
-                "reference": "41e20da72e2e8e33c91c44403a20e486baa36692",
+                "url": "https://api.github.com/repos/webignition/absolute-url-deriver/zipball/ea9e63504a812cb27d87f7dda6eff5fb787271af",
+                "reference": "ea9e63504a812cb27d87f7dda6eff5fb787271af",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0",
-                "webignition/url": ">=1.9.3"
+                "webignition/url": ">=1.9.7"
             },
             "type": "library",
             "autoload": {
@@ -286,7 +286,7 @@
                 "absolute",
                 "url"
             ],
-            "time": "2013-10-21 10:18:54"
+            "time": "2014-01-08 17:25:31"
         },
         {
             "name": "webignition/css-validator-output-parser",
@@ -466,16 +466,16 @@
         },
         {
             "name": "webignition/url",
-            "version": "1.9.6",
+            "version": "1.9.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/url.git",
-                "reference": "9cf53198c2d148b4069a373da65d3ff933580eb3"
+                "reference": "2c4a23ab1b557f182358a3f22bb5d9125b65ca56"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/url/zipball/9cf53198c2d148b4069a373da65d3ff933580eb3",
-                "reference": "9cf53198c2d148b4069a373da65d3ff933580eb3",
+                "url": "https://api.github.com/repos/webignition/url/zipball/2c4a23ab1b557f182358a3f22bb5d9125b65ca56",
+                "reference": "2c4a23ab1b557f182358a3f22bb5d9125b65ca56",
                 "shasum": ""
             },
             "require": {
@@ -504,7 +504,7 @@
             "keywords": [
                 "url"
             ],
-            "time": "2013-12-20 13:32:17"
+            "time": "2014-01-08 16:43:43"
         },
         {
             "name": "webignition/web-json-model",
@@ -636,16 +636,16 @@
         },
         {
             "name": "webignition/web-resource-service",
-            "version": "0.2.5",
+            "version": "0.2.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-resource-service.git",
-                "reference": "b12577aed5ef4079f6746aa59952a9ce43ba0e16"
+                "reference": "a8d6b6cad7e4bc2af8857a6057700ced623e85d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-resource-service/zipball/b12577aed5ef4079f6746aa59952a9ce43ba0e16",
-                "reference": "b12577aed5ef4079f6746aa59952a9ce43ba0e16",
+                "url": "https://api.github.com/repos/webignition/web-resource-service/zipball/a8d6b6cad7e4bc2af8857a6057700ced623e85d0",
+                "reference": "a8d6b6cad7e4bc2af8857a6057700ced623e85d0",
                 "shasum": ""
             },
             "require": {
@@ -678,7 +678,7 @@
                 "service",
                 "web"
             ],
-            "time": "2014-01-07 16:52:38"
+            "time": "2014-01-09 09:40:43"
         },
         {
             "name": "xrstf/ip-utils",

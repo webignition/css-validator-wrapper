@@ -108,7 +108,7 @@ class LocalProxyResource {
     }
     
     
-    public function prepare() {
+    public function prepare() {        
         $rootWebResource = $this->getRootWebResource();        
         $this->storeWebResource($rootWebResource);
         
@@ -121,7 +121,7 @@ class LocalProxyResource {
             }
             
             $this->clearHrefUrlsForExceptionedStylesheets(); 
-        }       
+        }
                 
         $this->getConfiguration()->setUrlToValidate('file:' . $this->getPath($rootWebResource));
     }
@@ -190,7 +190,7 @@ class LocalProxyResource {
     private function updateRootWebResourceStylesheetUrl($sourceUrl, $newUrl) {
         /* @var $rootWebResource \webignition\WebResource\WebPage\WebPage */
         $rootWebResource = $this->getRootWebResource();
-        
+
         if (!$this->isHtmlResource($this->getRootWebResource())) {
             return;
         }
@@ -202,25 +202,43 @@ class LocalProxyResource {
         foreach ($linkElements as $linkElement) {
             if ($this->isLinkElementStylesheetElementWithHrefAttribute($linkElement)) {
                 $hrefAttribute = trim($linkElement->getAttribute('href'));
+                $possibleInDocumentStylesheetUrls = $this->getPossibleStylesheetUrlsFromHref($hrefAttribute);                
                 
-                $absoluteUrlDeriver = new AbsoluteUrlDeriver(
-                    $hrefAttribute,
-                    $rootWebResource->getUrl()
-                );
-                
-                $stylesheetUrl = (string)$absoluteUrlDeriver->getAbsoluteUrl();
-                
-                if ($stylesheetUrl == $sourceUrl) {
-                    $rootWebResource->setContent(str_replace(array(
-                        'href="'.$hrefAttribute.'"',
-                        'href=\''.$hrefAttribute.'\''
-                    ), 'href="'.$newUrl.'"', $rootWebResource->getContent()));
+                foreach ($possibleInDocumentStylesheetUrls as $stylesheetUrl) {
+                    if ($stylesheetUrl == $sourceUrl) {
+                        $rootWebResource->setContent(str_replace(array(
+                            'href="'.$hrefAttribute.'"',
+                            'href=\''.$hrefAttribute.'\''
+                        ), 'href="'.$newUrl.'"', $rootWebResource->getContent()));
+                    }                    
                 }
             }
         }
 
         $this->getConfiguration()->setContentToValidate($rootWebResource->getContent());
         $this->storeWebResource($rootWebResource);        
+    }
+    
+    
+    private function getPossibleStylesheetUrlsFromHref($href) {
+        $absoluteUrlDeriver = new AbsoluteUrlDeriver(
+            $href,
+            $this->getRootWebResource()->getUrl()
+        );
+        
+        $givenUrl = (string)$absoluteUrlDeriver->getAbsoluteUrl();        
+        $decodedUrl = rawurldecode($givenUrl);
+        
+        if ($givenUrl == $decodedUrl) {
+            return array(
+                $givenUrl
+            );
+        }
+        
+        return array(
+            $givenUrl,
+            $decodedUrl
+        );
     }
     
     
@@ -234,7 +252,7 @@ class LocalProxyResource {
             return false;
         }
         
-        if (!$domElement->getAttribute('rel') == 'stylesheet') {
+        if ($domElement->getAttribute('rel') != 'stylesheet') {
             return false;
         }
         
@@ -265,33 +283,58 @@ class LocalProxyResource {
     
     private function retrieveStylesheetResources() {
         /* @var $rootWebResource \webignition\WebResource\WebPage\WebPage */
-        $rootWebResource = $this->getRootWebResource();
+        $rootWebResource = $this->getRootWebResource();            
         
         if (!$this->isHtmlResource($this->getRootWebResource())) {
             return;
         }
         
+        if (!$rootWebResource instanceof \webignition\WebResource\WebPage\WebPage) {
+            $rootWebResource = $this->translateHtmlWebResourceToWebPage($rootWebResource);
+        }
+        
+        $stylesheetUrls = $this->findStylesheetUrls($rootWebResource);        
+        foreach ($stylesheetUrls as $stylesheetUrl) {            
+            $this->getWebResource($stylesheetUrl);
+        }
+    }
+    
+    
+    private function findStylesheetUrls(\webignition\WebResource\WebPage\WebPage $webPage) {
         $stylesheetUrls = array();
         
-        $rootWebResource->find('link[rel=stylesheet]')->each(function ($index, \DOMElement $domElement) use ($rootWebResource, &$stylesheetUrls) {
-            $hrefAttribute = trim($domElement->getAttribute('href'));
-            if ($hrefAttribute !== '') {
+        $rootDom = new \DOMDocument();
+        @$rootDom->loadHTML($webPage->getContent());
+        
+        $linkElements = $rootDom->getElementsByTagName('link');
+        foreach ($linkElements as $linkElement) {
+            if ($this->isLinkElementStylesheetElementWithHrefAttribute($linkElement)) {
+                $hrefAttribute = trim($linkElement->getAttribute('href'));
                 $absoluteUrlDeriver = new AbsoluteUrlDeriver(
                     $hrefAttribute,
-                    $rootWebResource->getUrl()
+                    $webPage->getUrl()
                 );
                 
                 $stylesheetUrl = (string)$absoluteUrlDeriver->getAbsoluteUrl();
+                
                 if (!in_array($stylesheetUrl, $stylesheetUrls)) {
                     $stylesheetUrls[] = $stylesheetUrl;
                 }
             }
-        });
+        } 
         
-        foreach ($stylesheetUrls as $stylesheetUrl) {
-            $this->getWebResource($stylesheetUrl);
-        }
-    }     
+        return $stylesheetUrls;
+    }
+    
+    
+    private function translateHtmlWebResourceToWebPage(\webignition\WebResource\WebResource $webResource) {
+        $webPage = new \webignition\WebResource\WebPage\WebPage();
+        $webPage->setContent($webResource->getContent());
+        $webPage->setContentType($webResource->getContentType());
+        $webPage->setUrl($webResource->getUrl());
+        
+        return $webPage;        
+    }
     
     
     
@@ -329,7 +372,7 @@ class LocalProxyResource {
      * @return \webignition\WebResource\WebResource
      */
     public function getRootWebResource() {
-        if (!$this->hasRootWebResource() && $this->getConfiguration()->hasContentToValidate()) {
+        if (!$this->hasRootWebResource() && $this->getConfiguration()->hasContentToValidate()) {             
             $this->webResources[$this->getUrlHash($this->getRootWebResourceUrl())] = $this->deriveRootWebResourceFromContentToValidate();
         }
         
@@ -341,7 +384,7 @@ class LocalProxyResource {
      * 
      * @return \webignition\WebResource\WebResource
      */
-    private function deriveRootWebResourceFromContentToValidate() {       
+    private function deriveRootWebResourceFromContentToValidate() {               
         return $this->getConfiguration()->getWebResourceService()->create(
             $this->getConfiguration()->getUrlToValidate(),
             $this->getConfiguration()->getContentToValidate(),
@@ -414,20 +457,19 @@ class LocalProxyResource {
         return (string)$webResource->getContentType()->getSubtype();
     }
     
-    
     /**
      * 
      * @return \webignition\WebResource\WebResource
      */
     private function getWebResource($url) {        
         try {
-            if (!$this->hasWebResource($url)) {
+            if (!$this->hasWebResource($url)) {                               
                 $request = clone $this->getConfiguration()->getBaseRequest();            
                 $request->setUrl($url);
                 
                 $this->webResources[$this->getUrlHash($url)] = $this->getConfiguration()->getWebResourceService()->get($request);     
             }            
-        } catch (\webignition\WebResource\Exception\Exception $webResourceException) {
+        } catch (\webignition\WebResource\Exception\Exception $webResourceException) {            
             if ($url === $this->getRootWebResourceUrl()) {
                 throw $webResourceException;
             }

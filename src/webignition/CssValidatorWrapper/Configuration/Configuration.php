@@ -109,26 +109,15 @@ class Configuration {
      */
     public function getWebResourceService() {
         if (is_null($this->webResourceService)) {
-            $this->webResourceService = new \webignition\WebResource\Service\Service(array(
+            $this->webResourceService = new \webignition\WebResource\Service\Service();
+            $this->webResourceService->getConfiguration()->setContentTypeWebResourceMap(array(
                 'text/html' => 'webignition\WebResource\WebPage\WebPage',
                 'text/css' => 'webignition\WebResource\WebResource'
             ));
-            
-            $this->webResourceService->disableAllowUnknownResourceTypes();
+            $this->webResourceService->getConfiguration()->disableAllowUnknownResourceTypes();
         }
         
         return $this->webResourceService;
-    }    
-    
-    
-    /**
-     * 
-     * @param \webignition\WebResource\Service\Service $webResourceService
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
-     */
-    public function setWebResourceService(\webignition\WebResource\Service\Service $webResourceService) {
-        $this->webResourceService = $webResourceService;
-        return $this;
     }
     
     
