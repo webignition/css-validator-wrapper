@@ -1,0 +1,18 @@
+{vextwarning=false, output=ucn, lang=en, warning=2, medium=all, profile=css3}
+<?xml version='1.0' encoding="utf-8"?>
+<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="file:/tmp/026cf0361f3e6e55b514da8994ced8eb.html" date="2014-01-11T08:38:38Z" xml:lang="en">
+
+
+
+
+<message type="error" ref="file:/tmp/026cf0361f3e6e55b514da8994ced8eb.html">
+	<context line="2">.hide-text</context>
+	<title>
+		Value Error :  font (nullfonts.html#propdef-font)
+		0 is not a font-weight value :
+		0 / 0 a
+	</title>
+</message>
+
+
+</observationresponse>

@@ -147,7 +147,7 @@ class Wrapper {
             return $cssValidatorOutput;            
         }
         
-        $cssValidatorOutputParserConfiguration = new CssValidatorOutputParserConfiguration();
+        $cssValidatorOutputParserConfiguration = new CssValidatorOutputParserConfiguration();        
         $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths(implode("\n", $this->getRawValidatorOutputLines()));                  
         
         $cssValidatorOutputParserConfiguration->setRawOutput($validatorOutput);
@@ -244,7 +244,7 @@ class Wrapper {
      * @param string $validatorOutputLines
      * @return string
      */
-    private function replaceLocalFilePathsWithOriginalFilePaths($validatorOutput) {        
+    private function replaceLocalFilePathsWithOriginalFilePaths($validatorOutput) {                
         $refMatches = array();
         preg_match_all('/ref="file:\/tmp\/[^"]*"/', $validatorOutput, $refMatches);        
         
@@ -252,8 +252,8 @@ class Wrapper {
             $refAttributes = $refMatches[0];
             
             foreach ($refAttributes as $refAttribute) {                
-                $originalUrl = $this->localProxyResource->getWebResourceUrlFromPath(str_replace(array('ref="file:', '"'), '', $refAttribute));
-                $validatorOutput = str_replace($refAttribute, 'ref="' . $originalUrl . '"', $validatorOutput);
+                $originalUrl = $this->localProxyResource->getWebResourceUrlFromPath(str_replace(array('ref="file:', '"'), '', $refAttribute));                
+                $validatorOutput = str_replace($refAttribute, 'ref="' . htmlspecialchars($originalUrl)  . '"', $validatorOutput);
             }
         }
         
