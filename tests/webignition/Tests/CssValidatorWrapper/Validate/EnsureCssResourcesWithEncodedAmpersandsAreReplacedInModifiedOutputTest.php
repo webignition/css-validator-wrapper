@@ -5,7 +5,7 @@ namespace webignition\Tests\CssValidatorWrapper\Validate;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 
-class EnsureSourceUrlsAreCorrectlyEncodedInModifiedOutput extends BaseTest {
+class EnsureCssResourcesWithEncodedAmpersandsAreReplacedInModifiedOutputTest extends BaseTest {
     
     private $wrapper;
     
@@ -14,19 +14,21 @@ class EnsureSourceUrlsAreCorrectlyEncodedInModifiedOutput extends BaseTest {
         $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath() . '/HttpResponses'));        
         
         $configuration = new Configuration();
-        $configuration->setUrlToValidate('http://example.com/foo"bar');
-        $configuration->setBaseRequest($this->getHttpClient()->get());        
-        $configuration->setContentToValidate(file_get_contents($this->getFixturesDataPath() . '/WebResourceContent/rootWebResource.html'));        
+        $configuration->setUrlToValidate('http://en.wikipedia.org/');
+        $configuration->setBaseRequest($this->getHttpClient()->get());
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
         $this->wrapper->setConfiguration($configuration);
-        
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('/CssValidatorOutput/1'));
     }
 
-    public function testDoubleQuotesAreEscaped() {
-        $this->wrapper->setCssValidatorRawOutput($this->getFixture('double-quote-in-ref-url.txt'));
+    public function testTest() {
+        //$this->assertTrue(true);
+        
         $output = $this->wrapper->validate();
-        $this->assertEquals(1, $output->getErrorCount());
+        //var_dump($output);
+//        
+//        //$this->assertFalse($output->hasException());
     }
      
 }

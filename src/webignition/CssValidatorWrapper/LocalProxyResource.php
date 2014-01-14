@@ -4,7 +4,6 @@ namespace webignition\CssValidatorWrapper;
 
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\AbsoluteUrlDeriver\AbsoluteUrlDeriver;
-use webignition\WebResource\Exception\Exception as WebResourceException;
 
 class LocalProxyResource {
     
@@ -162,7 +161,13 @@ class LocalProxyResource {
         return (isset($this->localPathToResourceUrlMap[$pathHash])) ? $this->localPathToResourceUrlMap[$pathHash] : null;
     }
     
-    private function updateRootWebResourceStylesheetUrl($index, $newUrl) {
+    
+    /**
+     * 
+     * @param int $index
+     * @param string $newUrl
+     */
+    private function updateRootWebResourceStylesheetUrl($index, $newUrl) {        
         $rootWebResource = $this->getRootWebResource();
         $currentIndex = 0;
         
@@ -175,10 +180,17 @@ class LocalProxyResource {
                 $hrefAttribute = trim($linkElement->getAttribute('href')); 
                 
                 if ($currentIndex === $index) {
-                    $rootWebResource->setContent(str_replace(array(
-                        'href="'.$hrefAttribute.'"',
-                        'href=\''.$hrefAttribute.'\''
-                    ), 'href="'.$newUrl.'"', $rootWebResource->getContent()));                    
+                    $possibleSourceHrefValues = $this->getPossibleSourceHrefValues($hrefAttribute);
+                    
+                    foreach ($possibleSourceHrefValues as $sourceHrefValue) {
+                        $possibleSourceHrefAttributeStrings = $this->getPossibleSourceHrefAttributeStrings($sourceHrefValue);
+                        
+                        foreach ($possibleSourceHrefAttributeStrings as $sourceHrefAttribute) {
+                            if (substr_count($rootWebResource->getContent(), $sourceHrefAttribute)) {
+                                $rootWebResource->setContent(str_replace($sourceHrefAttribute, 'href="'.$newUrl.'"', $rootWebResource->getContent()));  
+                            }                            
+                        }                        
+                    }
                 }
                 
                 $currentIndex++;
@@ -190,44 +202,32 @@ class LocalProxyResource {
     }
     
     
-//    private function getPossibleStylesheetUrlsFromHref($href) {
-//        $absoluteUrlDeriver = new AbsoluteUrlDeriver(
-//            $href,
-//            $this->getRootWebResource()->getUrl()
-//        );
-//        
-//        $absoluteUrl = $absoluteUrlDeriver->getAbsoluteUrl();
-////        $protocolRelativeAbsoluteUrl = clone $absoluteUrl;
-////        if ($protocolRelativeAbsoluteUrl->hasScheme()) {
-////            $protocolRelativeAbsoluteUrl->setScheme(null);
-////        }
-//        
-//        
-//                
-//        $givenUrl = (string)$absoluteUrl;        
-//        $decodedUrl = rawurldecode($givenUrl);
-//        
-//        // need:
-//        // given
-//        // decoded given
-//        // protocol relative
-//        // decoded protocol relative
-//        // .. and each with potential equals on the end
-//        
-//        if ($givenUrl == $decodedUrl) {
-//            return array(
-//                $givenUrl,
-//                //$givenUrl . '=',
-//                //(string)$protocolRelativeAbsoluteUrl
-//            );
-//        }
-//        
-//        return array(
-//            $givenUrl,
-//            $decodedUrl,
-//            //(string)$protocolRelativeAbsoluteUrl
-//        );
-//    }
+    /**
+     * 
+     * @param string $href
+     * @return string[]
+     */
+    private function getPossibleSourceHrefValues($href) {
+        $urls = array($href);        
+        if (substr_count($href, '&')) {
+            $urls[] = str_replace('&', '&amp;', $href);
+        }
+        
+        return $urls;
+    }
+    
+    
+    /**
+     * 
+     * @param string $hrefValue
+     * @return string[]
+     */
+    private function getPossibleSourceHrefAttributeStrings($hrefValue) {
+        return array(
+            'href="'.$hrefValue.'"',
+            'href=\''.$hrefValue.'\''            
+        );
+    }
     
     
     /**
@@ -249,16 +249,7 @@ class LocalProxyResource {
         }
         
         return trim($domElement->getAttribute('href')) != '';        
-    }
-    
-    
-//    /**
-//     * 
-//     * @return \webignition\WebResource\WebResource[]
-//     */
-//    private function getLinkedResources() {
-//        return $this->linkedResources;
-//    }
+    }    
     
     
     private function retrieveStylesheetResources() {        
@@ -280,6 +271,11 @@ class LocalProxyResource {
     }
     
     
+    /**
+     * 
+     * @param \webignition\WebResource\WebPage\WebPage $webPage
+     * @return array
+     */
     private function findStylesheetUrls(\webignition\WebResource\WebPage\WebPage $webPage) {
         $stylesheetUrls = array();
         
@@ -307,6 +303,11 @@ class LocalProxyResource {
     }
     
     
+    /**
+     * 
+     * @param \webignition\WebResource\WebResource $webResource
+     * @return \webignition\WebResource\WebPage\WebPage
+     */
     private function translateHtmlWebResourceToWebPage(\webignition\WebResource\WebResource $webResource) {
         $webPage = new \webignition\WebResource\WebPage\WebPage();
         $webPage->setContent($webResource->getContent());
@@ -358,17 +359,7 @@ class LocalProxyResource {
      */    
     private function isHtmlResource(\webignition\WebResource\WebResource $resource) {
         return $resource->getContentType()->getTypeSubtypeString() === self::HTML_CONTENT_TYPE;
-    }    
-    
-    
-//    /**
-//     * 
-//     * @param \webignition\WebResource\WebResource $resource
-//     * @return boolean
-//     */
-//    private function isCssResource(\webignition\WebResource\WebResource $resource) {
-//        return $resource->getContentType()->getTypeSubtypeString() === self::CSS_CONTENT_TYPE;
-//    }
+    }
     
     
     /**
@@ -426,11 +417,6 @@ class LocalProxyResource {
     public function getRootWebResourceUrl() {
         return $this->sourceConfiguration->getUrlToValidate();
     }
-    
-    
-//    public function getLinkedResourceUrlByIndex($index) {
-//        return $this->
-//    }
     
     
     /**
