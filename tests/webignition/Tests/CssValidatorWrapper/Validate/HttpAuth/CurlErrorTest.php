@@ -22,6 +22,9 @@ class CurlErrorTest extends BaseTest {
             ),
             'base-request' => $this->getHttpClient()->get()
         ));
+        
+        $this->wrapper->getConfiguration()->setCssValidatorJarPath('/home/jon/tools/css-validator/2002/css-validator/css-validator.jar');        
+        $this->wrapper->enableDeferToParentIfNoRawOutput();
     }
     
     

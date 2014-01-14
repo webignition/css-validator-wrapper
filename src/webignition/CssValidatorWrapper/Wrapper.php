@@ -148,7 +148,8 @@ class Wrapper {
         }
         
         $cssValidatorOutputParserConfiguration = new CssValidatorOutputParserConfiguration();        
-        $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths(implode("\n", $this->getRawValidatorOutputLines()));                  
+        $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths(implode("\n", $this->getRawValidatorOutputLines()));
+//        exit();
         
         $cssValidatorOutputParserConfiguration->setRawOutput($validatorOutput);
         
@@ -232,8 +233,8 @@ class Wrapper {
      * @return array
      */
     protected function getRawValidatorOutputLines() {
-        $validatorOutputLines = array();        
-        exec($this->getLocalProxyResource()->getConfiguration()->getExecutableCommand(), $validatorOutputLines);                
+        $validatorOutputLines = array();           
+        exec($this->getLocalProxyResource()->getConfiguration()->getExecutableCommand(), $validatorOutputLines);
         return $validatorOutputLines;
     }
     
@@ -244,18 +245,36 @@ class Wrapper {
      * @param string $validatorOutputLines
      * @return string
      */
-    private function replaceLocalFilePathsWithOriginalFilePaths($validatorOutput) {                
+    private function replaceLocalFilePathsWithOriginalFilePaths($validatorOutput) {                        
+//        echo $validatorOutput;
+//        exit();
+        
+        
+        
         $refMatches = array();
         preg_match_all('/ref="file:\/tmp\/[^"]*"/', $validatorOutput, $refMatches);        
         
         if (count($refMatches) > 0) {
             $refAttributes = $refMatches[0];
             
-            foreach ($refAttributes as $refAttribute) {                
-                $originalUrl = $this->localProxyResource->getWebResourceUrlFromPath(str_replace(array('ref="file:', '"'), '', $refAttribute));                
+            foreach ($refAttributes as $index => $refAttribute) {           
+                if ($index === 0) {
+                    $originalUrl = $this->getLocalProxyResource()->getRootWebResourceUrl();                    
+                } else {
+                    $originalUrl = $this->getLocalProxyResource()->getWebResourceUrlFromPath(str_replace(array('ref="file:', '"'), '', $refAttribute));
+                }
+                
+                
                 $validatorOutput = str_replace($refAttribute, 'ref="' . htmlspecialchars($originalUrl)  . '"', $validatorOutput);
+                
+//                
+//                
             }
         }
+        
+//        echo $validatorOutput;
+//        
+//        exit();
         
         return $validatorOutput;
     }

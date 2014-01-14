@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "067cb6cf4cb0ef69500dcce100aebcb9",
+    "hash": "d116ff334bc8bea0e61f7745b2dbac5b",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -248,21 +248,21 @@
         },
         {
             "name": "webignition/absolute-url-deriver",
-            "version": "1.4.1.1",
+            "version": "1.4.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/absolute-url-deriver.git",
-                "reference": "ea9e63504a812cb27d87f7dda6eff5fb787271af"
+                "reference": "a4095e6a6f72206041baf29db33083d88d78108a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/absolute-url-deriver/zipball/ea9e63504a812cb27d87f7dda6eff5fb787271af",
-                "reference": "ea9e63504a812cb27d87f7dda6eff5fb787271af",
+                "url": "https://api.github.com/repos/webignition/absolute-url-deriver/zipball/a4095e6a6f72206041baf29db33083d88d78108a",
+                "reference": "a4095e6a6f72206041baf29db33083d88d78108a",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0",
-                "webignition/url": ">=1.9.7"
+                "webignition/url": ">=1.9.8"
             },
             "type": "library",
             "autoload": {
@@ -286,7 +286,7 @@
                 "absolute",
                 "url"
             ],
-            "time": "2014-01-08 17:25:31"
+            "time": "2014-01-13 18:13:07"
         },
         {
             "name": "webignition/css-validator-output-parser",
@@ -466,16 +466,16 @@
         },
         {
             "name": "webignition/url",
-            "version": "1.9.7",
+            "version": "1.9.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/url.git",
-                "reference": "2c4a23ab1b557f182358a3f22bb5d9125b65ca56"
+                "reference": "ad988e7e5a4eed333b055bba0aac8409137c397c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/url/zipball/2c4a23ab1b557f182358a3f22bb5d9125b65ca56",
-                "reference": "2c4a23ab1b557f182358a3f22bb5d9125b65ca56",
+                "url": "https://api.github.com/repos/webignition/url/zipball/ad988e7e5a4eed333b055bba0aac8409137c397c",
+                "reference": "ad988e7e5a4eed333b055bba0aac8409137c397c",
                 "shasum": ""
             },
             "require": {
@@ -504,7 +504,7 @@
             "keywords": [
                 "url"
             ],
-            "time": "2014-01-08 16:43:43"
+            "time": "2014-01-13 18:09:20"
         },
         {
             "name": "webignition/web-json-model",

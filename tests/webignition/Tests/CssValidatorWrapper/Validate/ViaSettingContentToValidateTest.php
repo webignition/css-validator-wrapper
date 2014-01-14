@@ -36,7 +36,7 @@ class ViaSettingContentToValidateTest extends BaseTest {
         $this->wrapper->validate();
         
         $modifiedContentToValidate = $this->wrapper->getLocalProxyResource()->getConfiguration()->getContentToValidate();
-        
+       
         $sourceDomLinkUrls = array();
         
         $sourceDom = new \DOMDocument();
