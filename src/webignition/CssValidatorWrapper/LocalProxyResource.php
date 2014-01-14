@@ -168,33 +168,21 @@ class LocalProxyResource {
      * @param string $newUrl
      */
     private function updateRootWebResourceStylesheetUrl($index, $newUrl) {        
-        $rootWebResource = $this->getRootWebResource();
-        $currentIndex = 0;
+        $rootWebResource = $this->getRootWebResource();        
+        $hrefs = $this->findStylesheetHrefs($rootWebResource);
         
-        $rootDom = new \DOMDocument();
-        @$rootDom->loadHTML($rootWebResource->getContent());
-        
-        $linkElements = $rootDom->getElementsByTagName('link');
-        foreach ($linkElements as $linkElement) {
-            if ($this->isLinkElementStylesheetElementWithHrefAttribute($linkElement)) {
-                $hrefAttribute = trim($linkElement->getAttribute('href')); 
-                
-                if ($currentIndex === $index) {
-                    $possibleSourceHrefValues = $this->getPossibleSourceHrefValues($hrefAttribute);
-                    
-                    foreach ($possibleSourceHrefValues as $sourceHrefValue) {
-                        $possibleSourceHrefAttributeStrings = $this->getPossibleSourceHrefAttributeStrings($sourceHrefValue);
-                        
-                        foreach ($possibleSourceHrefAttributeStrings as $sourceHrefAttribute) {
-                            if (substr_count($rootWebResource->getContent(), $sourceHrefAttribute)) {
-                                $rootWebResource->setContent(str_replace($sourceHrefAttribute, 'href="'.$newUrl.'"', $rootWebResource->getContent()));  
-                            }                            
-                        }                        
-                    }
-                }
-                
-                $currentIndex++;
-            }
+        if (isset($hrefs[$index])) {
+            $possibleSourceHrefValues = $this->getPossibleSourceHrefValues($hrefs[$index]);
+
+            foreach ($possibleSourceHrefValues as $sourceHrefValue) {
+                $possibleSourceHrefAttributeStrings = $this->getPossibleSourceHrefAttributeStrings($sourceHrefValue);
+
+                foreach ($possibleSourceHrefAttributeStrings as $sourceHrefAttribute) {
+                    if (substr_count($rootWebResource->getContent(), $sourceHrefAttribute)) {
+                        $rootWebResource->setContent(str_replace($sourceHrefAttribute, 'href="'.$newUrl.'"', $rootWebResource->getContent()));  
+                    }                            
+                }                        
+            }            
         }
         
         $this->getConfiguration()->setContentToValidate($rootWebResource->getContent());
@@ -278,16 +266,11 @@ class LocalProxyResource {
      */
     private function findStylesheetUrls(\webignition\WebResource\WebPage\WebPage $webPage) {
         $stylesheetUrls = array();
+        $hrefs = $this->findStylesheetHrefs($webPage);
         
-        $rootDom = new \DOMDocument();
-        @$rootDom->loadHTML($webPage->getContent());
-        
-        $linkElements = $rootDom->getElementsByTagName('link');
-        foreach ($linkElements as $linkElement) {
-            if ($this->isLinkElementStylesheetElementWithHrefAttribute($linkElement)) {
-                $hrefAttribute = trim($linkElement->getAttribute('href'));
+        foreach ($hrefs as $href) {
                 $absoluteUrlDeriver = new AbsoluteUrlDeriver(
-                    $hrefAttribute,
+                    $href,
                     $webPage->getUrl()
                 );
                 
@@ -295,11 +278,32 @@ class LocalProxyResource {
                 
                 if (!in_array($stylesheetUrl, $stylesheetUrls)) {
                     $stylesheetUrls[] = $stylesheetUrl;
-                }
+                }            
+        }
+        
+        return $stylesheetUrls;
+    }
+    
+    
+    /**
+     * 
+     * @param \webignition\WebResource\WebPage\WebPage $webPage
+     * @return array
+     */
+    private function findStylesheetHrefs(\webignition\WebResource\WebPage\WebPage $webPage) {
+        $hrefs = array();
+        
+        $rootDom = new \DOMDocument();
+        @$rootDom->loadHTML($webPage->getContent());
+        
+        $linkElements = $rootDom->getElementsByTagName('link');
+        foreach ($linkElements as $linkElement) {
+            if ($this->isLinkElementStylesheetElementWithHrefAttribute($linkElement)) {
+                $hrefs[] = trim($linkElement->getAttribute('href'));
             }
         } 
         
-        return $stylesheetUrls;
+        return $hrefs;
     }
     
     
