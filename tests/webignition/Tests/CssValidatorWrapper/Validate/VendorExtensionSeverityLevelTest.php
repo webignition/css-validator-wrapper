@@ -43,8 +43,17 @@ class VendorExtensionSeverityLevelTest extends BaseTest {
         $output = $this->wrapper->validate();
         
         $this->wrapper->getConfiguration()->setVendorExtensionSeverityLevel(VendorExtensionSeverityLevel::LEVEL_WARN);
-        $this->assertEquals(0, $output->getWarningCount());      
-        $this->assertEquals(3, $output->getErrorCount());
+        $this->assertEquals(3, $output->getWarningCount());      
+        $this->assertEquals(0, $output->getErrorCount());
+    }
+    
+    public function testWarningWithVendorSpecificAtRuleErrorsThatShouldBeWarnings() {
+        $this->wrapper->setCssValidatorRawOutput($this->getFixture('vendor-specific-at-rules.txt'));
+        $output = $this->wrapper->validate();
+        
+        $this->wrapper->getConfiguration()->setVendorExtensionSeverityLevel(VendorExtensionSeverityLevel::LEVEL_WARN);        
+        $this->assertEquals(12, $output->getWarningCount());      
+        $this->assertEquals(1, $output->getErrorCount());        
     }
     
 }

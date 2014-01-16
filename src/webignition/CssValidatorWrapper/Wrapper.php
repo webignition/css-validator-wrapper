@@ -152,6 +152,7 @@ class Wrapper {
         
         $cssValidatorOutputParserConfiguration->setRawOutput($validatorOutput);
         
+        
         $this->localProxyResource->clear();
         
         if ($this->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES)) {
@@ -165,6 +166,10 @@ class Wrapper {
         if ($this->getConfiguration()->getVendorExtensionSeverityLevel() === VendorExtensionSeverityLevel::LEVEL_IGNORE) {
             $cssValidatorOutputParserConfiguration->setIgnoreVendorExtensionIssues(true);
         }
+        
+        if ($this->getConfiguration()->getVendorExtensionSeverityLevel() === VendorExtensionSeverityLevel::LEVEL_WARN) {                        
+            $cssValidatorOutputParserConfiguration->setReportVendorExtensionIssuesAsWarnings(true);
+        }        
         
         if ($this->getConfiguration()->hasDomainsToIgnore()) {
             $cssValidatorOutputParserConfiguration->setRefDomainsToIgnore($this->getConfiguration()->getDomainsToIgnore());
