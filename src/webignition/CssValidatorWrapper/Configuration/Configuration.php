@@ -71,7 +71,14 @@ class Configuration {
      *
      * @var \webignition\WebResource\Service\Service
      */
-    private $webResourceService; 
+    private $webResourceService;
+    
+    
+    /**
+     *
+     * @var array
+     */
+    private $cookies = array();
     
     
     /**
@@ -357,6 +364,26 @@ class Configuration {
      */
     public function hasDomainsToIgnore() {        
         return is_array($this->getDomainsToIgnore()) && count($this->getDomainsToIgnore()) > 0;
+    }
+    
+    
+    /**
+     * 
+     * @param array $cookies
+     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     */
+    public function setCookies($cookies) {
+        $this->cookies = $cookies;
+        return $this;
+    }
+    
+    
+    /**
+     * 
+     * @return array
+     */
+    public function getCookies() {
+        return $this->cookies;
     }
     
 }

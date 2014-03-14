@@ -136,4 +136,22 @@ class CreateConfigurationTest extends BaseTest {
         
         $this->assertEquals($content, $wrapper->getConfiguration()->getContentToValidate());
     }    
+    
+    
+    public function testSetCookies() {        
+        $cookies = array(
+            array(
+                'name' => 'name1',
+                'value' => 'value1'
+            )                       
+        );
+        
+        $wrapper = new Wrapper();
+        $wrapper->createConfiguration(array(
+            'url-to-validate' => 'http://example.com/',
+            'cookies' => $cookies
+        ));         
+        
+        $this->assertEquals($cookies, $wrapper->getConfiguration()->getCookies());
+    }     
 }

@@ -107,6 +107,10 @@ class Wrapper {
             $configuration->setContentToValidate($configurationValues['content-to-validate']);
         }
         
+        if (isset($configurationValues['cookies'])) {
+            $configuration->setCookies($configurationValues['cookies']);
+        }
+        
         $this->setConfiguration($configuration);
         return $this;
     }    
