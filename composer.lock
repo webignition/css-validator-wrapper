@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "ced9beaf0217fe1f566fd00d23e316bb",
+    "hash": "898d81d4c6862ac2caa81058b6fbf5cf",
     "packages": [
         {
             "name": "etechnika/idna-convert",

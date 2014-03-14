@@ -11,7 +11,7 @@
         "webignition/css-validator-output-parser": ">=2.1.4",
         "webignition/web-resource-service":">=0.2.9",
         "webignition/absolute-url-deriver":">=1.4.1.2",
-        "webignition/url":">=1.9.8",
+        "webignition/url":">=1.9.9",
         "webignition/web-page-model":"*",
         "webignition/cookie-url-matcher":">=0.1,<1"
     },
