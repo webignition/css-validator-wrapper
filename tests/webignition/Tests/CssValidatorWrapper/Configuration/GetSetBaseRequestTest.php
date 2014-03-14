@@ -8,10 +8,10 @@ use \webignition\CssValidatorWrapper\Configuration\Configuration;
 class GetSetBaseRequestTest extends BaseTest {
     
     public function testGetDefaultBaseRequest() {        
-        $configuration = new Configuration();
-        $this->assertEquals($this->getHttpClient()->get(), $configuration->getBaseRequest());
+        $configuration = new Configuration();        
+        $this->assertInstanceOf('\Guzzle\Http\Message\Request', $configuration->getBaseRequest());
     }
-    
+
     
     public function testSetReturnsSelf() {
         $configuration = new Configuration();

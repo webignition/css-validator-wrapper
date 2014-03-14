@@ -44,7 +44,7 @@ class RetryWithUrlEncodingDisabledTest extends BaseTest {
         $this->wrapper->getConfiguration()->getWebResourceService()->getConfiguration()->disableRetryWithUrlEncodingDisabled();
         $output = $this->wrapper->validate();
         
-        $this->assertEquals(1, count($output->getErrorsByUrl('http://s1.example.com/?%3Fstyle.css=')));
+        $this->assertEquals(1, count($output->getErrorsByUrl('http://s1.example.com/?%3Fstyle.css')));
     }
 
     

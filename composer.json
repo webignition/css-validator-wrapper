@@ -12,7 +12,8 @@
         "webignition/web-resource-service":">=0.2.9",
         "webignition/absolute-url-deriver":">=1.4.1.2",
         "webignition/url":">=1.9.8",
-        "webignition/web-page-model":"*"
+        "webignition/web-page-model":"*",
+        "webignition/cookie-url-matcher":">=0.1,<1"
     },
 
     "autoload": {
