@@ -403,12 +403,20 @@ class LocalProxyResource {
      * 
      * @return \webignition\WebResource\WebResource
      */
-    private function deriveRootWebResourceFromContentToValidate() {               
-        return $this->getConfiguration()->getWebResourceService()->create(
-            $this->getConfiguration()->getUrlToValidate(),
-            $this->getConfiguration()->getContentToValidate(),
-            $this->deriveRootWebResourceContentTypeFromContentToValidate()
-        );
+    private function deriveRootWebResourceFromContentToValidate() { 
+        return $this->getConfiguration()->getWebResourceService()->create($this->deriveRootWebResourceHttpResponseFromContentToValidate());
+    }
+    
+    
+    /**
+     * 
+     * @return \Guzzle\Http\Message\Response
+     */
+    private function deriveRootWebResourceHttpResponseFromContentToValidate() {
+        $httpResponse = \Guzzle\Http\Message\Response::fromMessage("HTTP/1.0 200 OK\nContent-Type: " . $this->deriveRootWebResourceContentTypeFromContentToValidate() . "\n\n" . $this->getConfiguration()->getContentToValidate());
+        $httpResponse->setEffectiveUrl($this->getConfiguration()->getUrlToValidate());
+        
+        return $httpResponse;
     }
     
     

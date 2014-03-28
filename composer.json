@@ -9,11 +9,12 @@
     "require": {
         "php": ">=5.3.2",
         "webignition/css-validator-output-parser": ">=2.1.4",
-        "webignition/web-resource-service":">=0.2.9",
+        "webignition/web-resource-service":">=1.0.1",
         "webignition/absolute-url-deriver":">=1.4.1.2",
         "webignition/url":">=1.9.9",
-        "webignition/web-page-model":"*",
-        "webignition/cookie-url-matcher":">=0.1,<1"
+        "webignition/web-page-model":">=1.0.2,<2.0",
+        "webignition/cookie-url-matcher":">=0.1,<1",
+        "guzzle/guzzle":">=3.8.1,<4.0"
     },
 
     "autoload": {
@@ -26,5 +27,8 @@
     "require-dev": {
         "symfony/class-loader": "*",
         "phpunit/phpunit": "3.7.*"
-    }
+    },
+    
+    "minimum-stability":"dev",
+    "prefer-stable":true    
 }
