@@ -10,3 +10,7 @@ before_install:
   
 install: 
   - composer install
+
+matrix:
+    allow_failures:
+        - php: hhvm
