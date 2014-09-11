@@ -5,6 +5,9 @@ namespace webignition\Tests\CssValidatorWrapper\Validate\CookiesTest;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 use webignition\Url\Url;
+use Guzzle\Plugin\Cookie\CookiePlugin;
+use Guzzle\Plugin\Cookie\CookieJar\ArrayCookieJar;
+use Guzzle\Plugin\Cookie\Cookie;
 
 abstract class CookiesTest extends BaseTest {
     
@@ -31,12 +34,21 @@ abstract class CookiesTest extends BaseTest {
     
     public function setUp() {                       
         $this->setTestFixturePath(get_class($this));
-        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath() . '/HttpResponses'));        
+        $this->setHttpFixtures($this->getHttpFixtures($this->getFixturesDataPath() . '/HttpResponses'));
+
+        $cookieJar = new ArrayCookieJar();
+
+        foreach ($this->getCookies() as $cookieData) {
+            $cookieJar->add(new Cookie($cookieData));
+        }
+
+        $cookiePlugin = new CookiePlugin($cookieJar);
+
+        $this->getHttpClient()->addSubscriber($cookiePlugin);
         
         $configuration = new Configuration();
         $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setBaseRequest($this->getHttpClient()->get());        
-        $configuration->setCookies($this->getCookies());
+        $configuration->setBaseRequest($this->getHttpClient()->get());
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
         $this->wrapper->setConfiguration($configuration);        

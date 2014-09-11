@@ -377,25 +377,12 @@ class LocalProxyResource {
             } else {                           
                 $request = clone $this->getConfiguration()->getBaseRequest();            
                 $request->setUrl($this->getRootWebResourceUrl());
-                
-                $this->setRequestCookies($request);
 
                 $this->rootWebResource = $this->getConfiguration()->getWebResourceService()->get($request);
             }
         }
         
         return $this->rootWebResource;
-    }
-    
-    
-    private function setRequestCookies(\Guzzle\Http\Message\RequestInterface $request) {
-        $cookieUrlMatcher = new \webignition\Cookie\UrlMatcher\UrlMatcher();
-        
-        foreach ($this->getConfiguration()->getCookies() as $cookie) {
-            if ($cookieUrlMatcher->isMatch($cookie, $request->getUrl())) {
-                $request->addCookie($cookie['name'], $cookie['value']);
-            }
-        }       
     }
     
     
@@ -493,9 +480,7 @@ class LocalProxyResource {
             if (!$this->hasLinkedResource($url)) {                               
                 $request = clone $this->getConfiguration()->getBaseRequest();            
                 $request->setUrl($url);
-                
-                $this->setRequestCookies($request);
-                
+
                 $resource = $this->getConfiguration()->getWebResourceService()->get($request);
                 
                 $this->linkedResources[$this->getUrlHash($url)] = $resource;
