@@ -324,7 +324,6 @@ class LocalProxyResource {
     private function translateHtmlWebResourceToWebPage(WebResource $webResource) {
         $webPage = new WebPage();
         $webPage->setContent($webResource->getContent());
-        $webPage->setContentType($webResource->getContentType());
         $webPage->setUrl($webResource->getUrl());
         
         return $webPage;        
