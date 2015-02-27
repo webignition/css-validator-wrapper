@@ -538,8 +538,6 @@ class LocalProxyResource {
      */
     private function hasRootWebResource() {
         return !is_null($this->rootWebResource);
-        
-        return isset($this->linkedResources[$this->getUrlHash($this->getRootWebResourceUrl())]);
     }
     
     
