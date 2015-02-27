@@ -44,7 +44,7 @@ class LocalProxyResource {
     
     /**
      *
-     * @var string
+     * @var string[]
      */
     private $paths = array();
     
