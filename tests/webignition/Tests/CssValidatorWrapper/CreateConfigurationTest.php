@@ -111,17 +111,19 @@ class CreateConfigurationTest extends BaseTest {
     } 
     
     
-    public function testSetBaseRequest() {
-        $baseRequest = $this->getHttpClient()->get();
-        $baseRequest->setAuth('example_username');
-        
+    public function testSetHttpClient() {
+        $this->getHttpClient()->setDefaultOption(
+            'auth',
+            ['example_user', 'example_password']
+        );
+
         $wrapper = new Wrapper();
         $wrapper->createConfiguration(array(
             'url-to-validate' => 'http://example.com/',
-            'base-request' => $baseRequest
-        ));         
-        
-        $this->assertEquals('example_username', $wrapper->getConfiguration()->getBaseRequest()->getUsername());
+            'http-client' => $this->getHttpClient()
+        ));
+
+        $this->assertEquals(['example_user', 'example_password'], $wrapper->getConfiguration()->getHttpClient()->getDefaultOption('auth'));
     }
     
     

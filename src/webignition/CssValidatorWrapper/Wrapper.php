@@ -10,6 +10,9 @@ use webignition\CssValidatorOutput\Parser\Configuration as CssValidatorOutputPar
 use webignition\CssValidatorOutput\CssValidatorOutput;
 use webignition\CssValidatorOutput\ExceptionOutput\ExceptionOutput;
 use webignition\CssValidatorOutput\ExceptionOutput\Type\Type as ExceptionOutputType;
+use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\ConnectException;
+use webignition\GuzzleHttp\Exception\CurlException\Factory as CurlExceptionFactory;
 
 class Wrapper {
     
@@ -99,8 +102,8 @@ class Wrapper {
             $configuration->setDomainsToIgnore($configurationValues['domains-to-ignore']);
         }  
         
-        if (isset($configurationValues['base-request']) && $configurationValues['base-request'] instanceof \Guzzle\Http\Message\Request) {
-            $configuration->setBaseRequest($configurationValues['base-request']);
+        if (isset($configurationValues['http-client']) && $configurationValues['http-client'] instanceof HttpClient) {
+            $configuration->setHttpClient($configurationValues['http-client']);
         }
         
         if (isset($configurationValues['content-to-validate'])) {
@@ -120,33 +123,39 @@ class Wrapper {
     public function validate() {
         if (!$this->hasConfiguration()) {
             throw new \InvalidArgumentException('Unable to validate; configuration not set', self::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET);
-        }        
+        }
 
-        try { 
+        try {
             $this->getLocalProxyResource()->prepare();
-        } catch (\webignition\WebResource\Exception\InvalidContentTypeException $invalidContentTypeException) {  
+        } catch (\webignition\WebResource\Exception\InvalidContentTypeException $invalidContentTypeException) {
             $cssValidatorOutput = new CssValidatorOutput();
             $cssValidatorOutputException = new ExceptionOutput();
             $cssValidatorOutputException->setType(new ExceptionOutputType('invalid-content-type:' . $invalidContentTypeException->getResponseContentType()->getTypeSubtypeString()));
 
             $cssValidatorOutput->setException($cssValidatorOutputException);
-            return $cssValidatorOutput;            
-        } catch (\webignition\WebResource\Exception\Exception $webResourceException) {                
+            return $cssValidatorOutput;
+        } catch (\webignition\WebResource\Exception\Exception $webResourceException) {
             $cssValidatorOutput = new CssValidatorOutput();
             $cssValidatorOutputException = new ExceptionOutput();
             $cssValidatorOutputException->setType(new ExceptionOutputType('http' . $webResourceException->getResponse()->getStatusCode()));
 
             $cssValidatorOutput->setException($cssValidatorOutputException);
             return $cssValidatorOutput;
-        } catch (\Guzzle\Http\Exception\CurlException $curlException) {                
-            $cssValidatorOutput = new CssValidatorOutput();
-            $cssValidatorOutputException = new ExceptionOutput();
-            $cssValidatorOutputException->setType(new ExceptionOutputType('curl' . $curlException->getErrorNo()));
+        } catch (ConnectException $connectException) {
+            $curlExceptionFactory = new CurlExceptionFactory();
+            if ($curlExceptionFactory->isCurlException($connectException)) {
+                $curlException = $curlExceptionFactory->fromConnectException($connectException);
 
-            $cssValidatorOutput->setException($cssValidatorOutputException);
-            return $cssValidatorOutput;            
+                $cssValidatorOutput = new CssValidatorOutput();
+                $cssValidatorOutputException = new ExceptionOutput();
+                $cssValidatorOutputException->setType(new ExceptionOutputType('curl' . $curlException->getCurlCode()));
+
+                $cssValidatorOutput->setException($cssValidatorOutputException);
+
+                return $cssValidatorOutput;
+            }
         }
-        
+
         $cssValidatorOutputParserConfiguration = new CssValidatorOutputParserConfiguration();        
         $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths(implode("\n", $this->getRawValidatorOutputLines()));
         
@@ -203,7 +212,7 @@ class Wrapper {
                 $error = new \webignition\CssValidatorOutput\Message\Error();
                 $error->setContext('');
                 $error->setLineNumber(0);
-                $error->setMessage('curl-error:' . $curlExceptionDetails['exception']->getErrorNo());
+                $error->setMessage('curl-error:' . $curlExceptionDetails['exception']->getCurlCode());
                 $error->setRef($curlExceptionDetails['url']);
 
                 $output->addMessage($error);

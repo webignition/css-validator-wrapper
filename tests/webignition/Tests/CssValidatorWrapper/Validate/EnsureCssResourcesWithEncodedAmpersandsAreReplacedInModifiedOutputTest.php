@@ -2,11 +2,15 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Validate;
 
+use webignition\CssValidatorWrapper\Wrapper as CssValidatorWrapper;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class EnsureCssResourcesWithEncodedAmpersandsAreReplacedInModifiedOutputTest extends BaseTest {
-    
+
+    /**
+     * @var CssValidatorWrapper
+     */
     private $wrapper;
     
     public function setUp() {                       
@@ -15,7 +19,7 @@ class EnsureCssResourcesWithEncodedAmpersandsAreReplacedInModifiedOutputTest ext
         
         $configuration = new Configuration();
         $configuration->setUrlToValidate('http://en.wikipedia.org/');
-        $configuration->setBaseRequest($this->getHttpClient()->get());
+        $configuration->setHttpClient($this->getHttpClient());
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
         $this->wrapper->setConfiguration($configuration);
@@ -23,12 +27,8 @@ class EnsureCssResourcesWithEncodedAmpersandsAreReplacedInModifiedOutputTest ext
     }
 
     public function testTest() {
-        //$this->assertTrue(true);
-        
         $output = $this->wrapper->validate();
-        //var_dump($output);
-//        
-//        //$this->assertFalse($output->hasException());
+        $this->assertFalse($output->hasException());
     }
      
 }

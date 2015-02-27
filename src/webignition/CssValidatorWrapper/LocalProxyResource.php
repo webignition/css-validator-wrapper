@@ -2,8 +2,17 @@
 
 namespace webignition\CssValidatorWrapper;
 
+use GuzzleHttp\Message\MessageFactory as HttpMessageFactory;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\AbsoluteUrlDeriver\AbsoluteUrlDeriver;
+use GuzzleHttp\Message\RequestInterface as HttpRequest;
+use GuzzleHttp\Message\ResponseInterface as HttpResponse;
+use GuzzleHttp\Exception\ConnectException;
+use webignition\GuzzleHttp\Exception\CurlException\Exception as CurlException;
+use webignition\GuzzleHttp\Exception\CurlException\Factory as CurlExceptionFactory;
+use webignition\WebResource\Exception\Exception as WebResourceException;
+use webignition\WebResource\WebPage\WebPage;
+use webignition\WebResource\WebResource;
 
 class LocalProxyResource {
     
@@ -42,21 +51,21 @@ class LocalProxyResource {
     
     /**
      *
-     * @var \webignition\WebResource\WebResource[]
+     * @var WebResource[]
      */
     private $linkedResources = array();
     
 
     /**
      *
-     * @var \webignition\WebResource\Exception\Exception[]
+     * @var WebResourceException[]
      */    
     private $webResourceExceptions = array();
     
     
     /**
      *
-     * @var \Guzzle\Http\Exception\CurlException[]
+     * @var CurlException[]
      */    
     private $curlExceptions = array();
     
@@ -70,14 +79,14 @@ class LocalProxyResource {
     
     /**
      *
-     * @var \webignition\WebResource\WebResource
+     * @var WebResource
      */
     private $rootWebResource = null;
         
     
     /**
      * 
-     * @param \webignition\CssValidatorWrapper\Configuration\Configuration $sourceConfiguration
+     * @param Configuration $sourceConfiguration
      */
     public function __construct(Configuration $sourceConfiguration) {
         $this->sourceConfiguration = $sourceConfiguration;
@@ -96,16 +105,15 @@ class LocalProxyResource {
     
     /**
      * 
-     * @return \webignition\WebResource\Exception\Exception[]
+     * @return WebResourceException[]
      */
     public function getWebResourceExceptions() {
         return $this->webResourceExceptions;
     }
     
-    
+
     /**
-     * 
-     * @return array
+     * @return bool
      */
     public function hasCurlExceptions() {
         return count($this->curlExceptions) > 0;
@@ -114,7 +122,7 @@ class LocalProxyResource {
     
     /**
      * 
-     * @return \Guzzle\Http\Exception\CurlException[]
+     * @return CurlException[]
      */
     public function getCurlExceptions() {
         return $this->curlExceptions;
@@ -123,7 +131,7 @@ class LocalProxyResource {
     
     /**
      * 
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     * @return Configuration
      */
     protected function getSourceConfiguration() {
         return $this->sourceConfiguration;
@@ -133,12 +141,12 @@ class LocalProxyResource {
     public function prepare() {        
         $rootWebResource = $this->getRootWebResource();        
         $this->storeWebResource($rootWebResource);
-        
+
         if ($this->isHtmlResource($rootWebResource)) {
             $this->retrieveStylesheetResources();
 
             foreach ($this->responses as $responseIndex => $response) {                
-                if ($response instanceof \webignition\WebResource\WebResource) {
+                if ($response instanceof WebResource) {
                     $this->storeWebResource($response);                 
                     $this->updateRootWebResourceStylesheetUrl($responseIndex, 'file:' . $this->getPath($response));
                 } else {
@@ -220,7 +228,7 @@ class LocalProxyResource {
     
     /**
      * 
-     * @param \DOMelement $domElement
+     * @param \DOMElement $domElement
      * @return boolean
      */
     private function isLinkElementStylesheetElementWithHrefAttribute(\DOMelement $domElement) {
@@ -241,14 +249,14 @@ class LocalProxyResource {
     
     
     private function retrieveStylesheetResources() {        
-        /* @var $rootWebResource \webignition\WebResource\WebPage\WebPage */
+        /* @var $rootWebResource WebPage */
         $rootWebResource = $this->getRootWebResource();            
         
         if (!$this->isHtmlResource($this->getRootWebResource())) {
             return;
         }
         
-        if (!$rootWebResource instanceof \webignition\WebResource\WebPage\WebPage) {
+        if (!$rootWebResource instanceof WebPage) {
             $rootWebResource = $this->translateHtmlWebResourceToWebPage($rootWebResource);
         }
         
@@ -261,10 +269,10 @@ class LocalProxyResource {
     
     /**
      * 
-     * @param \webignition\WebResource\WebPage\WebPage $webPage
+     * @param WebPage $webPage
      * @return array
      */
-    private function findStylesheetUrls(\webignition\WebResource\WebPage\WebPage $webPage) {
+    private function findStylesheetUrls(WebPage $webPage) {
         $stylesheetUrls = array();
         $hrefs = $this->findStylesheetHrefs($webPage);
         
@@ -287,11 +295,11 @@ class LocalProxyResource {
     
     /**
      * 
-     * @param \webignition\WebResource\WebPage\WebPage $webPage
+     * @param WebPage $webPage
      * @return array
      */
-    private function findStylesheetHrefs(\webignition\WebResource\WebPage\WebPage $webPage) {
-        $hrefs = array();
+    private function findStylesheetHrefs(WebPage $webPage) {
+        $hrefs = [];
         
         $rootDom = new \DOMDocument();
         @$rootDom->loadHTML($webPage->getContent());
@@ -299,6 +307,7 @@ class LocalProxyResource {
         $linkElements = $rootDom->getElementsByTagName('link');
         foreach ($linkElements as $linkElement) {
             if ($this->isLinkElementStylesheetElementWithHrefAttribute($linkElement)) {
+                /* @var $linkElement \DOMElement */
                 $hrefs[] = trim($linkElement->getAttribute('href'));
             }
         } 
@@ -309,11 +318,11 @@ class LocalProxyResource {
     
     /**
      * 
-     * @param \webignition\WebResource\WebResource $webResource
-     * @return \webignition\WebResource\WebPage\WebPage
+     * @param WebResource $webResource
+     * @return WebPage
      */
-    private function translateHtmlWebResourceToWebPage(\webignition\WebResource\WebResource $webResource) {
-        $webPage = new \webignition\WebResource\WebPage\WebPage();
+    private function translateHtmlWebResourceToWebPage(WebResource $webResource) {
+        $webPage = new WebPage();
         $webPage->setContent($webResource->getContent());
         $webPage->setContentType($webResource->getContentType());
         $webPage->setUrl($webResource->getUrl());
@@ -325,9 +334,9 @@ class LocalProxyResource {
     
     /**
      * 
-     * @param \webignition\WebResource\WebResource $resource
+     * @param WebResource $resource
      */
-    private function storeWebResource(\webignition\WebResource\WebResource $resource) {        
+    private function storeWebResource(WebResource $resource) {
         $path = $this->getPath($resource);
         
         file_put_contents($path, $resource->getContent());
@@ -339,9 +348,9 @@ class LocalProxyResource {
     /**
      * 
      * @param string $path
-     * @param \webignition\WebResource\WebResource $resource
+     * @param WebResource $resource
      */
-    private function setLocalPathToResourceUrlMapping($path, \webignition\WebResource\WebResource $resource) {
+    private function setLocalPathToResourceUrlMapping($path, WebResource $resource) {
         $this->localPathToResourceUrlMap[$this->getLocalPathHash($path)] = $resource->getUrl();
     }
     
@@ -358,25 +367,27 @@ class LocalProxyResource {
     
     /**
      * 
-     * @param \webignition\WebResource\WebResource $resource
+     * @param WebResource $resource
      * @return boolean
      */    
-    private function isHtmlResource(\webignition\WebResource\WebResource $resource) {
+    private function isHtmlResource(WebResource $resource) {
         return $resource->getContentType()->getTypeSubtypeString() === self::HTML_CONTENT_TYPE;
     }
     
     
     /**
      * 
-     * @return \webignition\WebResource\WebResource
+     * @return WebResource
      */
     public function getRootWebResource() {
         if (!$this->hasRootWebResource()) {             
             if ($this->getConfiguration()->hasContentToValidate()) {
                 $this->rootWebResource = $this->deriveRootWebResourceFromContentToValidate();            
-            } else {                           
-                $request = clone $this->getConfiguration()->getBaseRequest();            
-                $request->setUrl($this->getRootWebResourceUrl());
+            } else {
+                $request = $this->getConfiguration()->getHttpClient()->createRequest(
+                    'GET',
+                    $this->getRootWebResourceUrl()
+                );
 
                 $this->rootWebResource = $this->getConfiguration()->getWebResourceService()->get($request);
             }
@@ -388,7 +399,7 @@ class LocalProxyResource {
     
     /**
      * 
-     * @return \webignition\WebResource\WebResource
+     * @return WebResource
      */
     private function deriveRootWebResourceFromContentToValidate() { 
         return $this->getConfiguration()->getWebResourceService()->create($this->deriveRootWebResourceHttpResponseFromContentToValidate());
@@ -397,10 +408,10 @@ class LocalProxyResource {
     
     /**
      * 
-     * @return \Guzzle\Http\Message\Response
+     * @return HttpResponse
      */
     private function deriveRootWebResourceHttpResponseFromContentToValidate() {
-        $httpResponse = \Guzzle\Http\Message\Response::fromMessage("HTTP/1.0 200 OK\nContent-Type: " . $this->deriveRootWebResourceContentTypeFromContentToValidate() . "\n\n" . $this->getConfiguration()->getContentToValidate());
+        $httpResponse = $this->getHttpResponseFromMessage("HTTP/1.0 200 OK\nContent-Type: " . $this->deriveRootWebResourceContentTypeFromContentToValidate() . "\n\n" . $this->getConfiguration()->getContentToValidate());
         $httpResponse->setEffectiveUrl($this->getConfiguration()->getUrlToValidate());
         
         return $httpResponse;
@@ -440,10 +451,10 @@ class LocalProxyResource {
     
     /**
      * 
-     * @param \webignition\WebResource\WebResource $webResource
+     * @param WebResource $webResource
      * @return string
      */
-    private function getPath(\webignition\WebResource\WebResource $webResource) {
+    private function getPath(WebResource $webResource) {
         if (!isset($this->paths[$this->getWebResourceUrlHash($webResource)])) {
             $this->paths[$this->getWebResourceUrlHash($webResource)] = $this->generatePath($webResource);
         }
@@ -454,51 +465,58 @@ class LocalProxyResource {
 
     /**
      * 
-     * @param \webignition\WebResource\WebResource $webResource
+     * @param WebResource $webResource
      * @return string
      */
-    protected function generatePath(\webignition\WebResource\WebResource $webResource) {
+    protected function generatePath(WebResource $webResource) {
         return sys_get_temp_dir() . '/' . md5($webResource->getUrl() . microtime(true)) . '.' . $this->getPathExtension($webResource);
     }
     
     
     /**
      * 
-     * @param \webignition\WebResource\WebResource $webResource
+     * @param WebResource $webResource
      * @return string
      */
-    protected function getPathExtension(\webignition\WebResource\WebResource $webResource) {
+    protected function getPathExtension(WebResource $webResource) {
         return (string)$webResource->getContentType()->getSubtype();
     }
-    
+
+
     /**
-     * 
-     * @return \webignition\WebResource\WebResource
+     * @param $url
+     * @return null|WebResource
      */
     private function getLinkedResource($url) {        
         try {
-            if (!$this->hasLinkedResource($url)) {                               
-                $request = clone $this->getConfiguration()->getBaseRequest();            
-                $request->setUrl($url);
+            if (!$this->hasLinkedResource($url)) {
+                $request = $this->getConfiguration()->getHttpClient()->createRequest(
+                    'GET',
+                    $url
+                );
 
                 $resource = $this->getConfiguration()->getWebResourceService()->get($request);
                 
                 $this->linkedResources[$this->getUrlHash($url)] = $resource;
                 $this->responses[] = $resource;
             }            
-        } catch (\webignition\WebResource\Exception\Exception $webResourceException) {                        
+        } catch (WebResourceException $webResourceException) {
             $this->webResourceExceptions[$this->getUrlHash($url)] = $webResourceException;
             $this->responses[] = $webResourceException;
             return null;
-        } catch (\Guzzle\Http\Exception\CurlException $curlException) {            
-            $this->curlExceptions[$this->getUrlHash($url)] = array(
-                'url' => $url,
-                'exception' => $curlException
-            );
-            
-            $this->responses[] = $curlException;
-            
-            return null;            
+        } catch (ConnectException $connectException) {
+            $curlExceptionFactory = new CurlExceptionFactory();
+            if ($curlExceptionFactory->isCurlException($connectException)) {
+                $curlException = $curlExceptionFactory->fromConnectException($connectException);
+
+                $this->curlExceptions[$this->getUrlHash($url)] = array(
+                    'url' => $url,
+                    'exception' => $curlException
+                );
+
+                $this->responses[] = $curlException;
+                return null;
+            }
         }
         
         return $this->linkedResources[$this->getUrlHash($url)];
@@ -528,10 +546,10 @@ class LocalProxyResource {
     
     /**
      * 
-     * @param \webignition\WebResource\WebResource $webResource
+     * @param WebResource $webResource
      * @return string
      */
-    private function getWebResourceUrlHash(\webignition\WebResource\WebResource $webResource) {
+    private function getWebResourceUrlHash(WebResource $webResource) {
         return $this->getUrlHash($webResource->getUrl());
     }
     
@@ -551,6 +569,16 @@ class LocalProxyResource {
             @unlink($path);
             unset($this->linkedResources[$webResourceHash]);
         }
+    }
+
+
+    /**
+     * @param $message
+     * @return HttpResponse
+     */
+    private function getHttpResponseFromMessage($message) {
+        $factory = new HttpMessageFactory();
+        return $factory->fromMessage($message);
     }
     
 }

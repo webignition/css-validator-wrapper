@@ -2,11 +2,15 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Validate;
 
+use webignition\CssValidatorWrapper\Wrapper as CssValidatorWrapper;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class RetryWithUrlEncodingDisabledTest extends BaseTest {
-    
+
+    /**
+     * @var CssValidatorWrapper
+     */
     private $wrapper;
     
     public function setUp() {        
@@ -15,7 +19,7 @@ class RetryWithUrlEncodingDisabledTest extends BaseTest {
         
         $configuration = new Configuration();
         $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setBaseRequest($this->getHttpClient()->get());
+        $configuration->setHttpClient($this->getHttpClient());
         $configuration->setContentToValidate(file_get_contents($this->getFixturesDataPath() . '/WebResourceContent/rootWebResource.html'));        
         
         $this->wrapper = $this->getNewCssValidatorWrapper();

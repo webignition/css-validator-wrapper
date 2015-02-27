@@ -2,20 +2,22 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Validate\CookiesTest;
 
+use GuzzleHttp\Message\RequestInterface as HttpRequest;
+
 class NoDomainNoPathNoSecureTest extends CookiesTest { 
     
     protected function getCookies() {
         return array(
             array(
-                'name' => 'name1',
-                'value' => 'value1'
+                'Name' => 'name1',
+                'Value' => 'value1'
             )                       
         );         
     }
     
     /**
      * 
-     * @return \Guzzle\Http\Message\RequestInterface[]
+     * @return HttpRequest[]
      */
     protected function getExpectedRequestsOnWhichCookiesShouldBeSet() {
         return array();
@@ -24,19 +26,10 @@ class NoDomainNoPathNoSecureTest extends CookiesTest {
     
     /**
      * 
-     * @return \Guzzle\Http\Message\RequestInterface[]
+     * @return HttpRequest[]
      */
     protected function getExpectedRequestsOnWhichCookiesShouldNotBeSet() {
-        $requests = array();
-        
-        foreach ($this->getHttpHistory()->getAll() as $httpTransaction) {
-            $requests[] = $httpTransaction['request'];
-        }
-        
-        return $requests;
+        return $this->getHttpHistory()->getRequests();
     }
-    
-    
-    
     
 }

@@ -2,13 +2,17 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Validate;
 
+use webignition\CssValidatorWrapper\Wrapper as CssValidatorWrapper;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class IgnoreIncorrectDataUrlBackgroundImageIssuesTest extends BaseTest {
-    
-    private $wrapper;    
+
+    /**
+     * @var CssValidatorWrapper
+     */
+    private $wrapper;
     
     public function setUp() {
         $this->setTestFixturePath(__CLASS__);        
@@ -16,7 +20,7 @@ class IgnoreIncorrectDataUrlBackgroundImageIssuesTest extends BaseTest {
         
         $configuration = new Configuration();
         $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setBaseRequest($this->getHttpClient()->get());
+        $configuration->setHttpClient($this->getHttpClient());
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
         $this->wrapper->setConfiguration($configuration);

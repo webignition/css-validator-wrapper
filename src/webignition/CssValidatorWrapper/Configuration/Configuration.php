@@ -2,6 +2,9 @@
 
 namespace webignition\CssValidatorWrapper\Configuration;
 
+use GuzzleHttp\Client as HttpClient;
+use webignition\WebResource\Service\Service as WebResourceService;
+
 class Configuration {
     
     const JAVA_JAR_FLAG = '-jar';
@@ -62,22 +65,21 @@ class Configuration {
     
     /**
      *
-     * @var \Guzzle\Http\Message\Request
-     */
-    private $baseRequest = null;
-    
-    
-    /**
-     *
-     * @var \webignition\WebResource\Service\Service
+     * @var WebResourceService
      */
     private $webResourceService;
+
+
+    /**
+     * @var HttpClient
+     */
+    private $httpClient;
     
     
     /**
      * 
      * @param string $content
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     * @return Configuration
      */
     public function setContentToValidate($content) {
         $this->contentToValidate = $content;
@@ -105,11 +107,11 @@ class Configuration {
     
     /**
      * 
-     * @return \webignition\WebResource\Service\Service
+     * @return WebResourceService
      */
     public function getWebResourceService() {
         if (is_null($this->webResourceService)) {
-            $this->webResourceService = new \webignition\WebResource\Service\Service();
+            $this->webResourceService = new WebResourceService();
             $this->webResourceService->getConfiguration()->setContentTypeWebResourceMap(array(
                 'text/html' => 'webignition\WebResource\WebPage\WebPage',
                 'text/css' => 'webignition\WebResource\WebResource'
@@ -119,38 +121,34 @@ class Configuration {
         
         return $this->webResourceService;
     }
-    
-    
+
+
     /**
-     * 
-     * @param \Guzzle\Http\Message\Request $request
-     * @return \webignition\CssValidatorWrapper\Configuration
+     * @param HttpClient $httpClient
+     * @return $this
      */
-    public function setBaseRequest(\Guzzle\Http\Message\Request $request) {
-        $this->baseRequest = $request;
+    public function setHttpClient(HttpClient $httpClient) {
+        $this->httpClient = $httpClient;
         return $this;
     }
-    
-    
-    
+
+
     /**
-     * 
-     * @return \Guzzle\Http\Message\Request $request
+     * @return HttpClient
      */
-    public function getBaseRequest() {
-        if (is_null($this->baseRequest)) {
-            $client = new \Guzzle\Http\Client;            
-            $this->baseRequest = $client->get();
+    public function getHttpClient() {
+        if (is_null($this->httpClient)) {
+            $this->httpClient = new HttpClient();
         }
-        
-        return $this->baseRequest;
-    }    
+
+        return $this->httpClient;
+    }
     
     
     /**
      * 
      * @param string $javaExecutablePath
-     * @return \webignition\CssValidatorWrapper\Configuration
+     * @return Configuration
      */
     public function setJavaExecutablePath($javaExecutablePath) {
         $this->javaExecutablePath = $javaExecutablePath;
@@ -170,7 +168,7 @@ class Configuration {
     /**
      * 
      * @param string $cssValidatorJarPath
-     * @return \webignition\CssValidatorWrapper\Configuration
+     * @return Configuration
      */
     public function setCssValidatorJarPath($cssValidatorJarPath) {
         $this->cssValidatorJarPath = $cssValidatorJarPath;
@@ -199,7 +197,7 @@ class Configuration {
     /**
      * 
      * @param string $vendorExtensionSeverityLevel
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     * @return Configuration
      * @throws \InvalidArgumentException
      */
     public function setVendorExtensionSeverityLevel($vendorExtensionSeverityLevel) {
@@ -224,7 +222,7 @@ class Configuration {
     /**
      * 
      * @param string $url
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     * @return Configuration
      */
     public function setUrlToValidate($url) {
         $this->urlToValidate = trim($url);
@@ -294,7 +292,7 @@ class Configuration {
     /**
      * 
      * @param string $flag
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     * @return Configuration
      * @throws \InvalidArgumentException
      */
     public function setFlag($flag) {
@@ -320,7 +318,7 @@ class Configuration {
     /**
      * 
      * @param string $flag
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     * @return Configuration
      */
     public function clearFlag($flag) {
         if ($this->hasFlag($flag)) {
@@ -334,7 +332,7 @@ class Configuration {
     /**
      * 
      * @param array $domainsToIgnore
-     * @return \webignition\CssValidatorWrapper\Configuration\Configuration
+     * @return Configuration
      */
     public function setDomainsToIgnore($domainsToIgnore) {
         $this->domainsToIgnore = $domainsToIgnore;

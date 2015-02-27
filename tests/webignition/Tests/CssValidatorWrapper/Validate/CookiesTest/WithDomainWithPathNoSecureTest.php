@@ -2,22 +2,24 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Validate\CookiesTest;
 
+use GuzzleHttp\Message\RequestInterface as HttpRequest;
+
 class WithDomainWithPathNoSecureTest extends CookiesTest { 
     
     protected function getCookies() {
         return array(
             array(
-                'domain' => '.example.com',
-                'path' => '/foo',
-                'name' => 'name1',
-                'value' => 'value1'
+                'Domain' => '.example.com',
+                'Path' => '/foo',
+                'Name' => 'name1',
+                'Value' => 'value1'
             )                       
         );         
     }
     
     /**
      * 
-     * @return \Guzzle\Http\Message\RequestInterface[]
+     * @return HttpRequest[]
      */
     protected function getExpectedRequestsOnWhichCookiesShouldBeSet() {
         return $this->getHttpHistory()->getLastRequest();
@@ -26,14 +28,14 @@ class WithDomainWithPathNoSecureTest extends CookiesTest {
     
     /**
      * 
-     * @return \Guzzle\Http\Message\RequestInterface[]
+     * @return HttpRequest[]
      */
     protected function getExpectedRequestsOnWhichCookiesShouldNotBeSet() {
         $requests = array();
         
-        foreach ($this->getHttpHistory()->getAll() as $httpTransaction) {
-            if ($httpTransaction['request']->getUrl() != 'http://example.com/foo/style3.css') {
-                $requests[] = $httpTransaction['request'];
+        foreach ($this->getHttpHistory()->getRequests() as $request) {
+            if ($request->getUrl() != 'http://example.com/foo/style3.css') {
+                $requests[] = $request;
             }
         }
         

@@ -2,11 +2,15 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Validate;
 
+use webignition\CssValidatorWrapper\Wrapper as CssValidatorWrapper;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class MangledContentTest extends BaseTest {
-    
+
+    /**
+     * @var CssValidatorWrapper
+     */
     private $wrapper;
     
     public function setUp() {                       
@@ -15,7 +19,7 @@ class MangledContentTest extends BaseTest {
         
         $configuration = new Configuration();
         $configuration->setUrlToValidate('http://example.com/');
-        $configuration->setBaseRequest($this->getHttpClient()->get());
+        $configuration->setHttpClient($this->getHttpClient());
         
         $this->wrapper = $this->getNewCssValidatorWrapper();
         $this->wrapper->setConfiguration($configuration);

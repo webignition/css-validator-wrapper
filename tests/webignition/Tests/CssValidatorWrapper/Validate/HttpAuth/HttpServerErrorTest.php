@@ -2,11 +2,15 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Validate\HttpAuth;
 
+use webignition\CssValidatorWrapper\Wrapper as CssValidatorWrapper;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 
 class HttpServerErrorTest extends BaseTest {
-    
-    private $wrapper;    
+
+    /**
+     * @var CssValidatorWrapper
+     */
+    private $wrapper;
     
     public function setUp() {
         $this->setTestFixturePath(__CLASS__, $this->getName());
@@ -15,7 +19,7 @@ class HttpServerErrorTest extends BaseTest {
         $this->wrapper = $this->getNewCssValidatorWrapper();
         $this->wrapper->createConfiguration(array(
             'url-to-validate' => 'http://example.com/',
-            'base-request' => $this->getHttpClient()->get()
+            'http-client' => $this->getHttpClient()
         ));            
     }
     
