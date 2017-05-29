@@ -1,7 +1,0 @@
-HTTP/1.1 200 OK
-Content-Type: text/css
-
-html, body {
-  padding: 0;
-  margin: 0;
-}
