@@ -14,34 +14,20 @@ use webignition\WebResource\WebResource;
 class ConfigurationTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var Configuration
-     */
-    private $configuration;
-
-    /**
-     * @inheritdoc
-     */
-    protected function setUp()
-    {
-        parent::setUp();
-        $this->configuration = new Configuration();
-    }
-
-    /**
      * @dataProvider clearFlagDataProvider
      *
      * @param $flag
      */
     public function testClearFlag($flag)
     {
-        foreach (Flags::getValidValues() as $flagToSet) {
-            $this->configuration->setFlag($flagToSet);
-        }
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_FLAGS => Flags::getValidValues()
+        ]);
 
-        $this->assertTrue($this->configuration->hasFlag($flag));
-        $this->configuration->clearFlag($flag);
+        $this->assertTrue($configuration->hasFlag($flag));
+        $configuration->clearFlag($flag);
 
-        $this->assertFalse($this->configuration->hasFlag($flag));
+        $this->assertFalse($configuration->hasFlag($flag));
     }
 
     /**
@@ -72,7 +58,12 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
             'Invalid flag, must be one of [ignore-warnings, ignore-false-background-data-url-messages]',
             2
         );
-        $this->configuration->setFlag($flag);
+
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_FLAGS => [
+                $flag
+            ]
+        ]);
     }
 
     /**
@@ -92,12 +83,13 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
 
     public function testSetGetContentToValidate()
     {
-        $this->assertEmpty($this->configuration->getContentToValidate());
         $contentToValidate = 'foo';
 
-        $this->configuration->setContentToValidate($contentToValidate);
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => $contentToValidate,
+        ]);
 
-        $this->assertEquals($this->configuration->getContentToValidate(), $contentToValidate);
+        $this->assertEquals($configuration->getContentToValidate(), $contentToValidate);
     }
 
     /**
@@ -108,9 +100,11 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
      */
     public function testSetGetDomainsToIgnore($domainsToIgnore, $expectedDomainsToIgnore)
     {
-        $this->configuration->setDomainsToIgnore($domainsToIgnore);
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_DOMAINS_TO_IGNORE => $domainsToIgnore,
+        ]);
 
-        $this->assertEquals($expectedDomainsToIgnore, $this->configuration->getDomainsToIgnore());
+        $this->assertEquals($expectedDomainsToIgnore, $configuration->getDomainsToIgnore());
     }
 
     /**
@@ -138,41 +132,21 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
 
     public function testGetExecutableCommandWithoutSettingUrlToValidate()
     {
+        $configuration = new Configuration([]);
+
         $this->setExpectedException(\InvalidArgumentException::class, 'URL to validate has not been set', 2);
-        $this->configuration->getExecutableCommand();
+        $configuration->getExecutableCommand();
     }
 
     /**
      * @dataProvider getExecutableCommandDataProvider
      *
-     * @param string $urlToValidate
-     * @param string $javaExecutablePath
-     * @param string $cssValidatorJarPath
-     * @param string $vendorExtensionSeverityLevel
+     * @param Configuration $configuration
      * @param string $expectedExecutableCommand
      */
-    public function testGetExecutableCommand(
-        $urlToValidate,
-        $javaExecutablePath,
-        $cssValidatorJarPath,
-        $vendorExtensionSeverityLevel,
-        $expectedExecutableCommand
-    ) {
-        $this->configuration->setUrlToValidate($urlToValidate);
-
-        if (!empty($javaExecutablePath)) {
-            $this->configuration->setJavaExecutablePath($javaExecutablePath);
-        }
-
-        if (!empty($cssValidatorJarPath)) {
-            $this->configuration->setCssValidatorJarPath($cssValidatorJarPath);
-        }
-
-        if (!empty($vendorExtensionSeverityLevel)) {
-            $this->configuration->setVendorExtensionSeverityLevel($vendorExtensionSeverityLevel);
-        }
-
-        $this->assertEquals($expectedExecutableCommand, $this->configuration->getExecutableCommand());
+    public function testGetExecutableCommand(Configuration $configuration, $expectedExecutableCommand)
+    {
+        $this->assertEquals($expectedExecutableCommand, $configuration->getExecutableCommand());
     }
 
     /**
@@ -182,66 +156,70 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
     {
         return [
             'use default' => [
-                'urlToValidate' => 'http://example.com/',
-                'javaExecutablePath' => null,
-                'cssValidatorJarPath' => null,
-                'vendorExtensionSeverityLevel' => null,
+                'configuration' => new Configuration([
+                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+                ]),
                 'expectedExecutableCommand' =>
                     'java -jar css-validator.jar -output ucn -vextwarning true "http://example.com/" 2>&1',
             ],
             'set to default' => [
-                'urlToValidate' => 'http://example.com/',
-                'javaExecutablePath' => Configuration::DEFAULT_JAVA_EXECUTABLE_PATH,
-                'cssValidatorJarPath' => Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH,
-                'vendorExtensionSeverityLevel' => Configuration::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL,
+                'configuration' => new Configuration([
+                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+                    Configuration::CONFIG_KEY_JAVA_EXECUTABLE_PATH => Configuration::DEFAULT_JAVA_EXECUTABLE_PATH,
+                    Configuration::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH => Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH,
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        Configuration::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL,
+                ]),
                 'expectedExecutableCommand' =>
                     'java -jar css-validator.jar -output ucn -vextwarning true "http://example.com/" 2>&1',
             ],
             'non-default url to validate' => [
-                'urlToValidate' => 'http://foo.example.com/',
-                'javaExecutablePath' => Configuration::DEFAULT_JAVA_EXECUTABLE_PATH,
-                'cssValidatorJarPath' => Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH,
-                'vendorExtensionSeverityLevel' => Configuration::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL,
+                'configuration' => new Configuration([
+                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://foo.example.com/',
+                ]),
                 'expectedExecutableCommand' =>
                     'java -jar css-validator.jar -output ucn -vextwarning true "http://foo.example.com/" 2>&1',
             ],
             'non-default java executable path' => [
-                'urlToValidate' => 'http://example.com/',
-                'javaExecutablePath' => '/foo/java',
-                'cssValidatorJarPath' => Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH,
-                'vendorExtensionSeverityLevel' => Configuration::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL,
+                'configuration' => new Configuration([
+                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+                    Configuration::CONFIG_KEY_JAVA_EXECUTABLE_PATH => '/foo/java',
+                ]),
                 'expectedExecutableCommand' =>
                     '/foo/java -jar css-validator.jar -output ucn -vextwarning true "http://example.com/" 2>&1',
             ],
             'non-default css validator jar path' => [
-                'urlToValidate' => 'http://example.com/',
-                'javaExecutablePath' => Configuration::DEFAULT_JAVA_EXECUTABLE_PATH,
-                'cssValidatorJarPath' => '/foo/css-validator-foo.jar',
-                'vendorExtensionSeverityLevel' => Configuration::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL,
+                'configuration' => new Configuration([
+                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+                    Configuration::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH => '/foo/css-validator-foo.jar',
+                ]),
                 'expectedExecutableCommand' =>
                     'java -jar /foo/css-validator-foo.jar -output ucn -vextwarning true "http://example.com/" 2>&1',
             ],
             'vendor extension severity level: warn' => [
-                'urlToValidate' => 'http://example.com/',
-                'javaExecutablePath' => Configuration::DEFAULT_JAVA_EXECUTABLE_PATH,
-                'cssValidatorJarPath' => Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH,
-                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'configuration' => new Configuration([
+                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        VendorExtensionSeverityLevel::LEVEL_WARN,
+                ]),
                 'expectedExecutableCommand' =>
                     'java -jar css-validator.jar -output ucn -vextwarning true "http://example.com/" 2>&1',
             ],
             'vendor extension severity level: ignore' => [
-                'urlToValidate' => 'http://example.com/',
-                'javaExecutablePath' => Configuration::DEFAULT_JAVA_EXECUTABLE_PATH,
-                'cssValidatorJarPath' => Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH,
-                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_IGNORE,
+                'configuration' => new Configuration([
+                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        VendorExtensionSeverityLevel::LEVEL_IGNORE,
+                ]),
                 'expectedExecutableCommand' =>
                     'java -jar css-validator.jar -output ucn -vextwarning false "http://example.com/" 2>&1',
             ],
             'vendor extension severity level: error' => [
-                'urlToValidate' => 'http://example.com/',
-                'javaExecutablePath' => Configuration::DEFAULT_JAVA_EXECUTABLE_PATH,
-                'cssValidatorJarPath' => Configuration::DEFAULT_CSS_VALIDATOR_JAR_PATH,
-                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_ERROR,
+                'configuration' => new Configuration([
+                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        VendorExtensionSeverityLevel::LEVEL_ERROR,
+                ]),
                 'expectedExecutableCommand' =>
                     'java -jar css-validator.jar -output ucn -vextwarning false "http://example.com/" 2>&1',
             ],
@@ -250,7 +228,11 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
 
     public function testGetWebResourceService()
     {
-        $webResourceService = $this->configuration->getWebResourceService();
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+        ]);
+
+        $webResourceService = $configuration->getWebResourceService();
 
         $this->assertEquals(
             [
@@ -269,8 +251,12 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
      */
     public function testHasContentToValidate($content, $expectedHasContentToValidate)
     {
-        $this->configuration->setContentToValidate($content);
-        $this->assertEquals($expectedHasContentToValidate, $this->configuration->hasContentToValidate());
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+            Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => $content,
+        ]);
+
+        $this->assertEquals($expectedHasContentToValidate, $configuration->hasContentToValidate());
     }
 
     /**
@@ -296,7 +282,11 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
 
     public function testGetDefaultHttpClient()
     {
-        $this->assertInstanceOf(HttpClient::class, $this->configuration->getHttpClient());
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+        ]);
+
+        $this->assertInstanceOf(HttpClient::class, $configuration->getHttpClient());
     }
 
     public function testSetGetHttpClient()
@@ -304,9 +294,12 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         /* @var $httpClient MockInterface|HttpClient */
         $httpClient = \Mockery::mock(HttpClient::class);
 
-        $this->configuration->setHttpClient($httpClient);
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
+        ]);
 
-        $this->assertEquals($httpClient, $this->configuration->getHttpClient());
+        $this->assertEquals($httpClient, $configuration->getHttpClient());
     }
 
     /**
@@ -321,7 +314,11 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
             'Invalid severity level, must be one of [error, warn, ignore]',
             1
         );
-        $this->configuration->setVendorExtensionSeverityLevel($vendorExtensionSeverityLevel);
+
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+            Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL => $vendorExtensionSeverityLevel,
+        ]);
     }
 
     /**
@@ -331,10 +328,10 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
     {
         return [
             'foo' => [
-                'vendorExtensionSeverityLevel' => 'foo',
+                Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL => 'foo',
             ],
             'bar' => [
-                'vendorExtensionSeverityLevel' => 'bar',
+                Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL => 'bar',
             ],
         ];
     }
@@ -349,10 +346,14 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         $vendorExtensionSeverityLevel,
         $expectedVendorExtensionSeverityLevel
     ) {
-        $this->configuration->setVendorExtensionSeverityLevel($vendorExtensionSeverityLevel);
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+            Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL => $vendorExtensionSeverityLevel,
+        ]);
+
         $this->assertEquals(
             $expectedVendorExtensionSeverityLevel,
-            $this->configuration->getVendorExtensionSeverityLevel()
+            $configuration->getVendorExtensionSeverityLevel()
         );
     }
 
@@ -365,7 +366,7 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
 
         foreach (VendorExtensionSeverityLevel::getValidValues() as $validValue) {
             $testData[] = [
-                'vendorExtensionSeverityLevel' => $validValue,
+                Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL => $validValue,
                 'expectedVendorExtensionSeverityLevel' => $validValue,
             ];
         }
@@ -381,8 +382,12 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
      */
     public function testHasDomainsToIgnore($domainsToIgnore, $expectedHasDomainsToIgnore)
     {
-        $this->configuration->setDomainsToIgnore($domainsToIgnore);
-        $this->assertEquals($expectedHasDomainsToIgnore, $this->configuration->hasDomainsToIgnore());
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+            Configuration::CONFIG_KEY_DOMAINS_TO_IGNORE => $domainsToIgnore,
+        ]);
+
+        $this->assertEquals($expectedHasDomainsToIgnore, $configuration->hasDomainsToIgnore());
     }
 
     /**

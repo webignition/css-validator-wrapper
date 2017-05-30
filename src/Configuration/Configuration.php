@@ -15,6 +15,15 @@ class Configuration
     const DEFAULT_OUTPUT_FORMAT = 'ucn';
     const DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL = VendorExtensionSeverityLevel::LEVEL_WARN;
 
+    const CONFIG_KEY_JAVA_EXECUTABLE_PATH = 'java-executable-path';
+    const CONFIG_KEY_CSS_VALIDATOR_JAR_PATH = 'css-validator-jar-path';
+    const CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL = 'vendor-extension-severity-level';
+    const CONFIG_KEY_URL_TO_VALIDATE = 'url-to-validate';
+    const CONFIG_KEY_CONTENT_TO_VALIDATE = 'content-to-validate';
+    const CONFIG_KEY_FLAGS = 'flags';
+    const CONFIG_KEY_DOMAINS_TO_IGNORE = 'domains-to-ignore';
+    const CONFIG_KEY_HTTP_CLIENT = 'http-client';
+
     /**
      * @var string
      */
@@ -62,15 +71,56 @@ class Configuration
     private $httpClient;
 
     /**
+     * @param array $configurationValues
+     */
+    public function __construct($configurationValues)
+    {
+        if (!isset($configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH])) {
+            $configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH] = self::DEFAULT_JAVA_EXECUTABLE_PATH;
+        }
+
+        if (!isset($configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH])) {
+            $configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH] = self::DEFAULT_CSS_VALIDATOR_JAR_PATH;
+        }
+
+        $this->setJavaExecutablePath($configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH]);
+        $this->setCssValidatorJarPath($configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH]);
+
+        if (array_key_exists(self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL, $configurationValues)) {
+            $this->setVendorExtensionSeverityLevel(
+                $configurationValues[self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL]
+            );
+        }
+
+        if (array_key_exists(self::CONFIG_KEY_URL_TO_VALIDATE, $configurationValues)) {
+            $this->setUrlToValidate($configurationValues[self::CONFIG_KEY_URL_TO_VALIDATE]);
+        }
+
+        if (array_key_exists(self::CONFIG_KEY_CONTENT_TO_VALIDATE, $configurationValues)) {
+            $this->setContentToValidate($configurationValues[self::CONFIG_KEY_CONTENT_TO_VALIDATE]);
+        }
+
+        if (array_key_exists(self::CONFIG_KEY_FLAGS, $configurationValues)) {
+            foreach ($configurationValues[self::CONFIG_KEY_FLAGS] as $flag) {
+                $this->setFlag($flag);
+            }
+        }
+
+        if (array_key_exists(self::CONFIG_KEY_DOMAINS_TO_IGNORE, $configurationValues)) {
+            $this->setDomainsToIgnore($configurationValues[self::CONFIG_KEY_DOMAINS_TO_IGNORE]);
+        }
+
+        if (array_key_exists(self::CONFIG_KEY_HTTP_CLIENT, $configurationValues)) {
+            $this->setHttpClient($configurationValues[self::CONFIG_KEY_HTTP_CLIENT]);
+        }
+    }
+
+    /**
      * @param string $content
-     *
-     * @return Configuration
      */
     public function setContentToValidate($content)
     {
         $this->contentToValidate = $content;
-
-        return $this;
     }
 
     /**
@@ -108,13 +158,10 @@ class Configuration
 
     /**
      * @param HttpClient $httpClient
-     *
-     * @return self
      */
-    public function setHttpClient(HttpClient $httpClient)
+    private function setHttpClient(HttpClient $httpClient)
     {
         $this->httpClient = $httpClient;
-        return $this;
     }
 
     /**
@@ -131,13 +178,10 @@ class Configuration
 
     /**
      * @param string $javaExecutablePath
-     *
-     * @return Configuration
      */
-    public function setJavaExecutablePath($javaExecutablePath)
+    private function setJavaExecutablePath($javaExecutablePath)
     {
         $this->javaExecutablePath = $javaExecutablePath;
-        return $this;
     }
 
     /**
@@ -150,19 +194,16 @@ class Configuration
 
     /**
      * @param string $cssValidatorJarPath
-     *
-     * @return Configuration
      */
-    public function setCssValidatorJarPath($cssValidatorJarPath)
+    private function setCssValidatorJarPath($cssValidatorJarPath)
     {
         $this->cssValidatorJarPath = $cssValidatorJarPath;
-        return $this;
     }
 
     /**
      * @return string
      */
-    public function getCssValidatorJarPath()
+    private function getCssValidatorJarPath()
     {
         return is_null($this->cssValidatorJarPath)
             ? self::DEFAULT_CSS_VALIDATOR_JAR_PATH
@@ -172,7 +213,7 @@ class Configuration
     /**
      * @return string
      */
-    public function getOutputFormat()
+    private function getOutputFormat()
     {
         return self::DEFAULT_OUTPUT_FORMAT;
     }
@@ -180,10 +221,8 @@ class Configuration
     /**
      * @param string $vendorExtensionSeverityLevel
      * @throws \InvalidArgumentException
-     *
-     * @return self
      */
-    public function setVendorExtensionSeverityLevel($vendorExtensionSeverityLevel)
+    private function setVendorExtensionSeverityLevel($vendorExtensionSeverityLevel)
     {
         if (!VendorExtensionSeverityLevel::isValid($vendorExtensionSeverityLevel)) {
             throw new \InvalidArgumentException(
@@ -195,8 +234,6 @@ class Configuration
         }
 
         $this->vendorExtensionSeverityLevel = $vendorExtensionSeverityLevel;
-
-        return $this;
     }
 
     /**
@@ -211,14 +248,10 @@ class Configuration
 
     /**
      * @param string $url
-     *
-     * @return self
      */
     public function setUrlToValidate($url)
     {
         $this->urlToValidate = trim($url);
-
-        return $this;
     }
 
 
@@ -295,10 +328,8 @@ class Configuration
     /**
      * @param string $flag
      * @throws \InvalidArgumentException
-     *
-     * @return Configuration
      */
-    public function setFlag($flag)
+    private function setFlag($flag)
     {
         if (!Flags::isValid($flag)) {
             throw new \InvalidArgumentException(
@@ -310,7 +341,6 @@ class Configuration
         }
 
         $this->flags[$flag] = true;
-        return $this;
     }
 
     /**
@@ -339,14 +369,10 @@ class Configuration
 
     /**
      * @param string[] $domainsToIgnore
-     *
-     * @return Configuration
      */
-    public function setDomainsToIgnore($domainsToIgnore)
+    private function setDomainsToIgnore($domainsToIgnore)
     {
         $this->domainsToIgnore = $domainsToIgnore;
-
-        return $this;
     }
 
     /**

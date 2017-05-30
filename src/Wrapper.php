@@ -11,7 +11,6 @@ use webignition\CssValidatorOutput\Parser\Configuration as CssValidatorOutputPar
 use webignition\CssValidatorOutput\CssValidatorOutput;
 use webignition\CssValidatorOutput\ExceptionOutput\ExceptionOutput;
 use webignition\CssValidatorOutput\ExceptionOutput\Type\Type as ExceptionOutputType;
-use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ConnectException;
 use webignition\GuzzleHttp\Exception\CurlException\Factory as CurlExceptionFactory;
 use webignition\WebResource\Exception\InvalidContentTypeException;
@@ -34,13 +33,10 @@ class Wrapper
 
     /**
      * @param Configuration $configuration
-     *
-     * @return self
      */
     public function setConfiguration(Configuration $configuration)
     {
         $this->configuration = $configuration;
-        return $this;
     }
 
     /**
@@ -58,67 +54,6 @@ class Wrapper
     {
         return !is_null($this->getConfiguration());
     }
-
-    /**
-     * @param array $configurationValues
-     * @throws \InvalidArgumentException
-     *
-     * @return self
-     */
-    public function createConfiguration($configurationValues)
-    {
-        if (empty($configurationValues)) {
-            throw new \InvalidArgumentException(
-                'A non-empty array of configuration values must be passed to create configuration',
-                self::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET
-            );
-        }
-
-        if (!isset($configurationValues['url-to-validate'])) {
-            throw new \InvalidArgumentException(
-                'Configuration value "url-to-validate" not set',
-                self::INVALID_ARGUMENT_EXCEPTION_URL_TO_VALIDATE_NOT_SET
-            );
-        }
-
-        $configuration = new Configuration();
-        $configuration->setUrlToValidate($configurationValues['url-to-validate']);
-
-        if (isset($configurationValues['java-executable-path'])) {
-            $configuration->setJavaExecutablePath($configurationValues['java-executable-path']);
-        }
-
-        if (isset($configurationValues['css-validator-jar-path'])) {
-            $configuration->setCssValidatorJarPath($configurationValues['css-validator-jar-path']);
-        }
-
-        if (isset($configurationValues['vendor-extension-severity-level'])) {
-            $configuration->setVendorExtensionSeverityLevel($configurationValues['vendor-extension-severity-level']);
-        }
-
-        if (isset($configurationValues['flags']) && is_array($configurationValues['flags'])) {
-            foreach ($configurationValues['flags'] as $flag) {
-                $configuration->setFlag($flag);
-            }
-        }
-
-        if (isset($configurationValues['domains-to-ignore']) && is_array($configurationValues['domains-to-ignore'])) {
-            $configuration->setDomainsToIgnore($configurationValues['domains-to-ignore']);
-        }
-
-        if (isset($configurationValues['http-client']) && $configurationValues['http-client'] instanceof HttpClient) {
-            $configuration->setHttpClient($configurationValues['http-client']);
-        }
-
-        if (isset($configurationValues['content-to-validate'])) {
-            $configuration->setContentToValidate($configurationValues['content-to-validate']);
-        }
-
-        $this->setConfiguration($configuration);
-
-        return $this;
-    }
-
 
     /**
      * @throws \InvalidArgumentException
