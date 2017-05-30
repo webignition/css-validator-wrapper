@@ -2,7 +2,6 @@
 
 namespace webignition\Tests\HtmlValidator\Wrapper;
 
-use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Message\Request;
 use Mockery\MockInterface;
@@ -21,167 +20,13 @@ class WrapperTest extends BaseTest
      */
     private $wrapper;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         parent::setUp();
-        $this->wrapper = \Mockery::mock(Wrapper::class)->makePartial();
-    }
-
-    public function testCreateConfigurationWithNoValues()
-    {
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'A non-empty array of configuration values must be passed to create configuration',
-            Wrapper::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET
-        );
-
-        $this->wrapper->createConfiguration([]);
-    }
-
-    public function testCreateConfigurationWithoutUrlToValidate()
-    {
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Configuration value "url-to-validate" not set',
-            Wrapper::INVALID_ARGUMENT_EXCEPTION_URL_TO_VALIDATE_NOT_SET
-        );
-
-        $this->wrapper->createConfiguration([
-            'foo' => 'bar',
-        ]);
-    }
-
-    public function testCreateConfigurationWithInvalidVendorExtensionSeverityLevel()
-    {
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Invalid severity level, must be one of [error, warn, ignore]',
-            1
-        );
-
-        $this->wrapper->createConfiguration([
-            'url-to-validate' => '/foo',
-            'vendor-extension-severity-level' => 'foo'
-        ]);
-    }
-
-    public function testCreateConfigurationWithInvalidFlag()
-    {
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Invalid flag, must be one of [ignore-warnings, ignore-false-background-data-url-messages]',
-            2
-        );
-
-        $this->wrapper->createConfiguration([
-            'url-to-validate' => '/foo',
-            'flags' => [
-                'foo' => 'bar'
-            ]
-        ]);
-    }
-
-    /**
-     * @dataProvider createConfigurationDataProvider
-     *
-     * @param array $configurationValues
-     * @param string $expectedUrlToValidate
-     * @param string $expectedJavaExecutablePath
-     * @param string $expectedCssValidatorJarPath
-     * @param string $expectedContentToValidate
-     * @param string $expectedVendorExtensionSeverityLevel
-     * @param string[] $expectedFlags
-     * @param string[] $expectedDomainsToIgnore
-     */
-    public function testCreateConfiguration(
-        $configurationValues,
-        $expectedUrlToValidate,
-        $expectedJavaExecutablePath,
-        $expectedCssValidatorJarPath,
-        $expectedContentToValidate,
-        $expectedVendorExtensionSeverityLevel,
-        $expectedFlags,
-        $expectedDomainsToIgnore
-    ) {
-        $this->wrapper->createConfiguration($configurationValues);
-
-        $configuration = $this->wrapper->getConfiguration();
-
-        $this->assertEquals($expectedUrlToValidate, $configuration->getUrlToValidate());
-        $this->assertEquals($expectedJavaExecutablePath, $configuration->getJavaExecutablePath());
-        $this->assertEquals($expectedCssValidatorJarPath, $configuration->getCssValidatorJarPath());
-        $this->assertEquals($expectedContentToValidate, $configuration->getContentToValidate());
-        $this->assertEquals($expectedVendorExtensionSeverityLevel, $configuration->getVendorExtensionSeverityLevel());
-        $this->assertEquals($expectedDomainsToIgnore, $configuration->getDomainsToIgnore());
-
-        foreach ($expectedFlags as $expectedFlag) {
-            $this->assertTrue($configuration->hasFlag($expectedFlag));
-        }
-    }
-
-    /**
-     * @return array
-     */
-    public function createConfigurationDataProvider()
-    {
-        return [
-            'default' => [
-                'configurationValues' => [
-                    'url-to-validate' => '/foo',
-                ],
-                'expectedUrlToValidate' => '/foo',
-                'expectedJavaExecutablePath' => 'java',
-                'expectedCssValidatorJarPath' => 'css-validator.jar',
-                'expectedContentToValidate' => null,
-                'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'expectedHasFlags' => [],
-                'expectedDomainsToIgnore' => [],
-            ],
-            'set all' => [
-                'configurationValues' => [
-                    'url-to-validate' => '/foo',
-                    'java-executable-path' => '/bin/java',
-                    'css-validator-jar-path' => '/bin/css-validator.jar',
-                    'content-to-validate' => '{ foo: bar }',
-                    'vendor-extension-severity-level' => VendorExtensionSeverityLevel::LEVEL_ERROR,
-                    'flags' => [
-                        Flags::FLAG_IGNORE_WARNINGS,
-                        Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES,
-                    ],
-                    'domains-to-ignore' => [
-                        'foo',
-                        'bar',
-                    ],
-                    'http-client' => new HttpClient(),
-                ],
-                'expectedUrlToValidate' => '/foo',
-                'expectedJavaExecutablePath' => '/bin/java',
-                'expectedCssValidatorJarPath' => '/bin/css-validator.jar',
-                'expectedContentToValidate' => '{ foo: bar }',
-                'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_ERROR,
-                'expectedHasFlags' => [
-                    Flags::FLAG_IGNORE_WARNINGS,
-                    Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES,
-                ],
-                'expectedDomainsToIgnore' => [
-                    'foo',
-                    'bar',
-                ],
-            ],
-            'domains to ignore not array' => [
-                'configurationValues' => [
-                    'url-to-validate' => '/foo',
-                    'domains-to-ignore' => 'foo',
-                ],
-                'expectedUrlToValidate' => '/foo',
-                'expectedJavaExecutablePath' => 'java',
-                'expectedCssValidatorJarPath' => 'css-validator.jar',
-                'expectedContentToValidate' => null,
-                'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'expectedHasFlags' => [],
-                'expectedDomainsToIgnore' => [],
-            ],
-        ];
+        $this->wrapper = new Wrapper();
     }
 
     /**
@@ -210,7 +55,7 @@ class WrapperTest extends BaseTest
                 'expectedHasConfiguration' => false,
             ],
             'has configuration' => [
-                'configuration' => new Configuration(),
+                'configuration' => new Configuration([]),
                 'expectedHasConfiguration' => true,
             ],
         ];
@@ -236,11 +81,12 @@ class WrapperTest extends BaseTest
     public function testValidateErrorOnRootWebResource($responseFixtures, $expectedExceptionType)
     {
         $httpClient = $this->createHttpClient($responseFixtures);
-
-        $this->wrapper->createConfiguration([
-            'url-to-validate' => 'http://example.com/',
-            'http-client' => $httpClient,
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
         ]);
+
+        $this->wrapper->setConfiguration($configuration);
         $output = $this->wrapper->validate();
 
         $this->assertInstanceOf(CssValidatorOutput::class, $output);
@@ -314,16 +160,17 @@ class WrapperTest extends BaseTest
      */
     public function testValidateErrorOnLinkedCssResource($responseFixtures, $expectedErrorMessage)
     {
-        $httpClient = $this->createHttpClient($responseFixtures);
-
         $this->setCssValidatorRawOutput(
             $this->loadCssValidatorRawOutputFixture('no-messages')
         );
 
-        $this->wrapper->createConfiguration([
-            'url-to-validate' => 'http://example.com/',
-            'http-client' => $httpClient,
+        $httpClient = $this->createHttpClient($responseFixtures);
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
         ]);
+
+        $this->wrapper->setConfiguration($configuration);
         $output = $this->wrapper->validate();
 
         $this->assertInstanceOf(CssValidatorOutput::class, $output);
@@ -409,7 +256,7 @@ class WrapperTest extends BaseTest
      *
      * @param array $responseFixtures
      * @param string $cssValidatorRawOutput
-     * @param array $configuration
+     * @param array $configurationValues
      * @param int $expectedWarningCount
      * @param int $expectedErrorCount
      * @param array $expectedErrorCountByUrl
@@ -417,19 +264,20 @@ class WrapperTest extends BaseTest
     public function testValidate(
         $responseFixtures,
         $cssValidatorRawOutput,
-        $configuration,
+        $configurationValues,
         $expectedWarningCount,
         $expectedErrorCount,
         $expectedErrorCountByUrl = []
     ) {
-        $httpClient = $this->createHttpClient($responseFixtures);
-
         $this->setCssValidatorRawOutput($cssValidatorRawOutput);
 
-        $this->wrapper->createConfiguration(array_merge([
-            'url-to-validate' => 'http://example.com/',
-            'http-client' => $httpClient,
-        ], $configuration));
+        $httpClient = $this->createHttpClient($responseFixtures);
+        $configuration = new Configuration(array_merge([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
+        ], $configurationValues));
+
+        $this->wrapper->setConfiguration($configuration);
         $output = $this->wrapper->validate();
 
         $this->assertFalse($output->hasException());
@@ -461,7 +309,7 @@ class WrapperTest extends BaseTest
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
                     'incorrect-data-url-background-image-errors'
                 ),
-                'configuration' => [
+                'configurationValues' => [
                     'flags' => [
                         Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES
                     ],
@@ -481,7 +329,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('single-warning'),
-                'configuration' => [
+                'configurationValues' => [
                     'flags' => [
                         Flags::FLAG_IGNORE_WARNINGS
                     ],
@@ -501,7 +349,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
-                'configuration' => [
+                'configurationValues' => [
                     'flags' => [
                         Flags::FLAG_IGNORE_WARNINGS
                     ],
@@ -522,7 +370,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'configuration' => [
+                'configurationValues' => [
                     'flags' => [
                         Flags::FLAG_IGNORE_WARNINGS
                     ],
@@ -543,7 +391,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
-                'configuration' => [
+                'configurationValues' => [
                     'vendor-extension-severity-level' => VendorExtensionSeverityLevel::LEVEL_IGNORE,
                 ],
                 'expectedWarningCount' => 0,
@@ -565,7 +413,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-                'configuration' => [],
+                'configurationValues' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 3,
                 'expectedErrorCountByUrl' => [
@@ -589,7 +437,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-                'configuration' => [
+                'configurationValues' => [
                     'domains-to-ignore' => [
                         'one.example.com',
                     ],
@@ -616,7 +464,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-                'configuration' => [
+                'configurationValues' => [
                     'domains-to-ignore' => [
                         'two.example.com',
                     ],
@@ -643,7 +491,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-                'configuration' => [
+                'configurationValues' => [
                     'domains-to-ignore' => [
                         'one.example.com',
                         'two.example.com',
@@ -672,7 +520,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-                'configuration' => [],
+                'configurationValues' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
@@ -684,7 +532,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-                'configuration' => [],
+                'configurationValues' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
@@ -696,7 +544,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-                'configuration' => [],
+                'configurationValues' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
@@ -712,7 +560,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-                'configuration' => [],
+                'configurationValues' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
@@ -728,7 +576,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'configuration' => [],
+                'configurationValues' => [],
                 'expectedWarningCount' => 3,
                 'expectedErrorCount' => 0,
             ],
@@ -744,7 +592,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'configuration' => [
+                'configurationValues' => [
                     'vendor-extension-severity-level' =>  VendorExtensionSeverityLevel::LEVEL_WARN,
                 ],
                 'expectedWarningCount' => 3,
@@ -762,7 +610,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
-                'configuration' => [
+                'configurationValues' => [
                     'vendor-extension-severity-level' =>  VendorExtensionSeverityLevel::LEVEL_ERROR,
                 ],
                 'expectedWarningCount' => 0,
@@ -780,7 +628,7 @@ class WrapperTest extends BaseTest
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
-                'configuration' => [
+                'configurationValues' => [
                     'vendor-extension-severity-level' =>  VendorExtensionSeverityLevel::LEVEL_WARN,
                 ],
                 'expectedWarningCount' => 12,

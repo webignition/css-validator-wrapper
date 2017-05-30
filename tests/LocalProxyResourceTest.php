@@ -21,11 +21,9 @@ class LocalProxyResourceTest extends BaseTest
      */
     public function testPrepareFromContentToValidate($content, $expectedLocalResourcePathExtension)
     {
-        $localProxyResource = new LocalProxyResource(
-            $this->createConfiguration([
-                'content' => $content,
-            ])
-        );
+        $localProxyResource = new LocalProxyResource(new Configuration([
+            Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => $content,
+        ]));
 
         $this->assertEmpty($localProxyResource->getConfiguration()->getUrlToValidate());
 
@@ -450,10 +448,10 @@ class LocalProxyResourceTest extends BaseTest
             $cssHttpResponseBodies
         ));
 
-        $configuration = $this->createConfiguration(
-            ['url' => 'http://example.com'],
-            $httpClient
-        );
+        $configuration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com',
+            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
+        ]);
 
         return new LocalProxyResource($configuration);
     }
@@ -481,31 +479,6 @@ class LocalProxyResourceTest extends BaseTest
             }
         }
         return $cssLinkElements;
-    }
-
-    /**
-     * @param array $content
-     * @param HttpClient|null $httpClient
-     *
-     * @return Configuration
-     */
-    private function createConfiguration($content, $httpClient = null)
-    {
-        $configuration = new Configuration();
-
-        if (isset($content['url'])) {
-            $configuration->setUrlToValidate($content['url']);
-        }
-
-        if (isset($content['content'])) {
-            $configuration->setContentToValidate($content['content']);
-        }
-
-        if (!empty($httpClient)) {
-            $configuration->setHttpClient($httpClient);
-        }
-
-        return $configuration;
     }
 
     /**

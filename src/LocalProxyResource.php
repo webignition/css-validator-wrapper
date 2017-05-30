@@ -359,9 +359,9 @@ class LocalProxyResource
      */
     private function deriveRootWebResourceContentTypeFromContentToValidate()
     {
-        if (strip_tags(
-            $this->getConfiguration()->getContentToValidate()) !== $this->getConfiguration()->getContentToValidate()
-        ) {
+        $contentToValidate = $this->getConfiguration()->getContentToValidate();
+
+        if (strip_tags($contentToValidate) !== $contentToValidate) {
             return 'text/html';
         }
 
