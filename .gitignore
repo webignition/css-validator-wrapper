@@ -2,4 +2,4 @@
 /vendor
 /composer.phar
 /.idea
-/coverage-html
+/build
