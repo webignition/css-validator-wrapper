@@ -157,8 +157,7 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         $cssValidatorJarPath,
         $vendorExtensionSeverityLevel,
         $expectedExecutableCommand
-    )
-    {
+    ) {
         $this->configuration->setUrlToValidate($urlToValidate);
 
         if (!empty($javaExecutablePath)) {
