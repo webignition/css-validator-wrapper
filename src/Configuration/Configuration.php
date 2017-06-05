@@ -3,6 +3,7 @@
 namespace webignition\CssValidatorWrapper\Configuration;
 
 use GuzzleHttp\Client as HttpClient;
+use webignition\WebResource\Service\Configuration as WebResourceServiceConfiguration;
 use webignition\WebResource\Service\Service as WebResourceService;
 use webignition\WebResource\WebPage\WebPage;
 use webignition\WebResource\WebResource;
@@ -145,12 +146,16 @@ class Configuration
     public function getWebResourceService()
     {
         if (is_null($this->webResourceService)) {
+            $webResourceServiceConfiguration = new WebResourceServiceConfiguration([
+                WebResourceServiceConfiguration::CONFIG_KEY_CONTENT_TYPE_WEB_RESOURCE_MAP => [
+                    'text/html' => WebPage::class,
+                    'text/css' => WebResource::class
+                ],
+                WebResourceServiceConfiguration::CONFIG_ALLOW_UNKNOWN_RESOURCE_TYPES => false,
+            ]);
+
             $this->webResourceService = new WebResourceService();
-            $this->webResourceService->getConfiguration()->setContentTypeWebResourceMap(array(
-                'text/html' => WebPage::class,
-                'text/css' => WebResource::class
-            ));
-            $this->webResourceService->getConfiguration()->disableAllowUnknownResourceTypes();
+            $this->webResourceService->setConfiguration($webResourceServiceConfiguration);
         }
 
         return $this->webResourceService;
