@@ -638,6 +638,89 @@ class WrapperTest extends BaseTest
     }
 
     /**
+     * @dataProvider createConfigurationDataProvider
+     *
+     * @param array $configurationValues
+     * @param string $expectedContentToValidate
+     * @param string[] $expectedDomainsToIgnore
+     * @param string $expectedJavaExecutablePath
+     * @param string $expectedUrlToValidate
+     * @param string $expectedVendorExtensionSeverityLevel
+     * @param string[] $expectedFlags
+     */
+    public function testCreateConfiguration(
+        $configurationValues,
+        $expectedContentToValidate,
+        $expectedDomainsToIgnore,
+        $expectedJavaExecutablePath,
+        $expectedUrlToValidate,
+        $expectedVendorExtensionSeverityLevel,
+        $expectedFlags
+    ) {
+        $this->wrapper->createConfiguration($configurationValues);
+
+        $configuration = $this->wrapper->getConfiguration();
+
+        $this->assertEquals($expectedContentToValidate, $configuration->getContentToValidate());
+        $this->assertEquals($expectedDomainsToIgnore, $configuration->getDomainsToIgnore());
+        $this->assertEquals($expectedJavaExecutablePath, $configuration->getJavaExecutablePath());
+        $this->assertEquals($expectedUrlToValidate, $configuration->getUrlToValidate());
+        $this->assertEquals($expectedVendorExtensionSeverityLevel, $configuration->getVendorExtensionSeverityLevel());
+
+        foreach ($expectedFlags as $expectedFlag) {
+            $this->assertTrue($configuration->hasFlag($expectedFlag));
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function createConfigurationDataProvider()
+    {
+        return [
+            'defaults' => [
+                'configurationValues' => [],
+                'expectedContentToValidate' => null,
+                'expectedDomainsToIgnore' => [],
+                'expectedJavaExecutablePath' => Configuration::DEFAULT_JAVA_EXECUTABLE_PATH,
+                'expectedUrlToValidate' => '',
+                'expectedVendorExtensionSeverityLevel' => Configuration::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL,
+                'expectedFlags' => [],
+            ],
+            'set to non-defaults' => [
+                'configurationValues' => [
+                    Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => 'foo',
+                    Configuration::CONFIG_KEY_DOMAINS_TO_IGNORE => [
+                        'foo',
+                        'bar',
+                    ],
+                    Configuration::CONFIG_KEY_JAVA_EXECUTABLE_PATH => '/bin/java',
+                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/foo',
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL
+                        => VendorExtensionSeverityLevel::LEVEL_ERROR,
+                    Configuration::CONFIG_KEY_FLAGS => [
+                        Flags::FLAG_IGNORE_WARNINGS,
+                        FLags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES,
+                    ],
+
+                ],
+                'expectedContentToValidate' => 'foo',
+                'expectedDomainsToIgnore' => [
+                    'foo',
+                    'bar',
+                ],
+                'expectedJavaExecutablePath' => '/bin/java',
+                'expectedUrlToValidate' => 'http://example.com/foo',
+                'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_ERROR,
+                'expectedFlags' => [
+                    Flags::FLAG_IGNORE_WARNINGS,
+                    FLags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES,
+                ],
+            ],
+        ];
+    }
+
+    /**
      * @param string $rawOutput
      */
     private function setCssValidatorRawOutput($rawOutput)

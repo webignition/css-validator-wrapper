@@ -32,6 +32,14 @@ class Wrapper
     private $localProxyResource = null;
 
     /**
+     * @param array $configurationValues
+     */
+    public function createConfiguration($configurationValues)
+    {
+        $this->setConfiguration(new Configuration($configurationValues));
+    }
+
+    /**
      * @param Configuration $configuration
      */
     public function setConfiguration(Configuration $configuration)
