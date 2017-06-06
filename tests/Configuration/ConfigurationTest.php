@@ -228,6 +228,8 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
 
     public function testGetWebResourceService()
     {
+        $httpClient = new HttpClient();
+
         $configuration = new Configuration([
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
         ]);
@@ -241,6 +243,8 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
             ],
             $webResourceService->getConfiguration()->getContentTypeWebResourceMap()
         );
+
+        $this->assertEquals($httpClient, $webResourceService->getConfiguration()->getHttpClient());
     }
 
     /**

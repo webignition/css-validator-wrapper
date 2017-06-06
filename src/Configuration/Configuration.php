@@ -152,6 +152,7 @@ class Configuration
                     'text/css' => WebResource::class
                 ],
                 WebResourceServiceConfiguration::CONFIG_ALLOW_UNKNOWN_RESOURCE_TYPES => false,
+                WebResourceServiceConfiguration::CONFIG_KEY_HTTP_CLIENT => $this->getHttpClient(),
             ]);
 
             $this->webResourceService = new WebResourceService();
