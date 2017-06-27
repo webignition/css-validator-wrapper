@@ -4,11 +4,12 @@ namespace webignition\CssValidatorWrapper;
 
 use GuzzleHttp\Message\MessageFactory as HttpMessageFactory;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
-use webignition\AbsoluteUrlDeriver\AbsoluteUrlDeriver;
 use GuzzleHttp\Message\ResponseInterface as HttpResponse;
 use GuzzleHttp\Exception\ConnectException;
 use webignition\GuzzleHttp\Exception\CurlException\Exception as CurlException;
 use webignition\GuzzleHttp\Exception\CurlException\Factory as CurlExceptionFactory;
+use webignition\HtmlDocumentLinkUrlFinder\Configuration as LinkFinderConfiguration;
+use webignition\HtmlDocumentLinkUrlFinder\HtmlDocumentLinkUrlFinder;
 use webignition\WebResource\Exception\Exception as WebResourceException;
 use webignition\WebResource\WebPage\WebPage;
 use webignition\WebResource\WebResource;
@@ -230,23 +231,19 @@ class LocalProxyResource
      */
     private function findStylesheetUrls(WebPage $webPage)
     {
-        $stylesheetUrls = array();
-        $hrefs = $this->findStylesheetHrefs($webPage);
+        $linkFinderConfiguration = new LinkFinderConfiguration([
+            LinkFinderConfiguration::CONFIG_KEY_ELEMENT_SCOPE => 'link',
+            LinkFinderConfiguration::CONFIG_KEY_SOURCE => $webPage,
+            LinkFinderConfiguration::CONFIG_KEY_SOURCE_URL => $webPage->getUrl(),
+            LinkFinderConfiguration::CONFIG_KEY_IGNORE_FRAGMENT_IN_URL_COMPARISON => true,
+            LinkFinderConfiguration::CONFIG_KEY_ATTRIBUTE_SCOPE_NAME => 'rel',
+            LinkFinderConfiguration::CONFIG_KEY_ATTRIBUTE_SCOPE_VALUE => 'stylesheet',
+            LinkFinderConfiguration::CONFIG_KEY_IGNORE_EMPTY_HREF => true,
+        ]);
+        $linkFinder = new HtmlDocumentLinkUrlFinder();
+        $linkFinder->setConfiguration($linkFinderConfiguration);
 
-        foreach ($hrefs as $href) {
-            $absoluteUrlDeriver = new AbsoluteUrlDeriver(
-                $href,
-                $webPage->getUrl()
-            );
-
-            $stylesheetUrl = (string)$absoluteUrlDeriver->getAbsoluteUrl();
-
-            if (!in_array($stylesheetUrl, $stylesheetUrls)) {
-                $stylesheetUrls[] = $stylesheetUrl;
-            }
-        }
-
-        return $stylesheetUrls;
+        return $linkFinder->getUniqueUrls();
     }
 
     /**
