@@ -147,6 +147,14 @@ class LocalProxyResourceTest extends BaseTest
                     $this->createRewrittenStylesheetLinkPattern(),
                 ],
             ],
+            'base element' => [
+                'expectedSourceCssElements' => [
+                    '<link href="foo.css" rel="stylesheet">',
+                ],
+                'expectedPreparedCssElementPatterns' => [
+                    $this->createRewrittenStylesheetLinkPattern(),
+                ],
+            ],
         ]);
     }
 
@@ -424,6 +432,12 @@ class LocalProxyResourceTest extends BaseTest
                         new Request('GET', 'http://example.com/')
                     ),
                     $this->createHttpFixture('text/css', 'body { color: #f0000f }'),
+                    $this->createHttpFixture('text/css', 'body { color: #f0f0f0 }'),
+                ],
+            ],
+            'base element' => [
+                'sourceDocument' => $this->loadHtmlDocumentFixture('base-element'),
+                'cssHttpResponseBodies' => [
                     $this->createHttpFixture('text/css', 'body { color: #f0f0f0 }'),
                 ],
             ],
