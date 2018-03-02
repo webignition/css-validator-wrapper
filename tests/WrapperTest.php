@@ -63,11 +63,9 @@ class WrapperTest extends BaseTest
 
     public function testValidateWithNoConfiguration()
     {
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Unable to validate; configuration not set',
-            Wrapper::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET
-        );
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unable to validate; configuration not set');
+        $this->expectExceptionCode(Wrapper::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET);
 
         $this->wrapper->validate();
     }
