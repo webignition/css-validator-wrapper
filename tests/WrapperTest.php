@@ -1,6 +1,6 @@
 <?php
 
-namespace webignition\Tests\HtmlValidator\Wrapper;
+namespace webignition\Tests\CssValidatorWrapper\Wrapper;
 
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Message\Request;
@@ -63,11 +63,9 @@ class WrapperTest extends BaseTest
 
     public function testValidateWithNoConfiguration()
     {
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Unable to validate; configuration not set',
-            Wrapper::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET
-        );
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unable to validate; configuration not set');
+        $this->expectExceptionCode(Wrapper::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET);
 
         $this->wrapper->validate();
     }
@@ -103,31 +101,34 @@ class WrapperTest extends BaseTest
         return [
             'application/pdf' => [
                 'responseFixtures' => [
-                    "HTTP/1.1 200 OK\nContent-type:application/pdf"
+                    "HTTP/1.1 200 OK\nContent-type:application/pdf",
                 ],
                 'expectedExceptionType' => 'invalid-content-type:application/pdf'
             ],
             'text/plain' => [
                 'responseFixtures' => [
-                    "HTTP/1.1 200 OK\nContent-type:text/plain"
+                    "HTTP/1.1 200 OK\nContent-type:text/plain",
                 ],
                 'expectedExceptionType' => 'invalid-content-type:text/plain'
             ],
             'http 410' => [
                 'responseFixtures' => [
-                    "HTTP/1.1 410 OK\nContent-type:text/html"
+                    "HTTP/1.1 410 OK\nContent-type:text/html",
+                    "HTTP/1.1 410 OK\nContent-type:text/html",
                 ],
                 'expectedExceptionType' => 'http410',
             ],
             'http 404' => [
                 'responseFixtures' => [
-                    "HTTP/1.1 404 OK\nContent-type:text/html"
+                    "HTTP/1.1 404 OK\nContent-type:text/html",
+                    "HTTP/1.1 404 OK\nContent-type:text/html",
                 ],
                 'expectedExceptionType' => 'http404',
             ],
             'http 500' => [
                 'responseFixtures' => [
-                    "HTTP/1.1 500 OK\nContent-type:text/html"
+                    "HTTP/1.1 500 OK\nContent-type:text/html",
+                    "HTTP/1.1 500 OK\nContent-type:text/html",
                 ],
                 'expectedExceptionType' => 'http500',
             ],
@@ -188,13 +189,16 @@ class WrapperTest extends BaseTest
      */
     public function validateErrorOnLinkedCssResourceDataProvider()
     {
+        $minimalHtml5SingleStylesheetHttpFixture = $this->createHttpFixture(
+            'text/html',
+            $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
+        );
+
         return [
             'invalid content type' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
                     $this->createHttpFixture(
                         'text/plain',
                         'foo'
@@ -204,30 +208,26 @@ class WrapperTest extends BaseTest
             ],
             'http 404' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    "HTTP/1.1 404"
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    "HTTP/1.1 404",
+                    "HTTP/1.1 404",
                 ],
                 'expectedErrorMessage' => 'http-error:404',
             ],
             'http 500' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    "HTTP/1.1 500"
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    "HTTP/1.1 500",
+                    "HTTP/1.1 500",
                 ],
                 'expectedErrorMessage' => 'http-error:500',
             ],
             'curl 6' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
                     new ConnectException(
                         'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
                         new Request('GET', 'http://example.com/')
@@ -237,10 +237,8 @@ class WrapperTest extends BaseTest
             ],
             'curl 28' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
                     new ConnectException(
                         'cURL error 28: Operation timed out.',
                         new Request('GET', 'http://example.com/')
@@ -261,7 +259,7 @@ class WrapperTest extends BaseTest
      * @param int $expectedErrorCount
      * @param array $expectedErrorCountByUrl
      */
-    public function testValidate(
+    public function testValidateFoo(
         $responseFixtures,
         $cssValidatorRawOutput,
         $configurationValues,
@@ -294,17 +292,33 @@ class WrapperTest extends BaseTest
      */
     public function validateDataProvider()
     {
+        $minimalHtml5HttpFixture = $this->createHttpFixture(
+            'text/html',
+            $this->loadHtmlDocumentFixture('minimal-html5')
+        );
+
+        $minimalHtml5SingleStylesheetHttpFixture = $this->createHttpFixture(
+            'text/html',
+            $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
+        );
+
+        $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture = $this->createHttpFixture(
+            'text/html',
+            $this->loadHtmlDocumentFixture('minimal-html5-two-stylesheets-different-domains')
+        );
+
+        $genericCssHttpFixture = $this->createHttpFixture(
+            'text/css',
+            'foo'
+        );
+
         return [
             'ignore false image data url messages' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
                     'incorrect-data-url-background-image-errors'
@@ -319,14 +333,10 @@ class WrapperTest extends BaseTest
             ],
             'ignore warnings' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('single-warning'),
                 'configurationValues' => [
@@ -339,14 +349,10 @@ class WrapperTest extends BaseTest
             ],
             'vendor extension issues:warn and ignore warnings' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
                 'configurationValues' => [
@@ -360,14 +366,10 @@ class WrapperTest extends BaseTest
             ],
             'ignore vendor extension warnings' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
                 'configurationValues' => [
@@ -381,14 +383,10 @@ class WrapperTest extends BaseTest
             ],
             'ignore vendor extension errors' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
                 'configurationValues' => [
@@ -399,18 +397,12 @@ class WrapperTest extends BaseTest
             ],
             'domains to ignore: ignore none' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-two-stylesheets-different-domains')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
+                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
                 'configurationValues' => [],
@@ -423,18 +415,12 @@ class WrapperTest extends BaseTest
             ],
             'domains to ignore: ignore first of two' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-two-stylesheets-different-domains')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
+                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
                 'configurationValues' => [
@@ -450,18 +436,12 @@ class WrapperTest extends BaseTest
             ],
             'domains to ignore: ignore second of two' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-two-stylesheets-different-domains')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
+                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
                 'configurationValues' => [
@@ -477,18 +457,12 @@ class WrapperTest extends BaseTest
             ],
             'domains to ignore: ignore both' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-two-stylesheets-different-domains')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
+                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
                 'configurationValues' => [
@@ -507,17 +481,15 @@ class WrapperTest extends BaseTest
                         $this->loadHtmlDocumentFixture('minimal-html5-three-stylesheets')
                     ),
                     $this->createHttpFixture(
-                        'text/css',
-                        'foo'
+                        'text/html',
+                        $this->loadHtmlDocumentFixture('minimal-html5-three-stylesheets')
                     ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5HttpFixture,
+                    $minimalHtml5HttpFixture,
+                    $minimalHtml5HttpFixture,
+                    $minimalHtml5HttpFixture,
+                    $minimalHtml5HttpFixture,
+                    $minimalHtml5HttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
                 'configurationValues' => [],
@@ -526,10 +498,8 @@ class WrapperTest extends BaseTest
             ],
             'html5 no css no linked resources' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5')
-                    ),
+                    $minimalHtml5HttpFixture,
+                    $minimalHtml5HttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
                 'configurationValues' => [],
@@ -538,6 +508,10 @@ class WrapperTest extends BaseTest
             ],
             'html5 content type with charset no css no linked resources' => [
                 'responseFixtures' => [
+                    $this->createHttpFixture(
+                        'text/html; charset=utf-8',
+                        $this->loadHtmlDocumentFixture('minimal-html5')
+                    ),
                     $this->createHttpFixture(
                         'text/html; charset=utf-8',
                         $this->loadHtmlDocumentFixture('minimal-html5')
@@ -555,9 +529,11 @@ class WrapperTest extends BaseTest
                         $this->loadHtmlDocumentFixture('minimal-html5-malformed-single-stylesheet')
                     ),
                     $this->createHttpFixture(
-                        'text/css',
-                        'foo'
+                        'text/html',
+                        $this->loadHtmlDocumentFixture('minimal-html5-malformed-single-stylesheet')
                     ),
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
                 'configurationValues' => [],
@@ -566,14 +542,10 @@ class WrapperTest extends BaseTest
             ],
             'vendor extension warnings: default' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
                 'configurationValues' => [],
@@ -582,14 +554,10 @@ class WrapperTest extends BaseTest
             ],
             'vendor extension warnings: warn' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
                 'configurationValues' => [
@@ -600,14 +568,10 @@ class WrapperTest extends BaseTest
             ],
             'vendor extension warnings: error' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
                 'configurationValues' => [
@@ -618,14 +582,10 @@ class WrapperTest extends BaseTest
             ],
             'vendor extension warnings: warn, with at-rule errors that should be warnings' => [
                 'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/css',
-                        'foo'
-                    ),
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $minimalHtml5SingleStylesheetHttpFixture,
+                    $genericCssHttpFixture,
+                    $genericCssHttpFixture,
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
                 'configurationValues' => [

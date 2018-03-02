@@ -53,13 +53,13 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
      */
     public function testSetInvalidFlag($flag)
     {
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Invalid flag, must be one of [ignore-warnings, ignore-false-background-data-url-messages]',
-            2
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Invalid flag, must be one of [ignore-warnings, ignore-false-background-data-url-messages]'
         );
+        $this->expectExceptionCode(2);
 
-        $configuration = new Configuration([
+        new Configuration([
             Configuration::CONFIG_KEY_FLAGS => [
                 $flag
             ]
@@ -134,7 +134,10 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
     {
         $configuration = new Configuration([]);
 
-        $this->setExpectedException(\InvalidArgumentException::class, 'URL to validate has not been set', 2);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('URL to validate has not been set');
+        $this->expectExceptionCode(2);
+
         $configuration->getExecutableCommand();
     }
 
@@ -313,13 +316,11 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
      */
     public function testSetInvalidVendorExtensionSeverityLevel($vendorExtensionSeverityLevel)
     {
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Invalid severity level, must be one of [error, warn, ignore]',
-            1
-        );
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid severity level, must be one of [error, warn, ignore]');
+        $this->expectExceptionCode(1);
 
-        $configuration = new Configuration([
+        new Configuration([
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
             Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL => $vendorExtensionSeverityLevel,
         ]);
