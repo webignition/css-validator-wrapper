@@ -2,7 +2,6 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Wrapper;
 
-use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Message\Request;
 use GuzzleHttp\Message\Response;
@@ -10,6 +9,7 @@ use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\LocalProxyResource;
 use webignition\Tests\CssValidatorWrapper\BaseTest;
 use webignition\WebResource\Exception\Exception as WebResourceException;
+use webignition\GuzzleHttp\Exception\CurlException\Exception as GuzzleCurlException;
 
 class LocalProxyResourceTest extends BaseTest
 {
@@ -239,13 +239,16 @@ class LocalProxyResourceTest extends BaseTest
         $this->assertEquals($expectedHasCurlExceptions, $localProxyResource->hasCurlExceptions());
         $this->assertCount(count($expectedCurlExceptions), $curlExceptions);
 
-        foreach ($curlExceptions as $urlHash => $curlException) {
+        foreach ($curlExceptions as $urlHash => $curlExceptionWrapper) {
             $this->assertTrue(array_key_exists($urlHash, $expectedCurlExceptions));
             $expectedCurlException = $expectedCurlExceptions[$urlHash];
 
-            $this->assertEquals($expectedCurlException['url'], $curlException['url']);
-            $this->assertEquals($expectedCurlException['code'], $curlException['exception']->getCurlCode());
-            $this->assertEquals($expectedCurlException['message'], $curlException['exception']->getMessage());
+            /* @var GuzzleCurlException $curlException */
+            $curlException = $curlExceptionWrapper['exception'];
+
+            $this->assertEquals($expectedCurlException['url'], $curlExceptionWrapper['url']);
+            $this->assertEquals($expectedCurlException['code'], $curlException->getCurlCode());
+            $this->assertEquals($expectedCurlException['message'], $curlException->getMessage());
         }
     }
 
@@ -407,6 +410,12 @@ class LocalProxyResourceTest extends BaseTest
      */
     public function prepareFromLinkedStylesheetsDataProvider()
     {
+        $internalServerErrorResponse = new Response(500);
+        $curlUnableToResolveHostResponse = new ConnectException(
+            'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
+            new Request('GET', 'http://example.com/')
+        );
+
         return [
             'single stylesheet' => [
                 'sourceDocument' => $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet'),
@@ -425,12 +434,9 @@ class LocalProxyResourceTest extends BaseTest
             'five stylesheets' => [
                 'sourceDocument' => $this->loadHtmlDocumentFixture('minimal-html5-five-stylesheets'),
                 'cssHttpResponseBodies' => [
-                    new Response(500),
+                    $internalServerErrorResponse,
                     $this->createHttpFixture('text/css', 'body { color: #00ff00 }'),
-                    new ConnectException(
-                        'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
-                        new Request('GET', 'http://example.com/')
-                    ),
+                    $curlUnableToResolveHostResponse,
                     $this->createHttpFixture('text/css', 'body { color: #f0000f }'),
                     $this->createHttpFixture('text/css', 'body { color: #f0f0f0 }'),
                 ],
@@ -452,14 +458,37 @@ class LocalProxyResourceTest extends BaseTest
      */
     private function createLocalProxyResource($sourceDocument, $cssHttpResponseBodies = [])
     {
+        $modifiedCssHttpResponseBodies = [];
+
+        foreach ($cssHttpResponseBodies as $cssHttpResponseBody) {
+            $duplicateResponse = false;
+
+            $responseType = gettype($cssHttpResponseBody);
+
+            if ('string' === $responseType) {
+                $duplicateResponse = true;
+            } elseif ('object' === $responseType) {
+                if ($cssHttpResponseBody instanceof Response) {
+                    $duplicateResponse = true;
+                }
+            }
+
+            $modifiedCssHttpResponseBodies[] = $cssHttpResponseBody;
+
+            if ($duplicateResponse) {
+                $modifiedCssHttpResponseBodies[] = $cssHttpResponseBody;
+            }
+        }
+
         $httpClient = $this->createHttpClient(array_merge(
             [
+                "HTTP/1.1 200\nContent-type: text/html",
                 $this->createHttpFixture(
                     'text/html',
                     $sourceDocument
-                )
+                ),
             ],
-            $cssHttpResponseBodies
+            $modifiedCssHttpResponseBodies
         ));
 
         $configuration = new Configuration([
