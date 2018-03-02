@@ -1,6 +1,6 @@
 <?php
 
-namespace webignition\Tests\HtmlValidator\Wrapper;
+namespace webignition\Tests\CssValidatorWrapper\Wrapper;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ConnectException;
