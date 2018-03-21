@@ -26,12 +26,12 @@
     "require": {
         "php": ">=5.6",
         "webignition/css-validator-output-parser": ">=2.2.2",
-        "webignition/web-resource-service":">=1.4.1,<2",
+        "webignition/web-resource-service":">=2,<3",
         "webignition/url":">=1.9.9",
-        "webignition/web-page-model":">=1.3,<2.0",
-        "guzzlehttp/guzzle":"~5",
-        "webignition/guzzle-curl-exception":">=0.1.4,<1",
-        "webignition/html-document-link-finder":">=1.5.1,<2.0"
+        "webignition/web-page-model":">=2,<3",
+        "guzzlehttp/guzzle":"~6",
+        "webignition/guzzle-curl-exception":">=1,<2",
+        "webignition/html-document-link-finder":">=2,<3"
     },
     "require-dev": {
         "phpunit/phpunit": "~5.0",
@@ -40,6 +40,6 @@
         "php-mock/php-mock-mockery": "1.1.0",
         "satooshi/php-coveralls": "~1.0"
     },
-    "minimum-stability":"dev",
+    "minimum-stability":"stable",
     "prefer-stable":true
 }
