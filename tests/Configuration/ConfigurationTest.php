@@ -2,16 +2,11 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Configuration;
 
-use GuzzleHttp\Client as HttpClient;
-use Mockery\MockInterface;
-use PHPUnit_Framework_TestCase;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
-use webignition\WebResource\WebPage\WebPage;
-use webignition\WebResource\WebResource;
 
-class ConfigurationTest extends PHPUnit_Framework_TestCase
+class ConfigurationTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider clearFlagDataProvider
@@ -227,86 +222,6 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
                     'java -jar css-validator.jar -output ucn -vextwarning false "http://example.com/" 2>&1',
             ],
         ];
-    }
-
-    public function testGetWebResourceService()
-    {
-        $httpClient = new HttpClient();
-
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-        ]);
-
-        $webResourceService = $configuration->getWebResourceService();
-
-        $this->assertEquals(
-            [
-                'text/html' => WebPage::class,
-                'text/css' => WebResource::class
-            ],
-            $webResourceService->getConfiguration()->getContentTypeWebResourceMap()
-        );
-
-        $this->assertEquals($httpClient, $webResourceService->getConfiguration()->getHttpClient());
-    }
-
-    /**
-     * @dataProvider hasContentToValidateDataProvider
-     *
-     * @param string $content
-     * @param bool $expectedHasContentToValidate
-     */
-    public function testHasContentToValidate($content, $expectedHasContentToValidate)
-    {
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-            Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => $content,
-        ]);
-
-        $this->assertEquals($expectedHasContentToValidate, $configuration->hasContentToValidate());
-    }
-
-    /**
-     * @return array
-     */
-    public function hasContentToValidateDataProvider()
-    {
-        return [
-            'null' => [
-                'content' => null,
-                'expectedHasContentToValidate' => false,
-            ],
-            'empty string' => [
-                'content' => '',
-                'expectedHasContentToValidate' => true,
-            ],
-            'non-empty string' => [
-                'content' => 'foo',
-                'expectedHasContentToValidate' => true,
-            ],
-        ];
-    }
-
-    public function testGetDefaultHttpClient()
-    {
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-        ]);
-
-        $this->assertInstanceOf(HttpClient::class, $configuration->getHttpClient());
-    }
-
-    public function testSetGetHttpClient()
-    {
-        /* @var $httpClient MockInterface|HttpClient */
-        $httpClient = \Mockery::mock(HttpClient::class);
-
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
-        ]);
-
-        $this->assertEquals($httpClient, $configuration->getHttpClient());
     }
 
     /**

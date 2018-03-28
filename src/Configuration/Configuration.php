@@ -2,12 +2,6 @@
 
 namespace webignition\CssValidatorWrapper\Configuration;
 
-use GuzzleHttp\Client as HttpClient;
-use webignition\WebResource\Service\Configuration as WebResourceServiceConfiguration;
-use webignition\WebResource\Service\Service as WebResourceService;
-use webignition\WebResource\WebPage\WebPage;
-use webignition\WebResource\WebResource;
-
 class Configuration
 {
     const JAVA_JAR_FLAG = '-jar';
@@ -54,22 +48,12 @@ class Configuration
     /**
      * @var array
      */
-    private $flags = array();
+    private $flags = [];
 
     /**
      * @var string[]
      */
-    private $domainsToIgnore = array();
-
-    /**
-     * @var WebResourceService
-     */
-    private $webResourceService;
-
-    /**
-     * @var HttpClient
-     */
-    private $httpClient;
+    private $domainsToIgnore = [];
 
     /**
      * @param array $configurationValues
@@ -84,8 +68,8 @@ class Configuration
             $configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH] = self::DEFAULT_CSS_VALIDATOR_JAR_PATH;
         }
 
-        $this->setJavaExecutablePath($configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH]);
-        $this->setCssValidatorJarPath($configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH]);
+        $this->javaExecutablePath = $configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH];
+        $this->cssValidatorJarPath = $configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH];
 
         if (array_key_exists(self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL, $configurationValues)) {
             $this->setVendorExtensionSeverityLevel(
@@ -110,10 +94,6 @@ class Configuration
         if (array_key_exists(self::CONFIG_KEY_DOMAINS_TO_IGNORE, $configurationValues)) {
             $this->setDomainsToIgnore($configurationValues[self::CONFIG_KEY_DOMAINS_TO_IGNORE]);
         }
-
-        if (array_key_exists(self::CONFIG_KEY_HTTP_CLIENT, $configurationValues)) {
-            $this->setHttpClient($configurationValues[self::CONFIG_KEY_HTTP_CLIENT]);
-        }
     }
 
     /**
@@ -133,77 +113,11 @@ class Configuration
     }
 
     /**
-     * @return boolean
-     */
-    public function hasContentToValidate()
-    {
-        return is_string($this->contentToValidate);
-    }
-
-    /**
-     * @return WebResourceService
-     */
-    public function getWebResourceService()
-    {
-        if (is_null($this->webResourceService)) {
-            $webResourceServiceConfiguration = new WebResourceServiceConfiguration([
-                WebResourceServiceConfiguration::CONFIG_KEY_CONTENT_TYPE_WEB_RESOURCE_MAP => [
-                    'text/html' => WebPage::class,
-                    'text/css' => WebResource::class
-                ],
-                WebResourceServiceConfiguration::CONFIG_ALLOW_UNKNOWN_RESOURCE_TYPES => false,
-                WebResourceServiceConfiguration::CONFIG_KEY_HTTP_CLIENT => $this->getHttpClient(),
-            ]);
-
-            $this->webResourceService = new WebResourceService();
-            $this->webResourceService->setConfiguration($webResourceServiceConfiguration);
-        }
-
-        return $this->webResourceService;
-    }
-
-    /**
-     * @param HttpClient $httpClient
-     */
-    private function setHttpClient(HttpClient $httpClient)
-    {
-        $this->httpClient = $httpClient;
-    }
-
-    /**
-     * @return HttpClient
-     */
-    public function getHttpClient()
-    {
-        if (is_null($this->httpClient)) {
-            $this->httpClient = new HttpClient();
-        }
-
-        return $this->httpClient;
-    }
-
-    /**
-     * @param string $javaExecutablePath
-     */
-    private function setJavaExecutablePath($javaExecutablePath)
-    {
-        $this->javaExecutablePath = $javaExecutablePath;
-    }
-
-    /**
      * @return string
      */
     public function getJavaExecutablePath()
     {
         return (is_null($this->javaExecutablePath)) ? self::DEFAULT_JAVA_EXECUTABLE_PATH : $this->javaExecutablePath;
-    }
-
-    /**
-     * @param string $cssValidatorJarPath
-     */
-    private function setCssValidatorJarPath($cssValidatorJarPath)
-    {
-        $this->cssValidatorJarPath = $cssValidatorJarPath;
     }
 
     /**
