@@ -2,10 +2,7 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Wrapper;
 
-use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use QueryPath\Exception as QueryPathException;
@@ -16,8 +13,9 @@ use webignition\Tests\CssValidatorWrapper\AbstractBaseTest;
 use webignition\Tests\CssValidatorWrapper\Factory\FixtureLoader;
 use webignition\Tests\CssValidatorWrapper\Factory\ResponseFactory;
 use webignition\WebResource\Exception\HttpException;
+use webignition\WebResource\Exception\InvalidContentTypeException;
+use webignition\WebResource\Exception\InvalidResponseContentTypeException;
 use webignition\WebResource\Exception\TransportException;
-use webignition\WebResourceInterfaces\InvalidContentTypeExceptionInterface;
 
 class LocalProxyResourceTest extends AbstractBaseTest
 {
@@ -29,11 +27,12 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @param string $content
      * @param string $expectedLocalResourcePathExtension
      *
-     * @throws QueryPathException
-     * @throws InternetMediaTypeParseException
-     * @throws InvalidContentTypeExceptionInterface
      * @throws HttpException
+     * @throws InternetMediaTypeParseException
+     * @throws QueryPathException
      * @throws TransportException
+     * @throws InvalidContentTypeException
+     * @throws InvalidResponseContentTypeException
      */
     public function testPrepareFromContentToValidate($content, $expectedLocalResourcePathExtension)
     {
@@ -75,7 +74,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
     /**
      * @throws HttpException
      * @throws InternetMediaTypeParseException
-     * @throws InvalidContentTypeExceptionInterface
+     * @throws InvalidContentTypeException
+     * @throws InvalidResponseContentTypeException
      * @throws QueryPathException
      * @throws TransportException
      */
@@ -105,7 +105,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      *
      * @throws HttpException
      * @throws InternetMediaTypeParseException
-     * @throws InvalidContentTypeExceptionInterface
+     * @throws InvalidContentTypeException
+     * @throws InvalidResponseContentTypeException
      * @throws QueryPathException
      * @throws TransportException
      */
@@ -198,7 +199,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      *
      * @throws HttpException
      * @throws InternetMediaTypeParseException
-     * @throws InvalidContentTypeExceptionInterface
+     * @throws InvalidContentTypeException
+     * @throws InvalidResponseContentTypeException
      * @throws QueryPathException
      * @throws TransportException
      */
@@ -257,7 +259,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      *
      * @throws HttpException
      * @throws InternetMediaTypeParseException
-     * @throws InvalidContentTypeExceptionInterface
+     * @throws InvalidContentTypeException
+     * @throws InvalidResponseContentTypeException
      * @throws QueryPathException
      * @throws TransportException
      */
@@ -309,6 +312,78 @@ class LocalProxyResourceTest extends AbstractBaseTest
     }
 
     /**
+     * @dataProvider getInvalidResponseContentTypeExceptionsDataProvider
+     *
+     * @param string $sourceDocument
+     * @param array $cssHttpFixtures
+     * @param array $expectedInvalidResponseContentTypeExceptions
+     *
+     * @throws HttpException
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeException
+     * @throws InvalidResponseContentTypeException
+     * @throws QueryPathException
+     * @throws TransportException
+     */
+    public function testGetInvalidResponseContentTypeExceptions(
+        $sourceDocument,
+        $cssHttpFixtures,
+        $expectedInvalidResponseContentTypeExceptions
+    ) {
+        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
+        $localProxyResource->prepare();
+
+        $invalidResponseContentTypeExceptions = $localProxyResource->getInvalidResponseContentTypeExceptions();
+
+        $this->assertCount(count($expectedInvalidResponseContentTypeExceptions), $invalidResponseContentTypeExceptions);
+
+        foreach ($invalidResponseContentTypeExceptions as $urlHash => $invalidResponseContentTypeException) {
+            $this->assertTrue(array_key_exists($urlHash, $expectedInvalidResponseContentTypeExceptions));
+
+            $expectedExceptionData = $expectedInvalidResponseContentTypeExceptions[$urlHash];
+
+            $this->assertEquals(
+                $expectedExceptionData['url'],
+                (string)$invalidResponseContentTypeException->getRequest()->getUri()
+            );
+            $this->assertEquals($expectedExceptionData['message'], $invalidResponseContentTypeException->getMessage());
+            $this->assertEquals(
+                $expectedExceptionData['contentTypeString'],
+                (string)$invalidResponseContentTypeException->getContentType()
+            );
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getInvalidResponseContentTypeExceptionsDataProvider()
+    {
+        return $this->mergePrepareFromLinkedStylesheetsData([
+            'single stylesheet' => [
+                'expectedInvalidResponseContentTypeExceptions' => [],
+            ],
+            'three stylesheets' => [
+                'sourceDocument' => FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                'cssHttpFixtures' => [
+                    ResponseFactory::create('text/plain', 'body { color: #ff0000 }'),
+                    ResponseFactory::createCssResponse(),
+                    ResponseFactory::createCssResponse('body { color: #ff0000 }'),
+                    ResponseFactory::createCssResponse(),
+                    ResponseFactory::createCssResponse('body { color: #ff0000 }'),
+                ],
+                'expectedInvalidResponseContentTypeExceptions' => [
+                    md5('http://example.com/one.css') => [
+                        'url' => 'http://example.com/one.css',
+                        'message' => 'Invalid content type "text/plain"',
+                        'contentTypeString' => 'text/plain',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * @dataProvider prepareFromLinkedStylesheetsDataProvider
      *
      * @param string $sourceDocument
@@ -316,7 +391,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      *
      * @throws HttpException
      * @throws InternetMediaTypeParseException
-     * @throws InvalidContentTypeExceptionInterface
+     * @throws InvalidContentTypeException
+     * @throws InvalidResponseContentTypeException
      * @throws QueryPathException
      * @throws TransportException
      */

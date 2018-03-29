@@ -14,12 +14,12 @@ use webignition\HtmlDocumentLinkUrlFinder\HtmlDocumentLinkUrlFinder;
 use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
 use webignition\WebResource\Exception\HttpException;
 use webignition\WebResource\Exception\InvalidContentTypeException;
+use webignition\WebResource\Exception\InvalidResponseContentTypeException;
 use webignition\WebResource\Exception\TransportException;
 use webignition\WebResource\Retriever as WebResourceRetriever;
 use webignition\WebResource\Retriever;
 use webignition\WebResource\WebPage\WebPage;
 use webignition\WebResource\WebResource;
-use webignition\WebResourceInterfaces\InvalidContentTypeExceptionInterface;
 use webignition\WebResourceInterfaces\WebPageInterface;
 use webignition\WebResourceInterfaces\WebResourceInterface;
 
@@ -69,6 +69,11 @@ class LocalProxyResource
     private $webResourceStorage;
 
     /**
+     * @var InvalidResponseContentTypeException[]
+     */
+    private $invalidResponseContentTypeExceptions = [];
+
+    /**
      * @param Configuration $sourceConfiguration
      * @param HttpClient $httpClient
      */
@@ -115,15 +120,27 @@ class LocalProxyResource
     }
 
     /**
-     * @throws InternetMediaTypeParseException
-     * @throws InvalidContentTypeExceptionInterface
-     * @throws QueryPathException
+     * @return InvalidResponseContentTypeException[]
+     */
+    public function getInvalidResponseContentTypeExceptions()
+    {
+        return $this->invalidResponseContentTypeExceptions;
+    }
+
+    /**
+     * @return array
+     *
      * @throws HttpException
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeException
+     * @throws InvalidResponseContentTypeException
+     * @throws QueryPathException
      * @throws TransportException
      */
     public function prepare()
     {
         $rootWebResource = $this->getRootWebResource();
+
         $rootWebResourcePath = $this->webResourceStorage->store($rootWebResource);
         $paths = [$rootWebResourcePath];
 
@@ -309,8 +326,9 @@ class LocalProxyResource
      *
      * @throws InternetMediaTypeParseException
      * @throws HttpException
-     * @throws InvalidContentTypeExceptionInterface
      * @throws TransportException
+     * @throws InvalidContentTypeException
+     * @throws InvalidResponseContentTypeException
      */
     private function getRootWebResource()
     {
@@ -345,7 +363,6 @@ class LocalProxyResource
      * @return null|WebResource
      *
      * @throws InternetMediaTypeParseException
-     * @throws InvalidContentTypeException
      */
     private function retrieveLinkedResource($url)
     {
@@ -355,7 +372,6 @@ class LocalProxyResource
             $request = new Request('GET', $url);
 
             $resource = $this->webResourceRetriever->retrieve($request);
-
 
             $this->linkedResources[$urlHash] = $resource;
             $this->responses[] = $resource;
@@ -367,6 +383,11 @@ class LocalProxyResource
         } catch (TransportException $transportException) {
             $this->transportExceptions[$urlHash] = $transportException;
             $this->responses[] = $transportException;
+
+            return null;
+        } catch (InvalidResponseContentTypeException $invalidContentTypeException) {
+            $this->invalidResponseContentTypeExceptions[$urlHash] = $invalidContentTypeException;
+            $this->responses[] = $invalidContentTypeException;
 
             return null;
         }
