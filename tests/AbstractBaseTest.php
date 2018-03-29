@@ -5,14 +5,26 @@ namespace webignition\Tests\CssValidatorWrapper;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Subscriber\Mock as HttpMockSubscriber;
 use phpmock\mockery\PHPMockery;
 
 abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var MockHandler
+     */
+    protected $mockHandler;
+
+    /**
+     * @var HttpClient
+     */
+    protected $httpClient;
+
     protected function setUp()
     {
         parent::setUp();
+
+        $this->mockHandler = new MockHandler();
+        $this->httpClient = new HttpClient(['handler' => HandlerStack::create($this->mockHandler)]);
 
         PHPMockery::mock(
             'webignition\CssValidatorWrapper',
@@ -22,29 +34,13 @@ abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param array $httpFixtures
-     *
-     * @return HttpClient
      */
-    protected function createHttpClient(array $httpFixtures)
+    protected function appendHttpFixtures(array $httpFixtures)
     {
-        $mockHandler = new MockHandler($httpFixtures);
-        $httpClient = new HttpClient(['handler' => HandlerStack::create($mockHandler)]);
-
-        return $httpClient;
+        foreach ($httpFixtures as $httpFixture) {
+            $this->mockHandler->append($httpFixture);
+        }
     }
-
-//    /**
-//     * @param array $responseFixtures
-//     *
-//     * @return HttpClient
-//     */
-//    protected function createHttpClient($responseFixtures)
-//    {
-//        $mockHandler = new MockHandler($responseFixtures);
-//        $httpClient = new HttpClient(['handler' => HandlerStack::create($mockHandler)]);
-//
-//        return $httpClient;
-//    }
 
     /**
      * @param string $name
@@ -65,6 +61,16 @@ abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
     protected function createHttpFixture($contentType, $body)
     {
         return "HTTP/1.1 200 OK\nContent-type:" . $contentType . "\n\n" . $body;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function assertPostConditions()
+    {
+        parent::assertPostConditions();
+
+        $this->assertEquals(0, $this->mockHandler->count());
     }
 
     /**
