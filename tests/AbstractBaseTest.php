@@ -21,17 +21,30 @@ abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param array $responseFixtures
+     * @param array $httpFixtures
      *
      * @return HttpClient
      */
-    protected function createHttpClient($responseFixtures)
+    protected function createHttpClient(array $httpFixtures)
     {
-        $mockHandler = new MockHandler($responseFixtures);
+        $mockHandler = new MockHandler($httpFixtures);
         $httpClient = new HttpClient(['handler' => HandlerStack::create($mockHandler)]);
 
         return $httpClient;
     }
+
+//    /**
+//     * @param array $responseFixtures
+//     *
+//     * @return HttpClient
+//     */
+//    protected function createHttpClient($responseFixtures)
+//    {
+//        $mockHandler = new MockHandler($responseFixtures);
+//        $httpClient = new HttpClient(['handler' => HandlerStack::create($mockHandler)]);
+//
+//        return $httpClient;
+//    }
 
     /**
      * @param string $name

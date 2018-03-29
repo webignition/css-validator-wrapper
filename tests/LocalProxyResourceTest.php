@@ -421,7 +421,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
      */
     private function createLocalProxyResource($sourceDocumentContent, array $cssHttpFixtures = [])
     {
-        $mockHandler = new MockHandler(array_merge(
+        $httpClient = $this->createHttpClient(array_merge(
             [
                 ResponseFactory::createHtmlResponse(),
                 ResponseFactory::createHtmlResponse($sourceDocumentContent),
@@ -429,13 +429,11 @@ class LocalProxyResourceTest extends AbstractBaseTest
             $cssHttpFixtures
         ));
 
-        $httpClient = new HttpClient(['handler' => HandlerStack::create($mockHandler)]);
-
         $cssValidatorConfiguration = new Configuration([
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
         ]);
         $localProxyResource = new LocalProxyResource($cssValidatorConfiguration);
-        $localProxyResource->getWebResourceRetriever()->setHttpClient($httpClient);
+        $localProxyResource->setHttpClient($httpClient);
 
         return $localProxyResource;
     }

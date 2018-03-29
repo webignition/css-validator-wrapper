@@ -3,7 +3,6 @@
 namespace webignition\CssValidatorWrapper;
 
 use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\Uri;
@@ -94,6 +93,14 @@ class LocalProxyResource
     public function getWebResourceRetriever()
     {
         return $this->webResourceRetriever;
+    }
+
+    /**
+     * @param HttpClient $httpClient
+     */
+    public function setHttpClient(HttpClient $httpClient)
+    {
+        $this->webResourceRetriever->setHttpClient($httpClient);
     }
 
     /**
