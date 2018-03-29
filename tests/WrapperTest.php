@@ -3,7 +3,7 @@
 namespace webignition\Tests\CssValidatorWrapper\Wrapper;
 
 use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Message\Request;
+use GuzzleHttp\Psr7\Request;
 use Mockery\MockInterface;
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorOutput\CssValidatorOutput;
@@ -11,9 +11,9 @@ use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Wrapper;
-use webignition\Tests\CssValidatorWrapper\BaseTest;
+use webignition\Tests\CssValidatorWrapper\AbstractBaseTest;
 
-class WrapperTest extends BaseTest
+class WrapperTest extends AbstractBaseTest
 {
     /**
      * @var Wrapper|MockInterface
@@ -27,47 +27,6 @@ class WrapperTest extends BaseTest
     {
         parent::setUp();
         $this->wrapper = new Wrapper();
-    }
-
-    /**
-     * @dataProvider hasConfigurationDataProvider
-     *
-     * @param $configuration
-     * @param $expectedHasConfiguration
-     */
-    public function testHasConfiguration($configuration, $expectedHasConfiguration)
-    {
-        if (!is_null($configuration)) {
-            $this->wrapper->setConfiguration($configuration);
-        }
-
-        $this->assertEquals($expectedHasConfiguration, $this->wrapper->hasConfiguration());
-    }
-
-    /**
-     * @return array
-     */
-    public function hasConfigurationDataProvider()
-    {
-        return [
-            'no configuration' => [
-                'configuration' => null,
-                'expectedHasConfiguration' => false,
-            ],
-            'has configuration' => [
-                'configuration' => new Configuration([]),
-                'expectedHasConfiguration' => true,
-            ],
-        ];
-    }
-
-    public function testValidateWithNoConfiguration()
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to validate; configuration not set');
-        $this->expectExceptionCode(Wrapper::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET);
-
-        $this->wrapper->validate();
     }
 
     /**

@@ -2,25 +2,43 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Wrapper;
 
+use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\Response;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use QueryPath\Exception as QueryPathException;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\LocalProxyResource;
-use webignition\Tests\CssValidatorWrapper\BaseTest;
-use webignition\WebResource\Exception\Exception as WebResourceException;
-use webignition\GuzzleHttp\Exception\CurlException\Exception as GuzzleCurlException;
+use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
+use webignition\Tests\CssValidatorWrapper\AbstractBaseTest;
+use webignition\Tests\CssValidatorWrapper\Factory\FixtureLoader;
+use webignition\Tests\CssValidatorWrapper\Factory\ResponseFactory;
+use webignition\WebResource\Exception\HttpException;
+use webignition\WebResource\Exception\TransportException;
+use webignition\WebResourceInterfaces\InvalidContentTypeExceptionInterface;
 
-class LocalProxyResourceTest extends BaseTest
+class LocalProxyResourceTest extends AbstractBaseTest
 {
+    const REWRITTEN_STYLESHEET_LINK_PATTERN = '<link href="file:\/tmp\/[a-f0-9]{32}\.css" rel="stylesheet">';
+
     /**
      * @dataProvider prepareFromContentToValidateDataProvider
      *
      * @param string $content
      * @param string $expectedLocalResourcePathExtension
+     *
+     * @throws QueryPathException
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeExceptionInterface
+     * @throws HttpException
+     * @throws TransportException
      */
     public function testPrepareFromContentToValidate($content, $expectedLocalResourcePathExtension)
     {
+
+
         $localProxyResource = new LocalProxyResource(new Configuration([
             Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => $content,
         ]));
@@ -56,9 +74,17 @@ class LocalProxyResourceTest extends BaseTest
         ];
     }
 
+    /**
+     * @throws HttpException
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeExceptionInterface
+     * @throws QueryPathException
+     * @throws TransportException
+     */
     public function testPrepareWithNoStylesheets()
     {
-        $localProxyResource = $this->createLocalProxyResource($this->loadHtmlDocumentFixture('minimal-html5'));
+        $localProxyResource = $this->createLocalProxyResourceFoo(FixtureLoader::load('Html/minimal-html5.html'));
+
         $localProxyResource->prepare();
 
         $urlToValidate = $localProxyResource->getConfiguration()->getUrlToValidate();
@@ -75,20 +101,27 @@ class LocalProxyResourceTest extends BaseTest
      * @dataProvider prepareFromHtmlDocumentWithLinkedStylesheetsDataProvider
      *
      * @param string $sourceDocument
-     * @param string[] $cssHttpResponseBodies
+     * @param array $cssHttpFixtures
      * @param string[] $expectedSourceCssElements
      * @param string[] $expectedPreparedCssElementPatterns
+     *
+     * @throws HttpException
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeExceptionInterface
+     * @throws QueryPathException
+     * @throws TransportException
      */
     public function testPrepareWithLinkedStylesheetsReplacesCssLinks(
         $sourceDocument,
-        $cssHttpResponseBodies,
+        $cssHttpFixtures,
         $expectedSourceCssElements,
         $expectedPreparedCssElementPatterns
     ) {
-        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpResponseBodies);
+        $localProxyResource = $this->createLocalProxyResourceFoo($sourceDocument, $cssHttpFixtures);
+
         $localProxyResource->prepare();
 
-        $preparedHtmlDocument = $localProxyResource->getRootWebResource()->getContent();
+        $preparedHtmlDocument = $localProxyResource->getConfiguration()->getContentToValidate();
 
         $preparedHtmlDocumentCssElements = $this->getCssLinkElementsFromHtmlDocument(
             $preparedHtmlDocument
@@ -116,7 +149,7 @@ class LocalProxyResourceTest extends BaseTest
                     '<link href="/style.css" rel="stylesheet">',
                 ],
                 'expectedPreparedCssElementPatterns' => [
-                    $this->createRewrittenStylesheetLinkPattern(),
+                    self::REWRITTEN_STYLESHEET_LINK_PATTERN,
                 ],
             ],
             'three stylesheets' => [
@@ -126,9 +159,9 @@ class LocalProxyResourceTest extends BaseTest
                     '<link href="/three.css" rel="stylesheet">',
                 ],
                 'expectedPreparedCssElementPatterns' => [
-                    $this->createRewrittenStylesheetLinkPattern(),
-                    $this->createRewrittenStylesheetLinkPattern(),
-                    $this->createRewrittenStylesheetLinkPattern(),
+                    self::REWRITTEN_STYLESHEET_LINK_PATTERN,
+                    self::REWRITTEN_STYLESHEET_LINK_PATTERN,
+                    self::REWRITTEN_STYLESHEET_LINK_PATTERN,
                 ],
             ],
             'five stylesheets' => [
@@ -141,10 +174,10 @@ class LocalProxyResourceTest extends BaseTest
                 ],
                 'expectedPreparedCssElementPatterns' => [
                     '<link href="about:blank" rel="stylesheet">',
-                    $this->createRewrittenStylesheetLinkPattern(),
+                    self::REWRITTEN_STYLESHEET_LINK_PATTERN,
                     '<link href="about:blank" rel="stylesheet">',
-                    $this->createRewrittenStylesheetLinkPattern(),
-                    $this->createRewrittenStylesheetLinkPattern(),
+                    self::REWRITTEN_STYLESHEET_LINK_PATTERN,
+                    self::REWRITTEN_STYLESHEET_LINK_PATTERN,
                 ],
             ],
             'base element' => [
@@ -152,61 +185,61 @@ class LocalProxyResourceTest extends BaseTest
                     '<link href="foo.css" rel="stylesheet">',
                 ],
                 'expectedPreparedCssElementPatterns' => [
-                    $this->createRewrittenStylesheetLinkPattern(),
+                    self::REWRITTEN_STYLESHEET_LINK_PATTERN,
                 ],
             ],
         ]);
     }
 
     /**
-     * @dataProvider getWebResourceExceptionsDataProvider
+     * @dataProvider getHttpExceptionsDataProvider
      *
      * @param string $sourceDocument
-     * @param string[] $cssHttpResponseBodies
-     * @param bool $expectedHasWebResourceExceptions
-     * @param WebResourceException[] $expectedWebResourceExceptions
+     * @param array $cssHttpFixtures
+     * @param HttpException[] $expectedHttpExceptions
+     *
+     * @throws HttpException
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeExceptionInterface
+     * @throws QueryPathException
+     * @throws TransportException
      */
-    public function testGetWebResourceExceptions(
+    public function testGetHttpExceptions(
         $sourceDocument,
-        $cssHttpResponseBodies,
-        $expectedHasWebResourceExceptions,
-        $expectedWebResourceExceptions
+        $cssHttpFixtures,
+        $expectedHttpExceptions
     ) {
-        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpResponseBodies);
+        $localProxyResource = $this->createLocalProxyResourceFoo($sourceDocument, $cssHttpFixtures);
         $localProxyResource->prepare();
 
-        $webResourceExceptions = $localProxyResource->getWebResourceExceptions();
+        $httpExceptions = $localProxyResource->getHttpExceptions();
 
-        $this->assertEquals($expectedHasWebResourceExceptions, $localProxyResource->hasWebResourceExceptions());
-        $this->assertCount(count($expectedWebResourceExceptions), $webResourceExceptions);
+        $this->assertCount(count($expectedHttpExceptions), $httpExceptions);
 
-        foreach ($webResourceExceptions as $urlHash => $webResourceException) {
-            $this->assertTrue(array_key_exists($urlHash, $expectedWebResourceExceptions));
-            $expectedWebResourceException = $expectedWebResourceExceptions[$urlHash];
+        foreach ($httpExceptions as $urlHash => $httpException) {
+            $this->assertTrue(array_key_exists($urlHash, $expectedHttpExceptions));
+            $expectedWebResourceException = $expectedHttpExceptions[$urlHash];
 
-            $this->assertEquals($expectedWebResourceException['url'], $webResourceException->getRequest()->getUrl());
-            $this->assertEquals($expectedWebResourceException['code'], $webResourceException->getCode());
-            $this->assertEquals($expectedWebResourceException['message'], $webResourceException->getMessage());
+            $this->assertEquals($expectedWebResourceException['url'], (string)$httpException->getRequest()->getUri());
+            $this->assertEquals($expectedWebResourceException['code'], $httpException->getCode());
+            $this->assertEquals($expectedWebResourceException['message'], $httpException->getMessage());
         }
     }
 
     /**
      * @return array
      */
-    public function getWebResourceExceptionsDataProvider()
+    public function getHttpExceptionsDataProvider()
     {
         return $this->mergePrepareFromLinkedStylesheetsData([
             'single stylesheet' => [
-                'expectedHasWebResourceExceptions' => false,
                 'expectedWebResourceExceptions' => [],
             ],
             'three stylesheets' => [
-                'expectedHasWebResourceExceptions' => false,
                 'expectedWebResourceExceptions' => [],
             ],
             'five stylesheets' => [
-                'expectedHasWebResourceExceptions' => true,
-                'expectedWebResourceExceptions' => [
+                'expectedHttpExceptions' => [
                     'f60aa2b17bb65faf34062becac5cfe65' => [
                         'url' => 'http://example.com/one.css',
                         'code' => 500,
@@ -218,57 +251,55 @@ class LocalProxyResourceTest extends BaseTest
     }
 
     /**
-     * @dataProvider getWebCurlExceptionsDataProvider
+     * @dataProvider getTransportExceptionsDataProvider
      *
      * @param string $sourceDocument
-     * @param string[] $cssHttpResponseBodies
-     * @param bool $expectedHasCurlExceptions
-     * @param array $expectedCurlExceptions
+     * @param array $cssHttpFixtures
+     * @param array $expectedTransportExceptions
+     *
+     * @throws HttpException
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeExceptionInterface
+     * @throws QueryPathException
+     * @throws TransportException
      */
-    public function testGetCurlExceptions(
+    public function testGetTransportExceptions(
         $sourceDocument,
-        $cssHttpResponseBodies,
-        $expectedHasCurlExceptions,
-        $expectedCurlExceptions
+        $cssHttpFixtures,
+        $expectedTransportExceptions
     ) {
-        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpResponseBodies);
+        $localProxyResource = $this->createLocalProxyResourceFoo($sourceDocument, $cssHttpFixtures);
         $localProxyResource->prepare();
 
-        $curlExceptions = $localProxyResource->getCurlExceptions();
+        $transportExceptions = $localProxyResource->getTransportExceptions();
 
-        $this->assertEquals($expectedHasCurlExceptions, $localProxyResource->hasCurlExceptions());
-        $this->assertCount(count($expectedCurlExceptions), $curlExceptions);
+        $this->assertCount(count($expectedTransportExceptions), $transportExceptions);
 
-        foreach ($curlExceptions as $urlHash => $curlExceptionWrapper) {
-            $this->assertTrue(array_key_exists($urlHash, $expectedCurlExceptions));
-            $expectedCurlException = $expectedCurlExceptions[$urlHash];
+        foreach ($transportExceptions as $urlHash => $transportException) {
+            $this->assertTrue(array_key_exists($urlHash, $expectedTransportExceptions));
 
-            /* @var GuzzleCurlException $curlException */
-            $curlException = $curlExceptionWrapper['exception'];
+            $expectedExceptionData = $expectedTransportExceptions[$urlHash];
 
-            $this->assertEquals($expectedCurlException['url'], $curlExceptionWrapper['url']);
-            $this->assertEquals($expectedCurlException['code'], $curlException->getCurlCode());
-            $this->assertEquals($expectedCurlException['message'], $curlException->getMessage());
+            $this->assertEquals($expectedExceptionData['url'], (string)$transportException->getRequest()->getUri());
+            $this->assertEquals($expectedExceptionData['code'], $transportException->getTransportErrorCode());
+            $this->assertEquals($expectedExceptionData['message'], $transportException->getMessage());
         }
     }
 
     /**
      * @return array
      */
-    public function getWebCurlExceptionsDataProvider()
+    public function getTransportExceptionsDataProvider()
     {
         return $this->mergePrepareFromLinkedStylesheetsData([
             'single stylesheet' => [
-                'expectedHasCurlExceptions' => false,
-                'expectedCurlExceptions' => [],
+                'expectedTransportExceptions' => [],
             ],
             'three stylesheets' => [
-                'expectedHasCurlExceptions' => false,
-                'expectedCurlExceptions' => [],
+                'expectedTransportExceptions' => [],
             ],
             'five stylesheets' => [
-                'expectedHasCurlExceptions' => true,
-                'expectedCurlExceptions' => [
+                'expectedTransportExceptions' => [
                     '8fc6785d17f93e6d7e1e4e2d2fc44a2b' => [
                         'url' => 'http://example.com/three.css',
                         'code' => 6,
@@ -280,109 +311,33 @@ class LocalProxyResourceTest extends BaseTest
     }
 
     /**
-     * @dataProvider getWebResourceUrlFromPathDataProvider
-     *
-     * @param string $sourceDocument
-     * @param string[] $cssHttpResponseBodies
-     * @param string[] $expectedWebResourceUrls
-     */
-    public function testGetWebResourceUrlFromPath(
-        $sourceDocument,
-        $cssHttpResponseBodies,
-        $expectedWebResourceUrls
-    ) {
-        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpResponseBodies);
-        $localPaths = $localProxyResource->prepare();
-
-        foreach ($localPaths as $index => $path) {
-            $this->assertEquals(
-                $expectedWebResourceUrls[$index],
-                $localProxyResource->getWebResourceUrlFromPath($path)
-            );
-        }
-    }
-
-    /**
-     * @return array
-     */
-    public function getWebResourceUrlFromPathDataProvider()
-    {
-        return $this->mergePrepareFromLinkedStylesheetsData([
-            'single stylesheet' => [
-                'expectedWebResourceUrls' => [
-                    'http://example.com',
-                    'http://example.com/style.css',
-                ],
-            ],
-            'three stylesheets' => [
-                'expectedWebResourceUrls' => [
-                    'http://example.com',
-                    'http://example.com/one.css',
-                    'http://example.com/two.css',
-                    'http://example.com/three.css?foo=bar&foobar=foobar',
-                ],
-            ],
-            'five stylesheets' => [
-                'expectedWebResourceUrls' => [
-                    'http://example.com',
-                    'http://example.com/two.css',
-                    'http://example.com/four.css',
-                    'http://example.com/five.css',
-                ],
-            ],
-        ]);
-    }
-
-    /**
      * @dataProvider prepareFromLinkedStylesheetsDataProvider
      *
      * @param string $sourceDocument
-     * @param string[] $cssHttpResponseBodies
+     * @param array $cssHttpFixtures
+     *
+     * @throws HttpException
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeExceptionInterface
+     * @throws QueryPathException
+     * @throws TransportException
      */
-    public function testClear(
+    public function testReset(
         $sourceDocument,
-        $cssHttpResponseBodies
+        $cssHttpFixtures
     ) {
-        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpResponseBodies);
+        $localProxyResource = $this->createLocalProxyResourceFoo($sourceDocument, $cssHttpFixtures);
         $localPaths = $localProxyResource->prepare();
 
         foreach ($localPaths as $localPath) {
             $this->assertFileExists($localPath);
         }
 
-        $localProxyResource->clear();
+        $localProxyResource->reset();
 
         foreach ($localPaths as $localPath) {
             $this->assertFileNotExists($localPath);
         }
-    }
-
-    /**
-     * @return array
-     */
-    public function clearDataProvider()
-    {
-        return $this->mergePrepareFromLinkedStylesheetsData([
-            'single stylesheet' => [
-
-            ],
-            'three stylesheets' => [
-                'expectedWebResourceUrls' => [
-                    'http://example.com',
-                    'http://example.com/one.css',
-                    'http://example.com/two.css',
-                    'http://example.com/three.css?foo=bar&foobar=foobar',
-                ],
-            ],
-            'five stylesheets' => [
-                'expectedWebResourceUrls' => [
-                    'http://example.com',
-                    'http://example.com/two.css',
-                    'http://example.com/four.css',
-                    'http://example.com/five.css',
-                ],
-            ],
-        ]);
     }
 
     /**
@@ -418,85 +373,73 @@ class LocalProxyResourceTest extends BaseTest
 
         return [
             'single stylesheet' => [
-                'sourceDocument' => $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet'),
-                'cssHttpResponseBodies' => [
-                    $this->createHttpFixture('text/css', 'body { color: #ff0000 }'),
+                'sourceDocument' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                'cssHttpFixtures' => [
+                    ResponseFactory::createCssResponse(),
+                    ResponseFactory::createCssResponse('body { color: #ff0000 }'),
                 ],
             ],
             'three stylesheets' => [
-                'sourceDocument' => $this->loadHtmlDocumentFixture('minimal-html5-three-stylesheets'),
-                'cssHttpResponseBodies' => [
-                    $this->createHttpFixture('text/css', 'body { color: #ff0000 }'),
-                    $this->createHttpFixture('text/css', 'body { color: #00ff00 }'),
-                    $this->createHttpFixture('text/css', 'body { color: #0000ff }'),
+                'sourceDocument' => FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                'cssHttpFixtures' => [
+                    ResponseFactory::createCssResponse(),
+                    ResponseFactory::createCssResponse('body { color: #ff0000 }'),
+                    ResponseFactory::createCssResponse(),
+                    ResponseFactory::createCssResponse('body { color: #ff0000 }'),
+                    ResponseFactory::createCssResponse(),
+                    ResponseFactory::createCssResponse('body { color: #ff0000 }'),
                 ],
             ],
             'five stylesheets' => [
                 'sourceDocument' => $this->loadHtmlDocumentFixture('minimal-html5-five-stylesheets'),
-                'cssHttpResponseBodies' => [
+                'cssHttpFixtures' => [
                     $internalServerErrorResponse,
-                    $this->createHttpFixture('text/css', 'body { color: #00ff00 }'),
+                    $internalServerErrorResponse,
+                    $internalServerErrorResponse,
+                    ResponseFactory::createCssResponse('body { color: #ff0000 }'),
                     $curlUnableToResolveHostResponse,
-                    $this->createHttpFixture('text/css', 'body { color: #f0000f }'),
-                    $this->createHttpFixture('text/css', 'body { color: #f0f0f0 }'),
+                    $curlUnableToResolveHostResponse,
+                    $curlUnableToResolveHostResponse,
+                    ResponseFactory::createCssResponse('body { color: #00ff00 }'),
+                    ResponseFactory::createCssResponse(),
+                    ResponseFactory::createCssResponse('body { color: #0000ff }'),
                 ],
             ],
             'base element' => [
                 'sourceDocument' => $this->loadHtmlDocumentFixture('base-element'),
-                'cssHttpResponseBodies' => [
-                    $this->createHttpFixture('text/css', 'body { color: #f0f0f0 }'),
+                'cssHttpFixtures' => [
+                    ResponseFactory::createCssResponse(),
+                    ResponseFactory::createCssResponse('body { color: #f0f0f0 }'),
                 ],
             ],
         ];
     }
 
     /**
-     * @param string $sourceDocument
-     * @param string[] $cssHttpResponseBodies
+     * @param string $sourceDocumentContent
+     * @param array $cssHttpFixtures
      *
      * @return LocalProxyResource
      */
-    private function createLocalProxyResource($sourceDocument, $cssHttpResponseBodies = [])
+    private function createLocalProxyResourceFoo($sourceDocumentContent, array $cssHttpFixtures = [])
     {
-        $modifiedCssHttpResponseBodies = [];
-
-        foreach ($cssHttpResponseBodies as $cssHttpResponseBody) {
-            $duplicateResponse = false;
-
-            $responseType = gettype($cssHttpResponseBody);
-
-            if ('string' === $responseType) {
-                $duplicateResponse = true;
-            } elseif ('object' === $responseType) {
-                if ($cssHttpResponseBody instanceof Response) {
-                    $duplicateResponse = true;
-                }
-            }
-
-            $modifiedCssHttpResponseBodies[] = $cssHttpResponseBody;
-
-            if ($duplicateResponse) {
-                $modifiedCssHttpResponseBodies[] = $cssHttpResponseBody;
-            }
-        }
-
-        $httpClient = $this->createHttpClient(array_merge(
+        $mockHandler = new MockHandler(array_merge(
             [
-                "HTTP/1.1 200\nContent-type: text/html",
-                $this->createHttpFixture(
-                    'text/html',
-                    $sourceDocument
-                ),
+                ResponseFactory::createHtmlResponse(),
+                ResponseFactory::createHtmlResponse($sourceDocumentContent),
             ],
-            $modifiedCssHttpResponseBodies
+            $cssHttpFixtures
         ));
 
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com',
-            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
-        ]);
+        $httpClient = new HttpClient(['handler' => HandlerStack::create($mockHandler)]);
 
-        return new LocalProxyResource($configuration);
+        $cssValidatorConfiguration = new Configuration([
+            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
+        ]);
+        $localProxyResource = new LocalProxyResource($cssValidatorConfiguration);
+        $localProxyResource->getWebResourceRetriever()->setHttpClient($httpClient);
+
+        return $localProxyResource;
     }
 
     /**
@@ -542,13 +485,5 @@ class LocalProxyResourceTest extends BaseTest
     private function createLocalResourcePathPattern($fileType)
     {
         return '/file:' . preg_quote(sys_get_temp_dir(), '/') . '\/[a-f0-9]{32}\.' . $fileType . '/';
-    }
-
-    /**
-     * @return string
-     */
-    private function createRewrittenStylesheetLinkPattern()
-    {
-        return '<link href="file:\/tmp\/[a-f0-9]{32}\.css" rel="stylesheet">';
     }
 }

@@ -2,29 +2,32 @@
 
 namespace webignition\CssValidatorWrapper;
 
-use GuzzleHttp\Message\MessageFactory as HttpMessageFactory;
-use webignition\CssValidatorWrapper\Configuration\Configuration;
-use GuzzleHttp\Message\ResponseInterface as HttpResponse;
+use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ConnectException;
-use webignition\GuzzleHttp\Exception\CurlException\Exception as CurlException;
-use webignition\GuzzleHttp\Exception\CurlException\Factory as CurlExceptionFactory;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Stream;
+use GuzzleHttp\Psr7\Uri;
+use Psr\Http\Message\StreamInterface;
+use QueryPath\Exception as QueryPathException;
+use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\HtmlDocumentLinkUrlFinder\Configuration as LinkFinderConfiguration;
 use webignition\HtmlDocumentLinkUrlFinder\HtmlDocumentLinkUrlFinder;
-use webignition\WebResource\Exception\Exception as WebResourceException;
+use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
+use webignition\WebResource\Exception\HttpException;
+use webignition\WebResource\Exception\InvalidContentTypeException;
+use webignition\WebResource\Exception\TransportException;
+use webignition\WebResource\Retriever as WebResourceRetriever;
+use webignition\WebResource\Retriever;
 use webignition\WebResource\WebPage\WebPage;
 use webignition\WebResource\WebResource;
+use webignition\WebResourceInterfaces\InvalidContentTypeExceptionInterface;
+use webignition\WebResourceInterfaces\WebPageInterface;
+use webignition\WebResourceInterfaces\WebResourceInterface;
 
 class LocalProxyResource
 {
     const CSS_CONTENT_TYPE = 'text/css';
     const HTML_CONTENT_TYPE = 'text/html';
-
-    /**
-     * Translates local file paths to their relevant resource URLs
-     *
-     * @var array
-     */
-    private $localPathToResourceUrlMap = array();
 
     /**
      * @var Configuration
@@ -37,34 +40,34 @@ class LocalProxyResource
     private $sourceConfiguration;
 
     /**
-     * @var string[]
+     * @var WebResourceInterface[]
      */
-    private $paths = array();
+    private $linkedResources = [];
 
     /**
-     * @var WebResource[]
+     * @var HttpException[]
      */
-    private $linkedResources = array();
+    private $httpExceptions = [];
 
     /**
-     * @var WebResourceException[]
+     * @var TransportException[]
      */
-    private $webResourceExceptions = array();
-
-    /**
-     * @var CurlException[]
-     */
-    private $curlExceptions = array();
+    private $transportExceptions = [];
 
     /**
      * @var mixed[]
      */
-    private $responses = array();
+    private $responses = [];
 
     /**
-     * @var WebResource
+     * @var WebResourceRetriever
      */
-    private $rootWebResource = null;
+    private $webResourceRetriever;
+
+    /**
+     * @var WebResourceStorage
+     */
+    private $webResourceStorage;
 
     /**
      * @param Configuration $sourceConfiguration
@@ -73,114 +76,142 @@ class LocalProxyResource
     {
         $this->sourceConfiguration = $sourceConfiguration;
         $this->configuration = clone $this->sourceConfiguration;
+
+        $httpClient = new HttpClient();
+
+        $this->webResourceRetriever = new Retriever(
+            $httpClient,
+            array_merge(WebPage::getModelledContentTypeStrings(), [HttpResponseFactory::CSS_CONTENT_TYPE]),
+            false
+        );
+
+        $this->webResourceStorage = new WebResourceStorage();
     }
 
     /**
-     * @return boolean
+     * @return Retriever
      */
-    public function hasWebResourceExceptions()
+    public function getWebResourceRetriever()
     {
-        return count($this->webResourceExceptions) > 0;
+        return $this->webResourceRetriever;
     }
 
     /**
-     * @return WebResourceException[]
+     * @return HttpException[]
      */
-    public function getWebResourceExceptions()
+    public function getHttpExceptions()
     {
-        return $this->webResourceExceptions;
+        return $this->httpExceptions;
     }
 
     /**
-     * @return bool
+     * @return TransportException[]
      */
-    public function hasCurlExceptions()
+    public function getTransportExceptions()
     {
-        return count($this->curlExceptions) > 0;
+        return $this->transportExceptions;
     }
 
     /**
-     * @return CurlException[]
-     */
-    public function getCurlExceptions()
-    {
-        return $this->curlExceptions;
-    }
-
-    /**
-     * @return string[]
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeExceptionInterface
+     * @throws QueryPathException
+     * @throws HttpException
+     * @throws TransportException
      */
     public function prepare()
     {
-        $paths = [];
-
         $rootWebResource = $this->getRootWebResource();
-        $paths[] = $this->storeWebResource($rootWebResource);
+        $rootWebResourcePath = $this->webResourceStorage->store($rootWebResource);
+        $paths = [$rootWebResourcePath];
 
-        if ($this->isHtmlResource($rootWebResource)) {
+        if ($rootWebResource instanceof WebPageInterface) {
+            /* @var WebPageInterface $rootWebResource */
             $stylesheetUrls = $this->findStylesheetUrls($rootWebResource);
+
             foreach ($stylesheetUrls as $stylesheetUrl) {
-                $this->getLinkedResource($stylesheetUrl);
+                $this->retrieveLinkedResource($stylesheetUrl);
             }
 
             foreach ($this->responses as $responseIndex => $response) {
-                if ($response instanceof WebResource) {
-                    $paths[] = $this->storeWebResource($response);
-                    $this->updateRootWebResourceStylesheetUrl($responseIndex, 'file:' . $this->getPath($response));
-                } else {
-                    $this->updateRootWebResourceStylesheetUrl($responseIndex, 'about:blank');
+                $localResourcePath = 'about:blank';
+
+                if ($response instanceof WebResourceInterface) {
+                    $localResourcePath = $this->webResourceStorage->store($response);
+                    $paths[] = $localResourcePath;
+                    $localResourcePath = 'file:' . $localResourcePath;
+                }
+
+                $updatedRootWebResource = $this->updateRootWebResourceStylesheetUrl(
+                    $rootWebResource,
+                    $responseIndex,
+                    $localResourcePath
+                );
+
+                if (!empty($updatedRootWebResource)) {
+                    $rootWebResource = $updatedRootWebResource;
+                    $rootWebResourcePath = $this->webResourceStorage->store($rootWebResource);
                 }
             }
+
+            $this->configuration->setContentToValidate($rootWebResource->getContent());
         }
 
-        $this->getConfiguration()->setUrlToValidate('file:' . $this->getPath($rootWebResource));
+        $this->configuration->setUrlToValidate('file:' . $rootWebResourcePath);
 
         return $paths;
     }
 
     /**
-     * @param string $path
-     *
-     * @return string
-     */
-    public function getWebResourceUrlFromPath($path)
-    {
-        $pathHash = $this->getLocalPathHash($path);
-
-        return isset($this->localPathToResourceUrlMap[$pathHash])
-            ? $this->localPathToResourceUrlMap[$pathHash]
-            : null;
-    }
-
-    /**
+     * @param WebPageInterface $webPage
      * @param int $index
      * @param string $newUrl
+     *
+     * @return WebResourceInterface|null
      */
-    private function updateRootWebResourceStylesheetUrl($index, $newUrl)
+    private function updateRootWebResourceStylesheetUrl(WebPageInterface $webPage, $index, $newUrl)
     {
-        $rootWebResource = $this->getRootWebResource();
-        $hrefs = $this->findStylesheetHrefs($rootWebResource);
+        $webPageContent = $webPage->getContent();
+        $hrefs = $this->findStylesheetHrefs($webPageContent);
 
-        if (isset($hrefs[$index])) {
-            $possibleSourceHrefValues = $this->getPossibleSourceHrefValues($hrefs[$index]);
+        if (!isset($hrefs[$index])) {
+            return null;
+        }
 
-            foreach ($possibleSourceHrefValues as $sourceHrefValue) {
-                $possibleSourceHrefAttributeStrings = $this->getPossibleSourceHrefAttributeStrings($sourceHrefValue);
+        $possibleSourceHrefValues = $this->getPossibleSourceHrefValues($hrefs[$index]);
 
-                foreach ($possibleSourceHrefAttributeStrings as $sourceHrefAttribute) {
-                    if (substr_count($rootWebResource->getContent(), $sourceHrefAttribute)) {
-                        $rootWebResource->setContent(str_replace(
-                            $sourceHrefAttribute,
-                            'href="'.$newUrl.'"',
-                            $rootWebResource->getContent()
-                        ));
-                    }
+        foreach ($possibleSourceHrefValues as $sourceHrefValue) {
+            $possibleSourceHrefAttributeStrings = $this->getPossibleSourceHrefAttributeStrings($sourceHrefValue);
+
+            foreach ($possibleSourceHrefAttributeStrings as $sourceHrefAttribute) {
+                if (substr_count($webPageContent, $sourceHrefAttribute)) {
+                    $webPageContent = str_replace(
+                        $sourceHrefAttribute,
+                        'href="'.$newUrl.'"',
+                        $webPageContent
+                    );
                 }
             }
         }
 
-        $this->getConfiguration()->setContentToValidate($rootWebResource->getContent());
-        $this->storeWebResource($rootWebResource);
+        $newBody = $this->createStreamFromString($webPageContent);
+
+        return $webPage->setBody($newBody);
+    }
+
+    /**
+     * @param string $content
+     *
+     * @return StreamInterface
+     */
+    private function createStreamFromString($content)
+    {
+        $stream = fopen('php://temp', 'r+');
+        if ($content !== '') {
+            fwrite($stream, $content);
+            fseek($stream, 0);
+        }
+        return new Stream($stream);
     }
 
     /**
@@ -190,7 +221,7 @@ class LocalProxyResource
      */
     private function getPossibleSourceHrefValues($href)
     {
-        $urls = array($href);
+        $urls = [$href];
         if (substr_count($href, '&')) {
             $urls[] = str_replace('&', '&amp;', $href);
         }
@@ -205,10 +236,10 @@ class LocalProxyResource
      */
     private function getPossibleSourceHrefAttributeStrings($hrefValue)
     {
-        return array(
+        return [
             'href="'.$hrefValue.'"',
             'href=\''.$hrefValue.'\''
-        );
+        ];
     }
 
     /**
@@ -218,23 +249,25 @@ class LocalProxyResource
      */
     private function isLinkElementStylesheetElementWithHrefAttribute(\DOMelement $domElement)
     {
-        $hasStylesheetRelAttribute = $domElement->getAttribute('rel') == 'stylesheet';
+        $hasStylesheetRelAttribute = $domElement->getAttribute('rel') === 'stylesheet';
         $hasNonEmptyHrefAttribute = !empty(trim($domElement->getAttribute('href')));
 
         return $hasStylesheetRelAttribute && $hasNonEmptyHrefAttribute;
     }
 
     /**
-     * @param WebPage $webPage
+     * @param WebPageInterface $webPage
      *
      * @return string[]
+     *
+     * @throws QueryPathException
      */
-    private function findStylesheetUrls(WebPage $webPage)
+    private function findStylesheetUrls(WebPageInterface $webPage)
     {
         $linkFinderConfiguration = new LinkFinderConfiguration([
             LinkFinderConfiguration::CONFIG_KEY_ELEMENT_SCOPE => 'link',
             LinkFinderConfiguration::CONFIG_KEY_SOURCE => $webPage,
-            LinkFinderConfiguration::CONFIG_KEY_SOURCE_URL => $webPage->getUrl(),
+            LinkFinderConfiguration::CONFIG_KEY_SOURCE_URL => (string)$webPage->getUri(),
             LinkFinderConfiguration::CONFIG_KEY_IGNORE_FRAGMENT_IN_URL_COMPARISON => true,
             LinkFinderConfiguration::CONFIG_KEY_ATTRIBUTE_SCOPE_NAME => 'rel',
             LinkFinderConfiguration::CONFIG_KEY_ATTRIBUTE_SCOPE_VALUE => 'stylesheet',
@@ -247,16 +280,16 @@ class LocalProxyResource
     }
 
     /**
-     * @param WebPage $webPage
+     * @param string $webPageContent
      *
      * @return string[]
      */
-    private function findStylesheetHrefs(WebPage $webPage)
+    private function findStylesheetHrefs($webPageContent)
     {
         $hrefs = [];
 
         $rootDom = new \DOMDocument();
-        @$rootDom->loadHTML($webPage->getContent());
+        @$rootDom->loadHTML($webPageContent);
 
         $linkElements = $rootDom->getElementsByTagName('link');
         foreach ($linkElements as $linkElement) {
@@ -270,107 +303,30 @@ class LocalProxyResource
     }
 
     /**
-     * @param WebResource $resource
+     * @return WebPageInterface|WebResourceInterface
      *
-     * @return string
+     * @throws InternetMediaTypeParseException
+     * @throws HttpException
+     * @throws InvalidContentTypeExceptionInterface
+     * @throws TransportException
      */
-    private function storeWebResource(WebResource $resource)
+    private function getRootWebResource()
     {
-        $path = $this->getPath($resource);
+        $contentToValidate = $this->configuration->getContentToValidate();
+        $urlToValidate = $this->configuration->getUrlToValidate();
 
-        file_put_contents($path, $resource->getContent());
+        if (empty($contentToValidate)) {
+            $request = new Request('GET', $urlToValidate);
 
-        $this->localPathToResourceUrlMap[$this->getLocalPathHash($path)] = $resource->getUrl();
-
-        return $path;
-    }
-
-    /**
-     * @param string $path
-     *
-     * @return string
-     */
-    private function getLocalPathHash($path)
-    {
-        return md5($path);
-    }
-
-    /**
-     * @param WebResource $resource
-     * @return boolean
-     */
-    private function isHtmlResource(WebResource $resource)
-    {
-        return $resource->getContentType()->getTypeSubtypeString() === self::HTML_CONTENT_TYPE;
-    }
-
-    /**
-     * @return WebResource
-     */
-    public function getRootWebResource()
-    {
-        if (!$this->hasRootWebResource()) {
-            if ($this->getConfiguration()->hasContentToValidate()) {
-                $this->rootWebResource = $this->deriveRootWebResourceFromContentToValidate();
-            } else {
-                $request = $this->getConfiguration()->getHttpClient()->createRequest(
-                    'GET',
-                    $this->getRootWebResourceUrl()
-                );
-
-                $this->rootWebResource = $this->getConfiguration()->getWebResourceService()->get($request);
-            }
+            $rootWebResource = $this->webResourceRetriever->retrieve($request);
+        } else {
+            $rootWebResource = WebResourceFactory::create(
+                $contentToValidate,
+                new Uri($urlToValidate)
+            );
         }
 
-        return $this->rootWebResource;
-    }
-
-    /**
-     * @return WebResource
-     */
-    private function deriveRootWebResourceFromContentToValidate()
-    {
-        return $this->getConfiguration()->getWebResourceService()->create(
-            $this->deriveRootWebResourceHttpResponseFromContentToValidate()
-        );
-    }
-
-    /**
-     * @return HttpResponse
-     */
-    private function deriveRootWebResourceHttpResponseFromContentToValidate()
-    {
-        $httpResponse = $this->getHttpResponseFromMessage(
-            "HTTP/1.0 200 OK\nContent-Type: "
-            . $this->deriveRootWebResourceContentTypeFromContentToValidate()
-            . "\n\n"
-            . $this->getConfiguration()->getContentToValidate()
-        );
-        $httpResponse->setEffectiveUrl($this->getConfiguration()->getUrlToValidate());
-
-        return $httpResponse;
-    }
-
-    /**
-     * @return string
-     */
-    private function deriveRootWebResourceContentTypeFromContentToValidate()
-    {
-        $contentToValidate = $this->getConfiguration()->getContentToValidate();
-
-        if (strip_tags($contentToValidate) !== $contentToValidate) {
-            return 'text/html';
-        }
-
-        return 'text/css';
-    }
-
-    /**
-     * @return string
-     */
-    public function getRootWebResourceUrl()
-    {
-        return $this->sourceConfiguration->getUrlToValidate();
+        return $rootWebResource;
     }
 
     /**
@@ -382,138 +338,53 @@ class LocalProxyResource
     }
 
     /**
-     * @param WebResource $webResource
-     *
-     * @return string
-     */
-    private function getPath(WebResource $webResource)
-    {
-        if (!isset($this->paths[$this->getWebResourceUrlHash($webResource)])) {
-            $this->paths[$this->getWebResourceUrlHash($webResource)] = $this->generatePath($webResource);
-        }
-
-        return $this->paths[$this->getWebResourceUrlHash($webResource)];
-    }
-
-    /**
-     * @param WebResource $webResource
-     *
-     * @return string
-     */
-    private function generatePath(WebResource $webResource)
-    {
-        return sys_get_temp_dir()
-            . '/'
-            . md5($webResource->getUrl() . microtime(true))
-            . '.'
-            . $this->getPathExtension($webResource);
-    }
-
-    /**
-     * @param WebResource $webResource
-     *
-     * @return string
-     */
-    private function getPathExtension(WebResource $webResource)
-    {
-        return (string)$webResource->getContentType()->getSubtype();
-    }
-
-    /**
      * @param $url
      *
      * @return null|WebResource
+     *
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidContentTypeException
      */
-    private function getLinkedResource($url)
+    private function retrieveLinkedResource($url)
     {
+        $urlHash = UrlHasher::create($url);
+
         try {
-            if (!$this->hasLinkedResource($url)) {
-                $request = $this->getConfiguration()->getHttpClient()->createRequest(
-                    'GET',
-                    $url
-                );
+            $request = new Request('GET', $url);
 
-                $resource = $this->getConfiguration()->getWebResourceService()->get($request);
+            $resource = $this->webResourceRetriever->retrieve($request);
 
-                $this->linkedResources[$this->getUrlHash($url)] = $resource;
-                $this->responses[] = $resource;
-            }
-        } catch (WebResourceException $webResourceException) {
-            $this->webResourceExceptions[$this->getUrlHash($url)] = $webResourceException;
-            $this->responses[] = $webResourceException;
+
+            $this->linkedResources[$urlHash] = $resource;
+            $this->responses[] = $resource;
+        } catch (HttpException $httpException) {
+            $this->httpExceptions[$urlHash] = $httpException;
+            $this->responses[] = $httpException;
+
             return null;
-        } catch (ConnectException $connectException) {
-            $curlExceptionFactory = new CurlExceptionFactory();
-            if ($curlExceptionFactory->isCurlException($connectException)) {
-                $curlException = $curlExceptionFactory->fromConnectException($connectException);
+        } catch (TransportException $transportException) {
+            $this->transportExceptions[$urlHash] = $transportException;
+            $this->responses[] = $transportException;
 
-                $this->curlExceptions[$this->getUrlHash($url)] = array(
-                    'url' => $url,
-                    'exception' => $curlException
-                );
-
-                $this->responses[] = $curlException;
-                return null;
-            }
+            return null;
         }
 
-        return $this->linkedResources[$this->getUrlHash($url)];
+        return $this->linkedResources[$urlHash];
     }
 
     /**
-     * @param string $url
-     *
-     * @return boolean
+     * @return WebResourceStorage
      */
-    private function hasLinkedResource($url)
+    public function getWebResourceStorage()
     {
-        return isset($this->linkedResources[$this->getUrlHash($url)]);
+        return $this->webResourceStorage;
     }
 
-    /**
-     * @return boolean
-     */
-    private function hasRootWebResource()
+    public function reset()
     {
-        return !is_null($this->rootWebResource);
-    }
-
-    /**
-     * @param WebResource $webResource
-     *
-     * @return string
-     */
-    private function getWebResourceUrlHash(WebResource $webResource)
-    {
-        return $this->getUrlHash($webResource->getUrl());
-    }
-
-    /**
-     * @param string $url
-     *
-     * @return string
-     */
-    private function getUrlHash($url)
-    {
-        return md5($url);
-    }
-
-    public function clear()
-    {
-        foreach ($this->paths as $webResourceHash => $path) {
-            @unlink($path);
-            unset($this->linkedResources[$webResourceHash]);
-        }
-    }
-
-    /**
-     * @param $message
-     *
-     * @return HttpResponse
-     */
-    private function getHttpResponseFromMessage($message)
-    {
-        $factory = new HttpMessageFactory();
-        return $factory->fromMessage($message);
+        $this->webResourceStorage->reset();
+        $this->linkedResources = [];
+        $this->httpExceptions = [];
+        $this->transportExceptions = [];
     }
 }

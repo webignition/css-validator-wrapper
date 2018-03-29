@@ -3,10 +3,12 @@
 namespace webignition\Tests\CssValidatorWrapper;
 
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Mock as HttpMockSubscriber;
 use phpmock\mockery\PHPMockery;
 
-abstract class BaseTest extends \PHPUnit_Framework_TestCase
+abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
@@ -25,13 +27,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
      */
     protected function createHttpClient($responseFixtures)
     {
-        $httpClient = new HttpClient();
-
-        $httpClient->getEmitter()->attach(
-            new HttpMockSubscriber(
-                $responseFixtures
-            )
-        );
+        $mockHandler = new MockHandler($responseFixtures);
+        $httpClient = new HttpClient(['handler' => HandlerStack::create($mockHandler)]);
 
         return $httpClient;
     }
