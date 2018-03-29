@@ -37,8 +37,6 @@ class LocalProxyResourceTest extends AbstractBaseTest
      */
     public function testPrepareFromContentToValidate($content, $expectedLocalResourcePathExtension)
     {
-
-
         $localProxyResource = new LocalProxyResource(new Configuration([
             Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => $content,
         ]));
@@ -83,7 +81,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
      */
     public function testPrepareWithNoStylesheets()
     {
-        $localProxyResource = $this->createLocalProxyResourceFoo(FixtureLoader::load('Html/minimal-html5.html'));
+        $localProxyResource = $this->createLocalProxyResource(FixtureLoader::load('Html/minimal-html5.html'));
 
         $localProxyResource->prepare();
 
@@ -117,7 +115,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         $expectedSourceCssElements,
         $expectedPreparedCssElementPatterns
     ) {
-        $localProxyResource = $this->createLocalProxyResourceFoo($sourceDocument, $cssHttpFixtures);
+        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
 
         $localProxyResource->prepare();
 
@@ -209,7 +207,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         $cssHttpFixtures,
         $expectedHttpExceptions
     ) {
-        $localProxyResource = $this->createLocalProxyResourceFoo($sourceDocument, $cssHttpFixtures);
+        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
         $localProxyResource->prepare();
 
         $httpExceptions = $localProxyResource->getHttpExceptions();
@@ -268,7 +266,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         $cssHttpFixtures,
         $expectedTransportExceptions
     ) {
-        $localProxyResource = $this->createLocalProxyResourceFoo($sourceDocument, $cssHttpFixtures);
+        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
         $localProxyResource->prepare();
 
         $transportExceptions = $localProxyResource->getTransportExceptions();
@@ -326,7 +324,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         $sourceDocument,
         $cssHttpFixtures
     ) {
-        $localProxyResource = $this->createLocalProxyResourceFoo($sourceDocument, $cssHttpFixtures);
+        $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
         $localPaths = $localProxyResource->prepare();
 
         foreach ($localPaths as $localPath) {
@@ -421,7 +419,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
      *
      * @return LocalProxyResource
      */
-    private function createLocalProxyResourceFoo($sourceDocumentContent, array $cssHttpFixtures = [])
+    private function createLocalProxyResource($sourceDocumentContent, array $cssHttpFixtures = [])
     {
         $mockHandler = new MockHandler(array_merge(
             [
