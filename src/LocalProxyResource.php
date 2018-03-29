@@ -70,13 +70,16 @@ class LocalProxyResource
 
     /**
      * @param Configuration $sourceConfiguration
+     * @param HttpClient $httpClient
      */
-    public function __construct(Configuration $sourceConfiguration)
+    public function __construct(Configuration $sourceConfiguration, HttpClient $httpClient = null)
     {
         $this->sourceConfiguration = $sourceConfiguration;
         $this->configuration = clone $this->sourceConfiguration;
 
-        $httpClient = new HttpClient();
+        if (empty($httpClient)) {
+            $httpClient = new HttpClient();
+        }
 
         $this->webResourceRetriever = new Retriever(
             $httpClient,
@@ -93,14 +96,6 @@ class LocalProxyResource
     public function getWebResourceRetriever()
     {
         return $this->webResourceRetriever;
-    }
-
-    /**
-     * @param HttpClient $httpClient
-     */
-    public function setHttpClient(HttpClient $httpClient)
-    {
-        $this->webResourceRetriever->setHttpClient($httpClient);
     }
 
     /**

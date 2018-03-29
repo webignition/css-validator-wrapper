@@ -432,8 +432,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         $cssValidatorConfiguration = new Configuration([
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
         ]);
-        $localProxyResource = new LocalProxyResource($cssValidatorConfiguration);
-        $localProxyResource->setHttpClient($httpClient);
+        $localProxyResource = new LocalProxyResource($cssValidatorConfiguration, $httpClient);
 
         return $localProxyResource;
     }
