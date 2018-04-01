@@ -2,19 +2,20 @@
 
 namespace webignition\CssValidatorWrapper;
 
+use GuzzleHttp\Client as HttpClient;
+use Psr\Http\Message\UriInterface;
+use QueryPath\Exception as QueryPathException;
+use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
-use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
-use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\CssValidatorOutput\Message\Error as CssValidatorOutputError;
 use webignition\CssValidatorOutput\Parser\Parser as CssValidatorOutputParser;
-use webignition\CssValidatorOutput\Parser\Configuration as CssValidatorOutputParserConfiguration;
 use webignition\CssValidatorOutput\CssValidatorOutput;
 use webignition\CssValidatorOutput\ExceptionOutput\ExceptionOutput;
 use webignition\CssValidatorOutput\ExceptionOutput\Type\Type as ExceptionOutputType;
-use GuzzleHttp\Exception\ConnectException;
-use webignition\GuzzleHttp\Exception\CurlException\Factory as CurlExceptionFactory;
-use webignition\WebResource\Exception\InvalidContentTypeException;
-use webignition\WebResource\Exception\Exception as WebResourceException;
+use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
+use webignition\WebResource\Exception\HttpException;
+use webignition\WebResource\Exception\TransportException;
+use webignition\WebResourceInterfaces\InvalidContentTypeExceptionInterface;
 
 class Wrapper
 {
@@ -22,94 +23,69 @@ class Wrapper
     const INVALID_ARGUMENT_EXCEPTION_URL_TO_VALIDATE_NOT_SET = 2;
 
     /**
-     * @var Configuration
+     * @var HttpClient
      */
-    private $configuration;
+    private $httpClient;
 
-    /**
-     * @var LocalProxyResource
-     */
-    private $localProxyResource = null;
-
-    /**
-     * @param array $configurationValues
-     */
-    public function createConfiguration($configurationValues)
+    public function __construct()
     {
-        $this->setConfiguration(new Configuration($configurationValues));
+        $this->httpClient = new HttpClient();
+    }
+
+    /**
+     * @param HttpClient $httpClient
+     */
+    public function setHttpClient(HttpClient $httpClient)
+    {
+        $this->httpClient = $httpClient;
     }
 
     /**
      * @param Configuration $configuration
-     */
-    public function setConfiguration(Configuration $configuration)
-    {
-        $this->configuration = $configuration;
-    }
-
-    /**
-     * @return Configuration
-     */
-    public function getConfiguration()
-    {
-        return $this->configuration;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function hasConfiguration()
-    {
-        return !is_null($this->getConfiguration());
-    }
-
-    /**
-     * @throws \InvalidArgumentException
      *
-     * @return \webignition\CssValidatorOutput\CssValidatorOutput
+     * @return CssValidatorOutput
+     *
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidValidatorOutputException
+     * @throws QueryPathException
      */
-    public function validate()
+    public function validate(Configuration $configuration)
     {
-        if (!$this->hasConfiguration()) {
-            throw new \InvalidArgumentException(
-                'Unable to validate; configuration not set',
-                self::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET
-            );
-        }
+        $sourceUrl = $configuration->getUrlToValidate();
+        $localProxyResource = new LocalProxyResource($configuration, $this->httpClient);
 
         try {
-            $this->getLocalProxyResource()->prepare();
-        } catch (InvalidContentTypeException $invalidContentTypeException) {
+            $localProxyResource->prepare();
+        } catch (InvalidContentTypeExceptionInterface $invalidContentTypeException) {
             $cssValidatorOutput = new CssValidatorOutput();
             $cssValidatorOutputException = new ExceptionOutput();
             $cssValidatorOutputException->setType(
                 new ExceptionOutputType(
                     'invalid-content-type:'
-                    . $invalidContentTypeException->getResponseContentType()->getTypeSubtypeString()
+                    . $invalidContentTypeException->getContentType()->getTypeSubtypeString()
                 )
             );
 
             $cssValidatorOutput->setException($cssValidatorOutputException);
 
             return $cssValidatorOutput;
-        } catch (WebResourceException $webResourceException) {
+        } catch (HttpException $httpException) {
             $cssValidatorOutput = new CssValidatorOutput();
             $cssValidatorOutputException = new ExceptionOutput();
             $cssValidatorOutputException->setType(
-                new ExceptionOutputType('http' . $webResourceException->getResponse()->getStatusCode())
+                new ExceptionOutputType('http' . $httpException->getCode())
             );
 
             $cssValidatorOutput->setException($cssValidatorOutputException);
 
             return $cssValidatorOutput;
-        } catch (ConnectException $connectException) {
-            $curlExceptionFactory = new CurlExceptionFactory();
-            if ($curlExceptionFactory->isCurlException($connectException)) {
-                $curlException = $curlExceptionFactory->fromConnectException($connectException);
-
+        } catch (TransportException $transportException) {
+            if ($transportException->isCurlException()) {
                 $cssValidatorOutput = new CssValidatorOutput();
                 $cssValidatorOutputException = new ExceptionOutput();
-                $cssValidatorOutputException->setType(new ExceptionOutputType('curl' . $curlException->getCurlCode()));
+                $cssValidatorOutputException->setType(
+                    new ExceptionOutputType('curl' . $transportException->getTransportErrorCode())
+                );
 
                 $cssValidatorOutput->setException($cssValidatorOutputException);
 
@@ -117,111 +93,87 @@ class Wrapper
             }
         }
 
-        $rawValidatorOutput = shell_exec($this->getLocalProxyResource()->getConfiguration()->getExecutableCommand());
+        $rawValidatorOutput = shell_exec($configuration->getExecutableCommand());
 
         $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths(
-            $rawValidatorOutput
+            $localProxyResource,
+            $rawValidatorOutput,
+            $sourceUrl
         );
 
-        $cssValidatorOutputParserConfiguration = new CssValidatorOutputParserConfiguration();
-        $cssValidatorOutputParserConfiguration->setRawOutput($validatorOutput);
-
-        $this->localProxyResource->clear();
-
-        if ($this->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES)) {
-            $cssValidatorOutputParserConfiguration->setIgnoreFalseImageDataUrlMessages(true);
-        }
-
-        if ($this->getConfiguration()->hasFlag(Flags::FLAG_IGNORE_WARNINGS)) {
-            $cssValidatorOutputParserConfiguration->setIgnoreWarnings(true);
-        }
-
-        if ($this->getConfiguration()->getVendorExtensionSeverityLevel()
-            === VendorExtensionSeverityLevel::LEVEL_IGNORE) {
-            $cssValidatorOutputParserConfiguration->setIgnoreVendorExtensionIssues(true);
-        }
-
-        if ($this->getConfiguration()->getVendorExtensionSeverityLevel() === VendorExtensionSeverityLevel::LEVEL_WARN) {
-            $cssValidatorOutputParserConfiguration->setReportVendorExtensionIssuesAsWarnings(true);
-        }
-
-        if ($this->getConfiguration()->hasDomainsToIgnore()) {
-            $cssValidatorOutputParserConfiguration->setRefDomainsToIgnore(
-                $this->getConfiguration()->getDomainsToIgnore()
-            );
-        }
-
         $cssValidatorOutputParser = new CssValidatorOutputParser();
-        $cssValidatorOutputParser->setConfiguration($cssValidatorOutputParserConfiguration);
 
-        $output = $cssValidatorOutputParser->getOutput();
+        $output = $cssValidatorOutputParser->parse(
+            $validatorOutput,
+            $configuration->getOutputParserConfiguration()
+        );
 
-        if ($this->getLocalProxyResource()->hasWebResourceExceptions()) {
-            foreach ($this->getLocalProxyResource()->getWebResourceExceptions() as $webResourceException) {
-                $error = new CssValidatorOutputError();
-                $error->setContext('');
-                $error->setLineNumber(0);
+        $httpExceptions = $localProxyResource->getHttpExceptions();
+        $transportExceptions = $localProxyResource->getTransportExceptions();
+        $invalidResponseContentTypeExceptions = $localProxyResource->getInvalidResponseContentTypeExceptions();
 
-                if ($webResourceException instanceof InvalidContentTypeException) {
-                    $error->setMessage(
-                        'invalid-content-type:' . (string)$webResourceException->getResponseContentType()
-                    );
-                } else {
-                    $error->setMessage('http-error:' . $webResourceException->getResponse()->getStatusCode());
+        if (!empty($httpExceptions)) {
+            foreach ($httpExceptions as $httpException) {
+                $output->addMessage($this->createCssValidatorOutputError(
+                    'http-error:' . $httpException->getCode(),
+                    $httpException->getRequest()->getUri()
+                ));
+            }
+        }
+
+        if (!empty($transportExceptions)) {
+            foreach ($transportExceptions as $transportException) {
+                if ($transportException->isCurlException()) {
+                    $output->addMessage($this->createCssValidatorOutputError(
+                        'curl-error:' . $transportException->getTransportErrorCode(),
+                        $transportException->getRequest()->getUri()
+                    ));
                 }
-
-                $error->setRef($webResourceException->getRequest()->getUrl());
-
-                $output->addMessage($error);
             }
         }
 
-        if ($this->getLocalProxyResource()->hasCurlExceptions()) {
-            foreach ($this->getLocalProxyResource()->getCurlExceptions() as $curlExceptionDetails) {
-                $error = new CssValidatorOutputError();
-                $error->setContext('');
-                $error->setLineNumber(0);
-                $error->setMessage('curl-error:' . $curlExceptionDetails['exception']->getCurlCode());
-                $error->setRef($curlExceptionDetails['url']);
+        if (!empty($invalidResponseContentTypeExceptions)) {
+            foreach ($invalidResponseContentTypeExceptions as $invalidResponseContentTypeException) {
+                $contentType = $invalidResponseContentTypeException->getContentType();
 
-                $output->addMessage($error);
+                $output->addMessage($this->createCssValidatorOutputError(
+                    'invalid-content-type:' . $contentType->getTypeSubtypeString(),
+                    $invalidResponseContentTypeException->getRequest()->getUri()
+                ));
             }
         }
 
-        return $cssValidatorOutputParser->getOutput();
+        $localProxyResource->reset();
+
+        return $output;
     }
 
     /**
-     * @return LocalProxyResource
-     */
-    public function getLocalProxyResource()
-    {
-        if (is_null($this->localProxyResource)) {
-            $this->localProxyResource = new LocalProxyResource($this->getConfiguration());
-        }
-
-        return $this->localProxyResource;
-    }
-
-    /**
+     * @param LocalProxyResource $localProxyResource
      * @param string $validatorOutput
+     * @param string $sourceUrl
      *
      * @return string
      */
-    private function replaceLocalFilePathsWithOriginalFilePaths($validatorOutput)
-    {
-        $refMatches = array();
+    private function replaceLocalFilePathsWithOriginalFilePaths(
+        LocalProxyResource $localProxyResource,
+        $validatorOutput,
+        $sourceUrl
+    ) {
+        $refMatches = [];
         preg_match_all('/ref="file:\/tmp\/[^"]*"/', $validatorOutput, $refMatches);
+
+        $webResourceStorage = $localProxyResource->getWebResourceStorage();
 
         if (count($refMatches) > 0) {
             $refAttributes = $refMatches[0];
 
             foreach ($refAttributes as $index => $refAttribute) {
                 if ($index === 0) {
-                    $originalUrl = $this->getLocalProxyResource()->getRootWebResourceUrl();
+                    $originalUrl = $sourceUrl;
                 } else {
-                    $originalUrl = $this->getLocalProxyResource()->getWebResourceUrlFromPath(
-                        str_replace(array('ref="file:', '"'), '', $refAttribute)
+                    $originalUrl = $webResourceStorage->getUrlFromPath(
+                        str_replace(['ref="file:', '"'], '', $refAttribute)
                     );
                 }
 
@@ -234,5 +186,21 @@ class Wrapper
         }
 
         return $validatorOutput;
+    }
+
+    /**
+     * @param string $message
+     * @param UriInterface $uri
+     *
+     * @return CssValidatorOutputError
+     */
+    private function createCssValidatorOutputError($message, UriInterface $uri)
+    {
+        return new CssValidatorOutputError(
+            $message,
+            '',
+            (string)$uri,
+            0
+        );
     }
 }

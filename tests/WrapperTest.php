@@ -3,17 +3,23 @@
 namespace webignition\Tests\CssValidatorWrapper\Wrapper;
 
 use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Message\Request;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use Mockery\MockInterface;
 use phpmock\mockery\PHPMockery;
+use QueryPath\Exception as QueryPathException;
 use webignition\CssValidatorOutput\CssValidatorOutput;
+use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
+use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
-use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Wrapper;
-use webignition\Tests\CssValidatorWrapper\BaseTest;
+use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
+use webignition\Tests\CssValidatorWrapper\AbstractBaseTest;
+use webignition\Tests\CssValidatorWrapper\Factory\FixtureLoader;
+use webignition\Tests\CssValidatorWrapper\Factory\ResponseFactory;
 
-class WrapperTest extends BaseTest
+class WrapperTest extends AbstractBaseTest
 {
     /**
      * @var Wrapper|MockInterface
@@ -27,65 +33,27 @@ class WrapperTest extends BaseTest
     {
         parent::setUp();
         $this->wrapper = new Wrapper();
-    }
-
-    /**
-     * @dataProvider hasConfigurationDataProvider
-     *
-     * @param $configuration
-     * @param $expectedHasConfiguration
-     */
-    public function testHasConfiguration($configuration, $expectedHasConfiguration)
-    {
-        if (!is_null($configuration)) {
-            $this->wrapper->setConfiguration($configuration);
-        }
-
-        $this->assertEquals($expectedHasConfiguration, $this->wrapper->hasConfiguration());
-    }
-
-    /**
-     * @return array
-     */
-    public function hasConfigurationDataProvider()
-    {
-        return [
-            'no configuration' => [
-                'configuration' => null,
-                'expectedHasConfiguration' => false,
-            ],
-            'has configuration' => [
-                'configuration' => new Configuration([]),
-                'expectedHasConfiguration' => true,
-            ],
-        ];
-    }
-
-    public function testValidateWithNoConfiguration()
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to validate; configuration not set');
-        $this->expectExceptionCode(Wrapper::INVALID_ARGUMENT_EXCEPTION_CONFIGURATION_NOT_SET);
-
-        $this->wrapper->validate();
+        $this->wrapper->setHttpClient($this->httpClient);
     }
 
     /**
      * @dataProvider validateInvalidContentTypeOnRootWebResourceDataProvider
      *
-     * @param array  $responseFixtures
+     * @param array $httpFixtures
      * @param string $expectedExceptionType
+     *
+     * @throws QueryPathException
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidValidatorOutputException
      */
-    public function testValidateErrorOnRootWebResource($responseFixtures, $expectedExceptionType)
+    public function testValidateErrorOnRootWebResource($httpFixtures, $expectedExceptionType)
     {
-        $httpClient = $this->createHttpClient($responseFixtures);
+        $this->appendHttpFixtures($httpFixtures);
         $configuration = new Configuration([
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
         ]);
 
-        $this->wrapper->setConfiguration($configuration);
-        $output = $this->wrapper->validate();
+        $output = $this->wrapper->validate($configuration);
 
         $this->assertInstanceOf(CssValidatorOutput::class, $output);
         $this->assertTrue($output->hasException());
@@ -98,55 +66,61 @@ class WrapperTest extends BaseTest
      */
     public function validateInvalidContentTypeOnRootWebResourceDataProvider()
     {
+        $curl6ConnectException = new ConnectException(
+            'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
+            new Request('GET', 'http://example.com/')
+        );
+
+        $curl28ConnectException = new ConnectException(
+            'cURL error 28: Operation timeout..',
+            new Request('GET', 'http://example.com/')
+        );
+
         return [
             'application/pdf' => [
-                'responseFixtures' => [
-                    "HTTP/1.1 200 OK\nContent-type:application/pdf",
+                'httpFixtures' => [
+                    ResponseFactory::create('application/pdf'),
                 ],
                 'expectedExceptionType' => 'invalid-content-type:application/pdf'
             ],
             'text/plain' => [
-                'responseFixtures' => [
-                    "HTTP/1.1 200 OK\nContent-type:text/plain",
+                'httpFixtures' => [
+                    ResponseFactory::create('text/plain'),
                 ],
                 'expectedExceptionType' => 'invalid-content-type:text/plain'
             ],
             'http 410' => [
-                'responseFixtures' => [
-                    "HTTP/1.1 410 OK\nContent-type:text/html",
-                    "HTTP/1.1 410 OK\nContent-type:text/html",
+                'httpFixtures' => [
+                    ResponseFactory::createHtmlResponse('', 410),
+                    ResponseFactory::createHtmlResponse('', 410),
                 ],
                 'expectedExceptionType' => 'http410',
             ],
             'http 404' => [
-                'responseFixtures' => [
-                    "HTTP/1.1 404 OK\nContent-type:text/html",
-                    "HTTP/1.1 404 OK\nContent-type:text/html",
+                'httpFixtures' => [
+                    ResponseFactory::createHtmlResponse('', 404),
+                    ResponseFactory::createHtmlResponse('', 404),
                 ],
                 'expectedExceptionType' => 'http404',
             ],
             'http 500' => [
-                'responseFixtures' => [
-                    "HTTP/1.1 500 OK\nContent-type:text/html",
-                    "HTTP/1.1 500 OK\nContent-type:text/html",
+                'httpFixtures' => [
+                    ResponseFactory::createHtmlResponse('', 500),
+                    ResponseFactory::createHtmlResponse('', 500),
                 ],
                 'expectedExceptionType' => 'http500',
             ],
             'curl 6' => [
-                'responseFixtures' => [
-                    new ConnectException(
-                        'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
-                        new Request('GET', 'http://example.com/')
-                    ),
+                'httpFixtures' => [
+                    $curl6ConnectException,
+                    $curl6ConnectException,
                 ],
                 'expectedExceptionType' => 'curl6',
             ],
             'curl 28' => [
-                'responseFixtures' => [
-                    new ConnectException(
-                        'cURL error 28: Operation timeout..',
-                        new Request('GET', 'http://example.com/')
-                    ),
+                'httpFixtures' => [
+                    $curl28ConnectException,
+                    $curl28ConnectException,
                 ],
                 'expectedExceptionType' => 'curl28',
             ],
@@ -156,23 +130,26 @@ class WrapperTest extends BaseTest
     /**
      * @dataProvider validateErrorOnLinkedCssResourceDataProvider
      *
-     * @param array $responseFixtures
+     * @param array $httpFixtures
      * @param string $expectedErrorMessage
+     *
+     * @throws InternetMediaTypeParseException
+     * @throws QueryPathException
+     * @throws InvalidValidatorOutputException
      */
-    public function testValidateErrorOnLinkedCssResource($responseFixtures, $expectedErrorMessage)
+    public function testValidateErrorOnLinkedCssResource($httpFixtures, $expectedErrorMessage)
     {
+        $this->appendHttpFixtures($httpFixtures);
+
         $this->setCssValidatorRawOutput(
             $this->loadCssValidatorRawOutputFixture('no-messages')
         );
 
-        $httpClient = $this->createHttpClient($responseFixtures);
         $configuration = new Configuration([
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
         ]);
 
-        $this->wrapper->setConfiguration($configuration);
-        $output = $this->wrapper->validate();
+        $output = $this->wrapper->validate($configuration);
 
         $this->assertInstanceOf(CssValidatorOutput::class, $output);
 
@@ -189,60 +166,64 @@ class WrapperTest extends BaseTest
      */
     public function validateErrorOnLinkedCssResourceDataProvider()
     {
-        $minimalHtml5SingleStylesheetHttpFixture = $this->createHttpFixture(
-            'text/html',
-            $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
+        $minimalHtml5SingleStylesheetHttpFixture = ResponseFactory::createHtmlResponse(
+            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+        );
+
+        $curl6ConnectException = new ConnectException(
+            'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
+            new Request('GET', 'http://example.com/')
+        );
+
+        $curl28ConnectException = new ConnectException(
+            'cURL error 28: Operation timed out.',
+            new Request('GET', 'http://example.com/')
         );
 
         return [
             'invalid content type' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
-                    $this->createHttpFixture(
-                        'text/plain',
-                        'foo'
+                    ResponseFactory::create(
+                        'text/plain'
                     ),
                 ],
                 'expectedErrorMessage' => 'invalid-content-type:text/plain',
             ],
             'http 404' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
-                    "HTTP/1.1 404",
-                    "HTTP/1.1 404",
+                    new Response(404),
+                    new Response(404),
                 ],
                 'expectedErrorMessage' => 'http-error:404',
             ],
             'http 500' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
-                    "HTTP/1.1 500",
-                    "HTTP/1.1 500",
+                    new Response(500),
+                    new Response(500),
                 ],
                 'expectedErrorMessage' => 'http-error:500',
             ],
             'curl 6' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
-                    new ConnectException(
-                        'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
-                        new Request('GET', 'http://example.com/')
-                    ),
+                    $curl6ConnectException,
+                    $curl6ConnectException,
                 ],
                 'expectedErrorMessage' => 'curl-error:6',
             ],
             'curl 28' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
-                    new ConnectException(
-                        'cURL error 28: Operation timed out.',
-                        new Request('GET', 'http://example.com/')
-                    ),
+                    $curl28ConnectException,
+                    $curl28ConnectException,
                 ],
                 'expectedErrorMessage' => 'curl-error:28',
             ],
@@ -250,33 +231,35 @@ class WrapperTest extends BaseTest
     }
 
     /**
-     * @dataProvider validateDataProvider
+     * @dataProvider validateSuccessDataProvider
      *
-     * @param array $responseFixtures
+     * @param array $httpFixtures
      * @param string $cssValidatorRawOutput
      * @param array $configurationValues
      * @param int $expectedWarningCount
      * @param int $expectedErrorCount
      * @param array $expectedErrorCountByUrl
+     *
+     * @throws InternetMediaTypeParseException
+     * @throws InvalidValidatorOutputException
+     * @throws QueryPathException
      */
-    public function testValidateFoo(
-        $responseFixtures,
+    public function testValidateSuccess(
+        $httpFixtures,
         $cssValidatorRawOutput,
         $configurationValues,
         $expectedWarningCount,
         $expectedErrorCount,
         $expectedErrorCountByUrl = []
     ) {
+        $this->appendHttpFixtures($httpFixtures);
         $this->setCssValidatorRawOutput($cssValidatorRawOutput);
 
-        $httpClient = $this->createHttpClient($responseFixtures);
         $configuration = new Configuration(array_merge([
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
         ], $configurationValues));
 
-        $this->wrapper->setConfiguration($configuration);
-        $output = $this->wrapper->validate();
+        $output = $this->wrapper->validate($configuration);
 
         $this->assertFalse($output->hasException());
         $this->assertEquals($expectedWarningCount, $output->getWarningCount());
@@ -290,31 +273,33 @@ class WrapperTest extends BaseTest
     /**
      * @return array
      */
-    public function validateDataProvider()
+    public function validateSuccessDataProvider()
     {
-        $minimalHtml5HttpFixture = $this->createHttpFixture(
-            'text/html',
-            $this->loadHtmlDocumentFixture('minimal-html5')
+        $minimalHtml5HttpFixture = ResponseFactory::createHtmlResponse(
+            FixtureLoader::load('Html/minimal-html5.html')
         );
 
-        $minimalHtml5SingleStylesheetHttpFixture = $this->createHttpFixture(
-            'text/html',
-            $this->loadHtmlDocumentFixture('minimal-html5-single-stylesheet')
+        $minimalHtml5SingleStylesheetHttpFixture = ResponseFactory::createHtmlResponse(
+            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
         );
 
-        $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture = $this->createHttpFixture(
-            'text/html',
-            $this->loadHtmlDocumentFixture('minimal-html5-two-stylesheets-different-domains')
+        $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture = ResponseFactory::createHtmlResponse(
+            FixtureLoader::load('Html/minimal-html5-two-stylesheets-different-domains.html')
         );
 
-        $genericCssHttpFixture = $this->createHttpFixture(
-            'text/css',
-            'foo'
+        $minimalHtml5TThreeStylesheetsHttpFixture = ResponseFactory::createHtmlResponse(
+            FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
         );
+
+        $minimalHtml5MalformedSingleStylesheetHttpFixture = ResponseFactory::createHtmlResponse(
+            FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html')
+        );
+
+        $genericCssHttpFixture = ResponseFactory::createCssResponse('foo');
 
         return [
             'ignore false image data url messages' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
@@ -324,15 +309,15 @@ class WrapperTest extends BaseTest
                     'incorrect-data-url-background-image-errors'
                 ),
                 'configurationValues' => [
-                    'flags' => [
-                        Flags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES
-                    ],
+                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
+                        OutputParserConfiguration::KEY_IGNORE_FALSE_DATA_URL_MESSAGES => true,
+                    ]),
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'ignore warnings' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
@@ -340,15 +325,15 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('single-warning'),
                 'configurationValues' => [
-                    'flags' => [
-                        Flags::FLAG_IGNORE_WARNINGS
-                    ],
+                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
+                        OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+                    ]),
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension issues:warn and ignore warnings' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
@@ -356,16 +341,18 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
                 'configurationValues' => [
-                    'flags' => [
-                        Flags::FLAG_IGNORE_WARNINGS
-                    ],
-                    'vendor-extension-severity-level' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
+                        OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+                        OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
+                    ]),
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        VendorExtensionSeverityLevel::LEVEL_WARN,
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension warnings' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
@@ -373,16 +360,17 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
                 'configurationValues' => [
-                    'flags' => [
-                        Flags::FLAG_IGNORE_WARNINGS
-                    ],
-                    'vendor-extension-severity-level' => VendorExtensionSeverityLevel::LEVEL_IGNORE,
+                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
+                        OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+                    ]),
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        VendorExtensionSeverityLevel::LEVEL_IGNORE,
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension errors' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
@@ -390,13 +378,17 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
                 'configurationValues' => [
-                    'vendor-extension-severity-level' => VendorExtensionSeverityLevel::LEVEL_IGNORE,
+                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
+                        OutputParserConfiguration::KEY_IGNORE_VENDOR_EXTENSION_ISSUES => true,
+                    ]),
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        VendorExtensionSeverityLevel::LEVEL_IGNORE,
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'domains to ignore: ignore none' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
                     $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
                     $genericCssHttpFixture,
@@ -414,7 +406,7 @@ class WrapperTest extends BaseTest
                 ],
             ],
             'domains to ignore: ignore first of two' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
                     $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
                     $genericCssHttpFixture,
@@ -424,9 +416,11 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
                 'configurationValues' => [
-                    'domains-to-ignore' => [
-                        'one.example.com',
-                    ],
+                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
+                        OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
+                            'one.example.com',
+                        ],
+                    ]),
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 2,
@@ -435,7 +429,7 @@ class WrapperTest extends BaseTest
                 ],
             ],
             'domains to ignore: ignore second of two' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
                     $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
                     $genericCssHttpFixture,
@@ -445,9 +439,11 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
                 'configurationValues' => [
-                    'domains-to-ignore' => [
-                        'two.example.com',
-                    ],
+                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
+                        OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
+                            'two.example.com',
+                        ],
+                    ]),
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 1,
@@ -456,7 +452,7 @@ class WrapperTest extends BaseTest
                 ],
             ],
             'domains to ignore: ignore both' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
                     $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
                     $genericCssHttpFixture,
@@ -466,24 +462,20 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
                 'configurationValues' => [
-                    'domains-to-ignore' => [
-                        'one.example.com',
-                        'two.example.com',
-                    ],
+                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
+                        OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
+                            'one.example.com',
+                            'two.example.com',
+                        ],
+                    ]),
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'encoded ampersands in css urls' => [
-                'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-three-stylesheets')
-                    ),
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-three-stylesheets')
-                    ),
+                'httpFixtures' => [
+                    $minimalHtml5TThreeStylesheetsHttpFixture,
+                    $minimalHtml5TThreeStylesheetsHttpFixture,
                     $minimalHtml5HttpFixture,
                     $minimalHtml5HttpFixture,
                     $minimalHtml5HttpFixture,
@@ -497,7 +489,7 @@ class WrapperTest extends BaseTest
                 'expectedErrorCount' => 0,
             ],
             'html5 no css no linked resources' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5HttpFixture,
                     $minimalHtml5HttpFixture,
                 ],
@@ -507,14 +499,14 @@ class WrapperTest extends BaseTest
                 'expectedErrorCount' => 0,
             ],
             'html5 content type with charset no css no linked resources' => [
-                'responseFixtures' => [
-                    $this->createHttpFixture(
+                'httpFixtures' => [
+                    ResponseFactory::create(
                         'text/html; charset=utf-8',
-                        $this->loadHtmlDocumentFixture('minimal-html5')
+                        FixtureLoader::load('Html/minimal-html5.html')
                     ),
-                    $this->createHttpFixture(
+                    ResponseFactory::create(
                         'text/html; charset=utf-8',
-                        $this->loadHtmlDocumentFixture('minimal-html5')
+                        FixtureLoader::load('Html/minimal-html5.html')
                     ),
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
@@ -523,15 +515,9 @@ class WrapperTest extends BaseTest
                 'expectedErrorCount' => 0,
             ],
             'html5 malformed single linked resource' => [
-                'responseFixtures' => [
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-malformed-single-stylesheet')
-                    ),
-                    $this->createHttpFixture(
-                        'text/html',
-                        $this->loadHtmlDocumentFixture('minimal-html5-malformed-single-stylesheet')
-                    ),
+                'httpFixtures' => [
+                    $minimalHtml5MalformedSingleStylesheetHttpFixture,
+                    $minimalHtml5MalformedSingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
                     $genericCssHttpFixture,
                 ],
@@ -541,7 +527,7 @@ class WrapperTest extends BaseTest
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: default' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
@@ -553,7 +539,7 @@ class WrapperTest extends BaseTest
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: warn' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
@@ -561,13 +547,14 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
                 'configurationValues' => [
-                    'vendor-extension-severity-level' =>  VendorExtensionSeverityLevel::LEVEL_WARN,
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        VendorExtensionSeverityLevel::LEVEL_WARN,
                 ],
                 'expectedWarningCount' => 3,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: error' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
@@ -575,13 +562,14 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
                 'configurationValues' => [
-                    'vendor-extension-severity-level' =>  VendorExtensionSeverityLevel::LEVEL_ERROR,
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        VendorExtensionSeverityLevel::LEVEL_ERROR,
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 3,
             ],
             'vendor extension warnings: warn, with at-rule errors that should be warnings' => [
-                'responseFixtures' => [
+                'httpFixtures' => [
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $minimalHtml5SingleStylesheetHttpFixture,
                     $genericCssHttpFixture,
@@ -589,93 +577,14 @@ class WrapperTest extends BaseTest
                 ],
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
                 'configurationValues' => [
-                    'vendor-extension-severity-level' =>  VendorExtensionSeverityLevel::LEVEL_WARN,
+                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
+                        VendorExtensionSeverityLevel::LEVEL_WARN,
+                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
+                        OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
+                    ]),
                 ],
                 'expectedWarningCount' => 12,
                 'expectedErrorCount' => 0,
-            ],
-        ];
-    }
-
-    /**
-     * @dataProvider createConfigurationDataProvider
-     *
-     * @param array $configurationValues
-     * @param string $expectedContentToValidate
-     * @param string[] $expectedDomainsToIgnore
-     * @param string $expectedJavaExecutablePath
-     * @param string $expectedUrlToValidate
-     * @param string $expectedVendorExtensionSeverityLevel
-     * @param string[] $expectedFlags
-     */
-    public function testCreateConfiguration(
-        $configurationValues,
-        $expectedContentToValidate,
-        $expectedDomainsToIgnore,
-        $expectedJavaExecutablePath,
-        $expectedUrlToValidate,
-        $expectedVendorExtensionSeverityLevel,
-        $expectedFlags
-    ) {
-        $this->wrapper->createConfiguration($configurationValues);
-
-        $configuration = $this->wrapper->getConfiguration();
-
-        $this->assertEquals($expectedContentToValidate, $configuration->getContentToValidate());
-        $this->assertEquals($expectedDomainsToIgnore, $configuration->getDomainsToIgnore());
-        $this->assertEquals($expectedJavaExecutablePath, $configuration->getJavaExecutablePath());
-        $this->assertEquals($expectedUrlToValidate, $configuration->getUrlToValidate());
-        $this->assertEquals($expectedVendorExtensionSeverityLevel, $configuration->getVendorExtensionSeverityLevel());
-
-        foreach ($expectedFlags as $expectedFlag) {
-            $this->assertTrue($configuration->hasFlag($expectedFlag));
-        }
-    }
-
-    /**
-     * @return array
-     */
-    public function createConfigurationDataProvider()
-    {
-        return [
-            'defaults' => [
-                'configurationValues' => [],
-                'expectedContentToValidate' => null,
-                'expectedDomainsToIgnore' => [],
-                'expectedJavaExecutablePath' => Configuration::DEFAULT_JAVA_EXECUTABLE_PATH,
-                'expectedUrlToValidate' => '',
-                'expectedVendorExtensionSeverityLevel' => Configuration::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL,
-                'expectedFlags' => [],
-            ],
-            'set to non-defaults' => [
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => 'foo',
-                    Configuration::CONFIG_KEY_DOMAINS_TO_IGNORE => [
-                        'foo',
-                        'bar',
-                    ],
-                    Configuration::CONFIG_KEY_JAVA_EXECUTABLE_PATH => '/bin/java',
-                    Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/foo',
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL
-                        => VendorExtensionSeverityLevel::LEVEL_ERROR,
-                    Configuration::CONFIG_KEY_FLAGS => [
-                        Flags::FLAG_IGNORE_WARNINGS,
-                        FLags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES,
-                    ],
-
-                ],
-                'expectedContentToValidate' => 'foo',
-                'expectedDomainsToIgnore' => [
-                    'foo',
-                    'bar',
-                ],
-                'expectedJavaExecutablePath' => '/bin/java',
-                'expectedUrlToValidate' => 'http://example.com/foo',
-                'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_ERROR,
-                'expectedFlags' => [
-                    Flags::FLAG_IGNORE_WARNINGS,
-                    FLags::FLAG_IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES,
-                ],
             ],
         ];
     }
@@ -700,6 +609,6 @@ class WrapperTest extends BaseTest
      */
     private function loadCssValidatorRawOutputFixture($name)
     {
-        return file_get_contents(__DIR__ . '/fixtures/raw-css-validator-output/' . $name . '.txt');
+        return file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
     }
 }

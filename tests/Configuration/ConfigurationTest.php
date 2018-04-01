@@ -2,85 +2,11 @@
 
 namespace webignition\Tests\CssValidatorWrapper\Configuration;
 
-use GuzzleHttp\Client as HttpClient;
-use Mockery\MockInterface;
-use PHPUnit_Framework_TestCase;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
-use webignition\CssValidatorWrapper\Configuration\Flags;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
-use webignition\WebResource\WebPage\WebPage;
-use webignition\WebResource\WebResource;
 
-class ConfigurationTest extends PHPUnit_Framework_TestCase
+class ConfigurationTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @dataProvider clearFlagDataProvider
-     *
-     * @param $flag
-     */
-    public function testClearFlag($flag)
-    {
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_FLAGS => Flags::getValidValues()
-        ]);
-
-        $this->assertTrue($configuration->hasFlag($flag));
-        $configuration->clearFlag($flag);
-
-        $this->assertFalse($configuration->hasFlag($flag));
-    }
-
-    /**
-     * @return array
-     */
-    public function clearFlagDataProvider()
-    {
-        $testData = [];
-
-        foreach (Flags::getValidValues() as $flag) {
-            $testData[] = [
-                'flag' => $flag
-            ];
-        }
-
-        return $testData;
-    }
-
-    /**
-     * @dataProvider invalidFlagDataProvider
-     *
-     * @param string $flag
-     */
-    public function testSetInvalidFlag($flag)
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(
-            'Invalid flag, must be one of [ignore-warnings, ignore-false-background-data-url-messages]'
-        );
-        $this->expectExceptionCode(2);
-
-        new Configuration([
-            Configuration::CONFIG_KEY_FLAGS => [
-                $flag
-            ]
-        ]);
-    }
-
-    /**
-     * @return array
-     */
-    public function invalidFlagDataProvider()
-    {
-        return [
-            'foo' => [
-                'flag' => 'foo',
-            ],
-            'bar' => [
-                'flag' => 'bar',
-            ],
-        ];
-    }
-
     public function testSetGetContentToValidate()
     {
         $contentToValidate = 'foo';
@@ -90,44 +16,6 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         ]);
 
         $this->assertEquals($configuration->getContentToValidate(), $contentToValidate);
-    }
-
-    /**
-     * @dataProvider setGetDomainsToIgnoreDataProvider
-     *
-     * @param string[] $domainsToIgnore
-     * @param string[] $expectedDomainsToIgnore
-     */
-    public function testSetGetDomainsToIgnore($domainsToIgnore, $expectedDomainsToIgnore)
-    {
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_DOMAINS_TO_IGNORE => $domainsToIgnore,
-        ]);
-
-        $this->assertEquals($expectedDomainsToIgnore, $configuration->getDomainsToIgnore());
-    }
-
-    /**
-     * @return array
-     */
-    public function setGetDomainsToIgnoreDataProvider()
-    {
-        return [
-            'empty set' => [
-                'domainsToIgnore' => [],
-                'expectedDomainsToIgnore' => [],
-            ],
-            'non-empty set' => [
-                'domainsToIgnore' => [
-                    'foo',
-                    'bar',
-                ],
-                'expectedDomainsToIgnore' => [
-                    'foo',
-                    'bar',
-                ],
-            ],
-        ];
     }
 
     public function testGetExecutableCommandWithoutSettingUrlToValidate()
@@ -229,86 +117,6 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         ];
     }
 
-    public function testGetWebResourceService()
-    {
-        $httpClient = new HttpClient();
-
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-        ]);
-
-        $webResourceService = $configuration->getWebResourceService();
-
-        $this->assertEquals(
-            [
-                'text/html' => WebPage::class,
-                'text/css' => WebResource::class
-            ],
-            $webResourceService->getConfiguration()->getContentTypeWebResourceMap()
-        );
-
-        $this->assertEquals($httpClient, $webResourceService->getConfiguration()->getHttpClient());
-    }
-
-    /**
-     * @dataProvider hasContentToValidateDataProvider
-     *
-     * @param string $content
-     * @param bool $expectedHasContentToValidate
-     */
-    public function testHasContentToValidate($content, $expectedHasContentToValidate)
-    {
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-            Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => $content,
-        ]);
-
-        $this->assertEquals($expectedHasContentToValidate, $configuration->hasContentToValidate());
-    }
-
-    /**
-     * @return array
-     */
-    public function hasContentToValidateDataProvider()
-    {
-        return [
-            'null' => [
-                'content' => null,
-                'expectedHasContentToValidate' => false,
-            ],
-            'empty string' => [
-                'content' => '',
-                'expectedHasContentToValidate' => true,
-            ],
-            'non-empty string' => [
-                'content' => 'foo',
-                'expectedHasContentToValidate' => true,
-            ],
-        ];
-    }
-
-    public function testGetDefaultHttpClient()
-    {
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-        ]);
-
-        $this->assertInstanceOf(HttpClient::class, $configuration->getHttpClient());
-    }
-
-    public function testSetGetHttpClient()
-    {
-        /* @var $httpClient MockInterface|HttpClient */
-        $httpClient = \Mockery::mock(HttpClient::class);
-
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-            Configuration::CONFIG_KEY_HTTP_CLIENT => $httpClient,
-        ]);
-
-        $this->assertEquals($httpClient, $configuration->getHttpClient());
-    }
-
     /**
      * @dataProvider invalidVendorExtensionSeverityLevelDataProvider
      *
@@ -377,42 +185,5 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         }
 
         return $testData;
-    }
-
-    /**
-     * @dataProvider hasDomainsToIgnoreDataProvider
-     *
-     * @param string[] $domainsToIgnore
-     * @param bool $expectedHasDomainsToIgnore
-     */
-    public function testHasDomainsToIgnore($domainsToIgnore, $expectedHasDomainsToIgnore)
-    {
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-            Configuration::CONFIG_KEY_DOMAINS_TO_IGNORE => $domainsToIgnore,
-        ]);
-
-        $this->assertEquals($expectedHasDomainsToIgnore, $configuration->hasDomainsToIgnore());
-    }
-
-    /**
-     * @return array
-     */
-    public function hasDomainsToIgnoreDataProvider()
-    {
-        return [
-            'null' => [
-                'domainsToIgnore' => null,
-                'expectedHasDomainsToIgnore' => false,
-            ],
-            'empty' => [
-                'domainsToIgnore' => [],
-                'expectedHasDomainsToIgnore' => false,
-            ],
-            'non-empty' => [
-                'domainsToIgnore' => ['foo'],
-                'expectedHasDomainsToIgnore' => true,
-            ],
-        ];
     }
 }

@@ -4,75 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "b586b7f3e87f54b730022dc316f9d849",
+    "content-hash": "d3efb1bd608df141d6ef5c946016ff62",
     "packages": [
-        {
-            "name": "doctrine/collections",
-            "version": "v1.4.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/doctrine/collections.git",
-                "reference": "1a4fb7e902202c33cce8c55989b945612943c2ba"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/collections/zipball/1a4fb7e902202c33cce8c55989b945612943c2ba",
-                "reference": "1a4fb7e902202c33cce8c55989b945612943c2ba",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^5.6 || ^7.0"
-            },
-            "require-dev": {
-                "doctrine/coding-standard": "~0.1@dev",
-                "phpunit/phpunit": "^5.7"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.3.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-0": {
-                    "Doctrine\\Common\\Collections\\": "lib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Roman Borschel",
-                    "email": "roman@code-factory.org"
-                },
-                {
-                    "name": "Benjamin Eberlei",
-                    "email": "kontakt@beberlei.de"
-                },
-                {
-                    "name": "Guilherme Blanco",
-                    "email": "guilhermeblanco@gmail.com"
-                },
-                {
-                    "name": "Jonathan Wage",
-                    "email": "jonwage@gmail.com"
-                },
-                {
-                    "name": "Johannes Schmitt",
-                    "email": "schmittjoh@gmail.com"
-                }
-            ],
-            "description": "Collections Abstraction library",
-            "homepage": "http://www.doctrine-project.org",
-            "keywords": [
-                "array",
-                "collections",
-                "iterator"
-            ],
-            "time": "2017-01-03T10:49:41+00:00"
-        },
         {
             "name": "etechnika/idna-convert",
             "version": "1.0.3",
@@ -129,29 +62,41 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "5.3.2",
+            "version": "6.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "f9acb4761844317e626a32259205bec1f1bc60d2"
+                "reference": "68d0ea14d5a3f42a20e87632a5f84931e2709c90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/f9acb4761844317e626a32259205bec1f1bc60d2",
-                "reference": "f9acb4761844317e626a32259205bec1f1bc60d2",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/68d0ea14d5a3f42a20e87632a5f84931e2709c90",
+                "reference": "68d0ea14d5a3f42a20e87632a5f84931e2709c90",
                 "shasum": ""
             },
             "require": {
-                "guzzlehttp/ringphp": "^1.1",
-                "php": ">=5.4.0",
-                "react/promise": "^2.2"
+                "guzzlehttp/promises": "^1.0",
+                "guzzlehttp/psr7": "^1.4",
+                "php": ">=5.5"
             },
             "require-dev": {
                 "ext-curl": "*",
-                "phpunit/phpunit": "^4.0"
+                "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.4",
+                "psr/log": "^1.0"
+            },
+            "suggest": {
+                "psr/log": "Required for using the Log middleware"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "6.3-dev"
+                }
+            },
             "autoload": {
+                "files": [
+                    "src/functions_include.php"
+                ],
                 "psr-4": {
                     "GuzzleHttp\\": "src/"
                 }
@@ -167,7 +112,7 @@
                     "homepage": "https://github.com/mtdowling"
                 }
             ],
-            "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+            "description": "Guzzle is a PHP HTTP client library",
             "homepage": "http://guzzlephp.org/",
             "keywords": [
                 "client",
@@ -178,44 +123,41 @@
                 "rest",
                 "web service"
             ],
-            "time": "2018-01-15T07:18:01+00:00"
+            "time": "2018-03-26T16:33:04+00:00"
         },
         {
-            "name": "guzzlehttp/ringphp",
-            "version": "1.1.0",
+            "name": "guzzlehttp/promises",
+            "version": "v1.3.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/guzzle/RingPHP.git",
-                "reference": "dbbb91d7f6c191e5e405e900e3102ac7f261bc0b"
+                "url": "https://github.com/guzzle/promises.git",
+                "reference": "a59da6cf61d80060647ff4d3eb2c03a2bc694646"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/RingPHP/zipball/dbbb91d7f6c191e5e405e900e3102ac7f261bc0b",
-                "reference": "dbbb91d7f6c191e5e405e900e3102ac7f261bc0b",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/a59da6cf61d80060647ff4d3eb2c03a2bc694646",
+                "reference": "a59da6cf61d80060647ff4d3eb2c03a2bc694646",
                 "shasum": ""
             },
             "require": {
-                "guzzlehttp/streams": "~3.0",
-                "php": ">=5.4.0",
-                "react/promise": "~2.0"
+                "php": ">=5.5.0"
             },
             "require-dev": {
-                "ext-curl": "*",
-                "phpunit/phpunit": "~4.0"
-            },
-            "suggest": {
-                "ext-curl": "Guzzle will use specific adapters if cURL is present"
+                "phpunit/phpunit": "^4.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.1-dev"
+                    "dev-master": "1.4-dev"
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "GuzzleHttp\\Ring\\": "src/"
-                }
+                    "GuzzleHttp\\Promise\\": "src/"
+                },
+                "files": [
+                    "src/functions_include.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -228,58 +170,76 @@
                     "homepage": "https://github.com/mtdowling"
                 }
             ],
-            "description": "Provides a simple API and specification that abstracts away the details of HTTP into a single PHP function.",
-            "time": "2015-05-20T03:37:09+00:00"
-        },
-        {
-            "name": "guzzlehttp/streams",
-            "version": "3.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/guzzle/streams.git",
-                "reference": "47aaa48e27dae43d39fc1cea0ccf0d84ac1a2ba5"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/streams/zipball/47aaa48e27dae43d39fc1cea0ccf0d84ac1a2ba5",
-                "reference": "47aaa48e27dae43d39fc1cea0ccf0d84ac1a2ba5",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.4.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "~4.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "GuzzleHttp\\Stream\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Michael Dowling",
-                    "email": "mtdowling@gmail.com",
-                    "homepage": "https://github.com/mtdowling"
-                }
-            ],
-            "description": "Provides a simple abstraction over streams of data",
-            "homepage": "http://guzzlephp.org/",
+            "description": "Guzzle promises library",
             "keywords": [
-                "Guzzle",
-                "stream"
+                "promise"
             ],
-            "time": "2014-10-12T19:18:40+00:00"
+            "time": "2016-12-20T10:07:11+00:00"
+        },
+        {
+            "name": "guzzlehttp/psr7",
+            "version": "1.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/guzzle/psr7.git",
+                "reference": "f5b8a8512e2b58b0071a7280e39f14f72e05d87c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/f5b8a8512e2b58b0071a7280e39f14f72e05d87c",
+                "reference": "f5b8a8512e2b58b0071a7280e39f14f72e05d87c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "psr/http-message": "~1.0"
+            },
+            "provide": {
+                "psr/http-message-implementation": "1.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "GuzzleHttp\\Psr7\\": "src/"
+                },
+                "files": [
+                    "src/functions_include.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Dowling",
+                    "email": "mtdowling@gmail.com",
+                    "homepage": "https://github.com/mtdowling"
+                },
+                {
+                    "name": "Tobias Schultze",
+                    "homepage": "https://github.com/Tobion"
+                }
+            ],
+            "description": "PSR-7 message implementation that also provides common utility methods",
+            "keywords": [
+                "http",
+                "message",
+                "request",
+                "response",
+                "stream",
+                "uri",
+                "url"
+            ],
+            "time": "2017-03-20T17:10:46+00:00"
         },
         {
             "name": "masterminds/html5",
@@ -347,6 +307,56 @@
             "time": "2017-09-04T12:26:28+00:00"
         },
         {
+            "name": "psr/http-message",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/http-message.git",
+                "reference": "f6561bf28d520154e4b0ec72be95418abe6d9363"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/http-message/zipball/f6561bf28d520154e4b0ec72be95418abe6d9363",
+                "reference": "f6561bf28d520154e4b0ec72be95418abe6d9363",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Http\\Message\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP messages",
+            "homepage": "https://github.com/php-fig/http-message",
+            "keywords": [
+                "http",
+                "http-message",
+                "psr",
+                "psr-7",
+                "request",
+                "response"
+            ],
+            "time": "2016-08-06T14:39:51+00:00"
+        },
+        {
             "name": "querypath/querypath",
             "version": "3.0.5",
             "source": {
@@ -389,32 +399,37 @@
             "time": "2016-08-01T22:40:30+00:00"
         },
         {
-            "name": "react/promise",
-            "version": "v2.5.1",
+            "name": "symfony/polyfill-mbstring",
+            "version": "v1.7.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/reactphp/promise.git",
-                "reference": "62785ae604c8d69725d693eb370e1d67e94c4053"
+                "url": "https://github.com/symfony/polyfill-mbstring.git",
+                "reference": "78be803ce01e55d3491c1397cf1c64beb9c1b63b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/62785ae604c8d69725d693eb370e1d67e94c4053",
-                "reference": "62785ae604c8d69725d693eb370e1d67e94c4053",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/78be803ce01e55d3491c1397cf1c64beb9c1b63b",
+                "reference": "78be803ce01e55d3491c1397cf1c64beb9c1b63b",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.4.0"
+                "php": ">=5.3.3"
             },
-            "require-dev": {
-                "phpunit/phpunit": "~4.8"
+            "suggest": {
+                "ext-mbstring": "For best performance"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.7-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
-                    "React\\Promise\\": "src/"
+                    "Symfony\\Polyfill\\Mbstring\\": ""
                 },
                 "files": [
-                    "src/functions_include.php"
+                    "bootstrap.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -423,44 +438,51 @@
             ],
             "authors": [
                 {
-                    "name": "Jan Sorgalla",
-                    "email": "jsorgalla@gmail.com"
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "A lightweight implementation of CommonJS Promises/A for PHP",
+            "description": "Symfony polyfill for the Mbstring extension",
+            "homepage": "https://symfony.com",
             "keywords": [
-                "promise",
-                "promises"
+                "compatibility",
+                "mbstring",
+                "polyfill",
+                "portable",
+                "shim"
             ],
-            "time": "2017-03-25T12:08:31+00:00"
+            "time": "2018-01-30T19:27:44+00:00"
         },
         {
             "name": "webignition/absolute-url-deriver",
-            "version": "1.5.1",
+            "version": "1.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/absolute-url-deriver.git",
-                "reference": "b7dace7091da38b6a311d44d68a4a2d8c07f3394"
+                "reference": "9c1f23ee5b609b32eefc836904254d0d481caa29"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/absolute-url-deriver/zipball/b7dace7091da38b6a311d44d68a4a2d8c07f3394",
-                "reference": "b7dace7091da38b6a311d44d68a4a2d8c07f3394",
+                "url": "https://api.github.com/repos/webignition/absolute-url-deriver/zipball/9c1f23ee5b609b32eefc836904254d0d481caa29",
+                "reference": "9c1f23ee5b609b32eefc836904254d0d481caa29",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.4.0",
+                "php": ">=5.6.0",
                 "webignition/url": ">=1.9.8"
             },
             "require-dev": {
-                "phpunit/phpunit": "3.7.*",
-                "symfony/class-loader": "*"
+                "phpunit/phpunit": "~5.0",
+                "squizlabs/php_codesniffer": "3.*"
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "webignition\\Tests": "tests/",
-                    "": "src/"
+                "psr-4": {
+                    "webignition\\AbsoluteUrlDeriver\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -479,7 +501,7 @@
                 "absolute",
                 "url"
             ],
-            "time": "2014-10-20T06:50:04+00:00"
+            "time": "2018-03-12T16:05:22+00:00"
         },
         {
             "name": "webignition/character-set-list",
@@ -530,31 +552,31 @@
         },
         {
             "name": "webignition/css-validator-output-parser",
-            "version": "2.2.2",
+            "version": "3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/css-validator-output-parser.git",
-                "reference": "a7478259f317b92da314bf13fe6434e7a0be64ad"
+                "reference": "a7d879b91b09349532d1d04ae5d9376e88c03187"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/a7478259f317b92da314bf13fe6434e7a0be64ad",
-                "reference": "a7478259f317b92da314bf13fe6434e7a0be64ad",
+                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/a7d879b91b09349532d1d04ae5d9376e88c03187",
+                "reference": "a7d879b91b09349532d1d04ae5d9376e88c03187",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0",
+                "php": ">=5.6.0",
+                "symfony/polyfill-mbstring": "^1.7",
                 "webignition/url": ">=1.0,<2.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.0",
-                "symfony/class-loader": "*"
+                "phpunit/phpunit": "^5",
+                "squizlabs/php_codesniffer": "^3"
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "webignition\\Tests": "tests/",
-                    "": "src/"
+                "psr-4": {
+                    "webignition\\CssValidatorOutput\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -574,7 +596,7 @@
                 "parser",
                 "validator"
             ],
-            "time": "2014-09-17T17:06:21+00:00"
+            "time": "2018-03-30T18:35:39+00:00"
         },
         {
             "name": "webignition/disallowed-character-terminated-string",
@@ -619,21 +641,21 @@
         },
         {
             "name": "webignition/guzzle-curl-exception",
-            "version": "0.1.4",
+            "version": "1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/guzzle-curl-exception.git",
-                "reference": "67149eaab8696413ed72d880ad1e06df449115bb"
+                "reference": "7f4ab79beffc2bebf1edfc6f8c17c32b0cc2cd9b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/guzzle-curl-exception/zipball/67149eaab8696413ed72d880ad1e06df449115bb",
-                "reference": "67149eaab8696413ed72d880ad1e06df449115bb",
+                "url": "https://api.github.com/repos/webignition/guzzle-curl-exception/zipball/7f4ab79beffc2bebf1edfc6f8c17c32b0cc2cd9b",
+                "reference": "7f4ab79beffc2bebf1edfc6f8c17c32b0cc2cd9b",
                 "shasum": ""
             },
             "require": {
-                "guzzlehttp/guzzle": "~5",
-                "php": ">=5.4.0"
+                "guzzlehttp/guzzle": "~6",
+                "php": ">=5.6.0"
             },
             "require-dev": {
                 "phpunit/phpunit": "~5.0",
@@ -662,32 +684,32 @@
                 "curl",
                 "exception"
             ],
-            "time": "2018-02-14T12:32:06+00:00"
+            "time": "2018-03-20T19:23:50+00:00"
         },
         {
             "name": "webignition/html-document-link-finder",
-            "version": "1.5.1",
+            "version": "3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/html-document-link-url-finder.git",
-                "reference": "2643381ea4433588452bf27126994bfe498648f3"
+                "reference": "8df3d2fd00dcd2008ff234022c17133de3f99f97"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/html-document-link-url-finder/zipball/2643381ea4433588452bf27126994bfe498648f3",
-                "reference": "2643381ea4433588452bf27126994bfe498648f3",
+                "url": "https://api.github.com/repos/webignition/html-document-link-url-finder/zipball/8df3d2fd00dcd2008ff234022c17133de3f99f97",
+                "reference": "8df3d2fd00dcd2008ff234022c17133de3f99f97",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.4.0",
-                "webignition/absolute-url-deriver": ">=1.4",
-                "webignition/url": ">=1.9.14,<2.0",
-                "webignition/web-page-model": ">=1.1,<2"
+                "php": ">=5.6.0",
+                "webignition/absolute-url-deriver": "^1.4",
+                "webignition/url": "^1.9",
+                "webignition/web-page-model": "^3"
             },
             "require-dev": {
-                "mockery/mockery": "~0.9",
-                "phpunit/phpunit": "~4.0",
-                "squizlabs/php_codesniffer": "3.*"
+                "mockery/mockery": "^1",
+                "phpunit/phpunit": "^5",
+                "squizlabs/php_codesniffer": "^3"
             },
             "type": "library",
             "autoload": {
@@ -714,35 +736,36 @@
                 "linkifier",
                 "validation"
             ],
-            "time": "2017-06-27T14:26:10+00:00"
+            "time": "2018-03-23T14:14:01+00:00"
         },
         {
             "name": "webignition/internet-media-type",
-            "version": "0.4.7",
+            "version": "1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/internet-media-type.git",
-                "reference": "968b95796bc682c7f554c2ec671b6a97a9d5a5b0"
+                "reference": "464a7699fc1dca47d7b58573e605d0a247de7c5c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/internet-media-type/zipball/968b95796bc682c7f554c2ec671b6a97a9d5a5b0",
-                "reference": "968b95796bc682c7f554c2ec671b6a97a9d5a5b0",
+                "url": "https://api.github.com/repos/webignition/internet-media-type/zipball/464a7699fc1dca47d7b58573e605d0a247de7c5c",
+                "reference": "464a7699fc1dca47d7b58573e605d0a247de7c5c",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0",
-                "webignition/quoted-string": ">=0.1,<1.0",
-                "webignition/string-parser": ">=0.2.2,<1.0"
+                "php": ">=5.6.0",
+                "webignition/internet-media-type-interface": ">=0.1,<1.0",
+                "webignition/quoted-string": ">=0.2.1,<1.0",
+                "webignition/string-parser": ">=0.2.3,<1.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.0"
+                "phpunit/phpunit": "~5.0",
+                "squizlabs/php_codesniffer": "3.*"
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "webignition\\Tests": "tests/",
-                    "": "src/"
+                "psr-4": {
+                    "webignition\\InternetMediaType\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -764,7 +787,51 @@
                 "media type",
                 "media-type"
             ],
-            "time": "2015-02-20T16:52:30+00:00"
+            "time": "2018-03-22T10:51:41+00:00"
+        },
+        {
+            "name": "webignition/internet-media-type-interface",
+            "version": "0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/internet-media-type-interface.git",
+                "reference": "db57dba3b4dacb78c24cb2a4a88768be47794726"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/internet-media-type-interface/zipball/db57dba3b4dacb78c24cb2a4a88768be47794726",
+                "reference": "db57dba3b4dacb78c24cb2a4a88768be47794726",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\InternetMediaTypeInterface\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "PHP interfaces for a model of an http://en.wikipedia.org/wiki/Internet_media_type",
+            "homepage": "https://github.com/webignition/internet-media-type-interface",
+            "keywords": [
+                "content type",
+                "content-type",
+                "internet media type",
+                "media type",
+                "media-type"
+            ],
+            "time": "2018-03-21T10:55:33+00:00"
         },
         {
             "name": "webignition/quoted-string",
@@ -862,30 +929,34 @@
         },
         {
             "name": "webignition/url",
-            "version": "1.9.14",
+            "version": "1.9.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/url.git",
-                "reference": "b651aed2781260d8b25a086e766f528d1b9a675e"
+                "reference": "a4e6044bc6786a59b37d2508e87b540b5074b09a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/url/zipball/b651aed2781260d8b25a086e766f528d1b9a675e",
-                "reference": "b651aed2781260d8b25a086e766f528d1b9a675e",
+                "url": "https://api.github.com/repos/webignition/url/zipball/a4e6044bc6786a59b37d2508e87b540b5074b09a",
+                "reference": "a4e6044bc6786a59b37d2508e87b540b5074b09a",
                 "shasum": ""
             },
             "require": {
                 "etechnika/idna-convert": "1.0.*",
-                "php": ">=5.3.0",
+                "php": ">=5.6.0",
                 "xrstf/ip-utils": "v1.0.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.0"
+                "mockery/mockery": "~0.9",
+                "php-mock/php-mock-mockery": "1.1.0",
+                "phpunit/phpunit": "~5.0",
+                "squizlabs/php_codesniffer": "3.*"
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "": "src/"
+                "psr-4": {
+                    "webignition\\Url\\": "src/Url",
+                    "webignition\\NormalisedUrl\\": "src/NormalisedUrl"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -903,36 +974,37 @@
             "keywords": [
                 "url"
             ],
-            "time": "2015-02-13T11:52:39+00:00"
+            "time": "2018-03-14T17:25:14+00:00"
         },
         {
             "name": "webignition/web-json-model",
-            "version": "1.1.6",
+            "version": "3.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-json-model.git",
-                "reference": "509aa11cf2b549418fbd680cac023bc5a0e197a3"
+                "reference": "c70ba4f8f1250539acb0d71b56ee580c16b8ba75"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-json-model/zipball/509aa11cf2b549418fbd680cac023bc5a0e197a3",
-                "reference": "509aa11cf2b549418fbd680cac023bc5a0e197a3",
+                "url": "https://api.github.com/repos/webignition/web-json-model/zipball/c70ba4f8f1250539acb0d71b56ee580c16b8ba75",
+                "reference": "c70ba4f8f1250539acb0d71b56ee580c16b8ba75",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6.0",
-                "webignition/web-resource-model": ">=1.3,<2"
+                "webignition/web-resource-interfaces": ">=0.1,<1",
+                "webignition/web-resource-model": ">=3.2.1,<4"
             },
             "require-dev": {
-                "mockery/mockery": "^0.9",
-                "phpunit/phpunit": "~5.0",
-                "squizlabs/php_codesniffer": "3.*"
+                "mockery/mockery": "^1.0",
+                "phpunit/phpunit": "^5",
+                "squizlabs/php_codesniffer": "^3",
+                "webignition/web-resource-testing-tools": "^0.2"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "webignition\\WebResource\\JsonDocument\\": "src/",
-                    "webignition\\Tests\\WebResource\\JsonDocument\\": "tests/"
+                    "webignition\\WebResource\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -951,39 +1023,41 @@
                 "json",
                 "model"
             ],
-            "time": "2018-03-02T09:23:55+00:00"
+            "time": "2018-03-28T11:35:08+00:00"
         },
         {
             "name": "webignition/web-page-model",
-            "version": "1.3",
+            "version": "3.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-page-model.git",
-                "reference": "885c7b77d7a70a44ce950c84ac5cfc080f3a0cd4"
+                "reference": "56427d522c81ebdf59572dfc431f6b02610d3d43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-page-model/zipball/885c7b77d7a70a44ce950c84ac5cfc080f3a0cd4",
-                "reference": "885c7b77d7a70a44ce950c84ac5cfc080f3a0cd4",
+                "url": "https://api.github.com/repos/webignition/web-page-model/zipball/56427d522c81ebdf59572dfc431f6b02610d3d43",
+                "reference": "56427d522c81ebdf59572dfc431f6b02610d3d43",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6.0",
                 "querypath/querypath": ">=3.0.0",
-                "webignition/character-set-list": ">=0.2,<1.0",
-                "webignition/internet-media-type": ">=0.1,<1.0",
-                "webignition/web-resource-model": ">=1.3,<2"
+                "webignition/character-set-list": "^0.2",
+                "webignition/internet-media-type": "^1.2",
+                "webignition/internet-media-type-interface": "^0.1",
+                "webignition/web-resource-interfaces": ">=0.1,<1",
+                "webignition/web-resource-model": ">=3.2.1,<4"
             },
             "require-dev": {
-                "mockery/mockery": "^0.9",
-                "phpunit/phpunit": "~4.0",
-                "squizlabs/php_codesniffer": "3.*"
+                "mockery/mockery": "^1",
+                "phpunit/phpunit": "^5",
+                "squizlabs/php_codesniffer": "^3",
+                "webignition/web-resource-testing-tools": "^0.2"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "webignition\\WebResource\\WebPage\\": "src/",
-                    "webignition\\Tests\\WebResource\\WebPage\\": "tests/"
+                    "webignition\\WebResource\\WebPage\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1002,38 +1076,85 @@
                 "model",
                 "webpage"
             ],
-            "time": "2018-03-02T07:47:04+00:00"
+            "time": "2018-03-28T11:34:19+00:00"
         },
         {
-            "name": "webignition/web-resource-model",
-            "version": "1.3",
+            "name": "webignition/web-resource-interfaces",
+            "version": "0.11",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webignition/web-resource-model.git",
-                "reference": "daf56dcd4044fb20c12202adbbb9c19dd619555c"
+                "url": "https://github.com/webignition/web-resource-interfaces.git",
+                "reference": "7e734ccbfde87ba7dd1b4b0ab3b1a5ad77cf5e3a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-resource-model/zipball/daf56dcd4044fb20c12202adbbb9c19dd619555c",
-                "reference": "daf56dcd4044fb20c12202adbbb9c19dd619555c",
+                "url": "https://api.github.com/repos/webignition/web-resource-interfaces/zipball/7e734ccbfde87ba7dd1b4b0ab3b1a5ad77cf5e3a",
+                "reference": "7e734ccbfde87ba7dd1b4b0ab3b1a5ad77cf5e3a",
                 "shasum": ""
             },
             "require": {
-                "doctrine/collections": "~1.0",
-                "guzzlehttp/guzzle": "~5",
                 "php": ">=5.6.0",
-                "webignition/internet-media-type": ">=0.4.7,<2.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "0.9.*",
-                "phpunit/phpunit": "~5.0",
-                "squizlabs/php_codesniffer": "3.*"
+                "psr/http-message": "~1.0",
+                "webignition/internet-media-type-interface": ">=0.1,<1"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "webignition\\WebResource\\": "src/",
-                    "webignition\\Tests\\WebResource\\": "tests/"
+                    "webignition\\WebResourceInterfaces\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Interfaces for web resource models and services to retrieve and create them",
+            "homepage": "https://github.com/webignition/web-resource-interfaces",
+            "keywords": [
+                "Sitemap",
+                "json-document",
+                "model",
+                "psr-7",
+                "web-page"
+            ],
+            "time": "2018-03-29T17:08:09+00:00"
+        },
+        {
+            "name": "webignition/web-resource-model",
+            "version": "3.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/web-resource-model.git",
+                "reference": "2a3f75dac635ef24d80e90c831fa9e7f63432fb1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/web-resource-model/zipball/2a3f75dac635ef24d80e90c831fa9e7f63432fb1",
+                "reference": "2a3f75dac635ef24d80e90c831fa9e7f63432fb1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0",
+                "psr/http-message": "^1",
+                "webignition/internet-media-type": "^1.2",
+                "webignition/internet-media-type-interface": "^0.1",
+                "webignition/web-resource-interfaces": ">=0.11,<1"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1",
+                "phpunit/phpunit": "^5",
+                "squizlabs/php_codesniffer": "^3",
+                "webignition/web-resource-testing-tools": "^0.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\WebResource\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1050,37 +1171,41 @@
             "homepage": "https://github.com/webignition/web-resource-model",
             "keywords": [
                 "modem",
+                "psr-7",
                 "web"
             ],
-            "time": "2018-03-01T16:50:26+00:00"
+            "time": "2018-03-29T17:26:38+00:00"
         },
         {
-            "name": "webignition/web-resource-service",
-            "version": "1.4.1",
+            "name": "webignition/web-resource-retriever",
+            "version": "0.6",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webignition/web-resource-service.git",
-                "reference": "7c5c3cb01bb84d7bac2a87ae3625f5be83b21551"
+                "url": "https://github.com/webignition/web-resource-retriever.git",
+                "reference": "547c199c89162a08c31037dbfcbc0fbde4b2b889"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-resource-service/zipball/7c5c3cb01bb84d7bac2a87ae3625f5be83b21551",
-                "reference": "7c5c3cb01bb84d7bac2a87ae3625f5be83b21551",
+                "url": "https://api.github.com/repos/webignition/web-resource-retriever/zipball/547c199c89162a08c31037dbfcbc0fbde4b2b889",
+                "reference": "547c199c89162a08c31037dbfcbc0fbde4b2b889",
                 "shasum": ""
             },
             "require": {
-                "guzzlehttp/guzzle": "~5",
+                "guzzlehttp/guzzle": "^6",
                 "php": ">=5.6.0",
-                "webignition/internet-media-type": ">=0.4.4,<2.0",
-                "webignition/url": ">=1.9.14,<2.0",
-                "webignition/web-json-model": ">=1.1.6,<2",
-                "webignition/web-page-model": ">=1.3,<2",
-                "webignition/web-resource-model": ">=1.3,<2"
+                "webignition/guzzle-curl-exception": "^1",
+                "webignition/internet-media-type": "^1.2",
+                "webignition/internet-media-type-interface": "^0.1",
+                "webignition/web-json-model": ">=3.1.1,<4",
+                "webignition/web-page-model": ">=3.1.1,<4",
+                "webignition/web-resource-interfaces": ">=0.11,<1",
+                "webignition/web-resource-model": ">=3.3,<4"
             },
             "require-dev": {
-                "mockery/mockery": "~0.9",
-                "phpunit/phpunit": "~5.0",
-                "squizlabs/php_codesniffer": "3.*"
+                "mockery/mockery": "^1.0",
+                "phpunit/phpunit": "^5.0",
+                "squizlabs/php_codesniffer": "^3",
+                "webignition/web-resource-testing-tools": "^0.2"
             },
             "type": "library",
             "autoload": {
@@ -1088,18 +1213,47 @@
                     "webignition\\WebResource\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "webignition\\Tests\\WebResource\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "./vendor/bin/phpunit --colors=always"
+                ],
+                "cs": [
+                    "./vendor/bin/phpcs src tests --colors --standard=PSR2"
+                ],
+                "ci": [
+                    "@composer cs",
+                    "@composer test"
+                ]
+            },
             "license": [
                 "MIT"
             ],
-            "description": "Service to retrieve over HTTP a \\webignition\\WebResource\\WebResource",
-            "homepage": "https://github.com/webignition/web-resource-service",
-            "keywords": [
-                "resource",
-                "service",
-                "web"
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
             ],
-            "time": "2018-03-02T10:00:34+00:00"
+            "description": "Retrieve a WebResourceInterface instance over HTTP",
+            "homepage": "https://github.com/webignition/web-resource-retriever",
+            "keywords": [
+                "json-document",
+                "psr-7",
+                "resource",
+                "retriever",
+                "web",
+                "web-page"
+            ],
+            "support": {
+                "source": "https://github.com/webignition/web-resource-retriever/tree/0.6",
+                "issues": "https://github.com/webignition/web-resource-retriever/issues"
+            },
+            "time": "2018-03-29T18:06:17+00:00"
         },
         {
             "name": "xrstf/ip-utils",
@@ -1303,20 +1457,20 @@
         },
         {
             "name": "hamcrest/hamcrest-php",
-            "version": "v1.2.2",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hamcrest/hamcrest-php.git",
-                "reference": "b37020aa976fa52d3de9aa904aa2522dc518f79c"
+                "reference": "776503d3a8e85d4f9a1148614f95b7a608b046ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hamcrest/hamcrest-php/zipball/b37020aa976fa52d3de9aa904aa2522dc518f79c",
-                "reference": "b37020aa976fa52d3de9aa904aa2522dc518f79c",
+                "url": "https://api.github.com/repos/hamcrest/hamcrest-php/zipball/776503d3a8e85d4f9a1148614f95b7a608b046ad",
+                "reference": "776503d3a8e85d4f9a1148614f95b7a608b046ad",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.2"
+                "php": "^5.3|^7.0"
             },
             "replace": {
                 "cordoval/hamcrest-php": "*",
@@ -1325,15 +1479,18 @@
             },
             "require-dev": {
                 "phpunit/php-file-iterator": "1.3.3",
-                "satooshi/php-coveralls": "dev-master"
+                "phpunit/phpunit": "~4.0",
+                "satooshi/php-coveralls": "^1.0"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
             "autoload": {
                 "classmap": [
                     "hamcrest"
-                ],
-                "files": [
-                    "hamcrest/Hamcrest.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1344,34 +1501,34 @@
             "keywords": [
                 "test"
             ],
-            "time": "2015-05-11T14:41:42+00:00"
+            "time": "2016-01-20T08:20:44+00:00"
         },
         {
             "name": "mockery/mockery",
-            "version": "0.9.9",
+            "version": "1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mockery/mockery.git",
-                "reference": "6fdb61243844dc924071d3404bb23994ea0b6856"
+                "reference": "1bac8c362b12f522fdd1f1fa3556284c91affa38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mockery/mockery/zipball/6fdb61243844dc924071d3404bb23994ea0b6856",
-                "reference": "6fdb61243844dc924071d3404bb23994ea0b6856",
+                "url": "https://api.github.com/repos/mockery/mockery/zipball/1bac8c362b12f522fdd1f1fa3556284c91affa38",
+                "reference": "1bac8c362b12f522fdd1f1fa3556284c91affa38",
                 "shasum": ""
             },
             "require": {
-                "hamcrest/hamcrest-php": "~1.1",
+                "hamcrest/hamcrest-php": "~2.0",
                 "lib-pcre": ">=7.0",
-                "php": ">=5.3.2"
+                "php": ">=5.6.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.0"
+                "phpunit/phpunit": "~5.7|~6.1"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "0.9.x-dev"
+                    "dev-master": "1.0.x-dev"
                 }
             },
             "autoload": {
@@ -1396,7 +1553,7 @@
                 }
             ],
             "description": "Mockery is a simple yet flexible PHP mock object framework for use in unit testing with PHPUnit, PHPSpec or any other testing framework. Its core goal is to offer a test double framework with a succinct API capable of clearly defining all possible object operations and interactions using a human readable Domain Specific Language (DSL). Designed as a drop in alternative to PHPUnit's phpunit-mock-objects library, Mockery is easy to integrate with PHPUnit and can operate alongside phpunit-mock-objects without the World ending.",
-            "homepage": "http://github.com/padraic/mockery",
+            "homepage": "http://github.com/mockery/mockery",
             "keywords": [
                 "BDD",
                 "TDD",
@@ -1409,7 +1566,7 @@
                 "test double",
                 "testing"
             ],
-            "time": "2017-02-28T12:52:32+00:00"
+            "time": "2017-10-06T16:20:43+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -1458,30 +1615,29 @@
         },
         {
             "name": "php-mock/php-mock",
-            "version": "1.0.1",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mock/php-mock.git",
-                "reference": "bfa2d17d64dbf129073a7ba2051a96ce52749570"
+                "reference": "22d297231118e6fd5b9db087fbe1ef866c2b95d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mock/php-mock/zipball/bfa2d17d64dbf129073a7ba2051a96ce52749570",
-                "reference": "bfa2d17d64dbf129073a7ba2051a96ce52749570",
+                "url": "https://api.github.com/repos/php-mock/php-mock/zipball/22d297231118e6fd5b9db087fbe1ef866c2b95d2",
+                "reference": "22d297231118e6fd5b9db087fbe1ef866c2b95d2",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5",
+                "php": ">=5.6",
                 "phpunit/php-text-template": "^1"
             },
             "replace": {
                 "malkusch/php-mock": "*"
             },
             "require-dev": {
-                "phpunit/phpunit": "^4|^5"
+                "phpunit/phpunit": "^5.7"
             },
             "suggest": {
-                "php-mock/php-mock-mockery": "Allows using PHPMockery for Mockery integration",
                 "php-mock/php-mock-phpunit": "Allows integration into PHPUnit testcase with the trait PHPMock."
             },
             "type": "library",
@@ -1489,7 +1645,7 @@
                 "psr-4": {
                     "phpmock\\": [
                         "classes/",
-                        "tests/unit/"
+                        "tests/"
                     ]
                 }
             },
@@ -1516,25 +1672,25 @@
                 "test",
                 "test double"
             ],
-            "time": "2015-11-11T22:37:09+00:00"
+            "time": "2017-02-17T20:52:52+00:00"
         },
         {
             "name": "php-mock/php-mock-integration",
-            "version": "1.0.0",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mock/php-mock-integration.git",
-                "reference": "e83fb65dd20cd3cf250d554cbd4682b96b684f4b"
+                "reference": "5a0d7d7755f823bc2a230cfa45058b40f9013bc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mock/php-mock-integration/zipball/e83fb65dd20cd3cf250d554cbd4682b96b684f4b",
-                "reference": "e83fb65dd20cd3cf250d554cbd4682b96b684f4b",
+                "url": "https://api.github.com/repos/php-mock/php-mock-integration/zipball/5a0d7d7755f823bc2a230cfa45058b40f9013bc4",
+                "reference": "5a0d7d7755f823bc2a230cfa45058b40f9013bc4",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5",
-                "php-mock/php-mock": "^1",
+                "php": ">=5.6",
+                "php-mock/php-mock": "^2",
                 "phpunit/php-text-template": "^1"
             },
             "require-dev": {
@@ -1569,26 +1725,26 @@
                 "test",
                 "test double"
             ],
-            "time": "2015-10-26T21:21:42+00:00"
+            "time": "2017-02-17T21:31:34+00:00"
         },
         {
             "name": "php-mock/php-mock-mockery",
-            "version": "1.1.0",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mock/php-mock-mockery.git",
-                "reference": "bc1fe0608cd47c939aba5eac1cb50de1cda9cbc3"
+                "reference": "d6d3df9d9232f1623f1ca3cfdaacd53415593825"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mock/php-mock-mockery/zipball/bc1fe0608cd47c939aba5eac1cb50de1cda9cbc3",
-                "reference": "bc1fe0608cd47c939aba5eac1cb50de1cda9cbc3",
+                "url": "https://api.github.com/repos/php-mock/php-mock-mockery/zipball/d6d3df9d9232f1623f1ca3cfdaacd53415593825",
+                "reference": "d6d3df9d9232f1623f1ca3cfdaacd53415593825",
                 "shasum": ""
             },
             "require": {
-                "mockery/mockery": "^0.9",
-                "php": ">=5.5",
-                "php-mock/php-mock-integration": "^1"
+                "mockery/mockery": "^1",
+                "php": ">=5.6",
+                "php-mock/php-mock-integration": "^2"
             },
             "require-dev": {
                 "phpunit/phpunit": "^4|^5"
@@ -1623,7 +1779,7 @@
                 "test",
                 "test double"
             ],
-            "time": "2015-11-11T22:48:58+00:00"
+            "time": "2018-03-27T07:00:25+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -2898,7 +3054,7 @@
         },
         {
             "name": "symfony/config",
-            "version": "v3.4.5",
+            "version": "v3.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
@@ -2961,7 +3117,7 @@
         },
         {
             "name": "symfony/console",
-            "version": "v3.4.5",
+            "version": "v3.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
@@ -3030,7 +3186,7 @@
         },
         {
             "name": "symfony/debug",
-            "version": "v3.4.5",
+            "version": "v3.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/debug.git",
@@ -3086,7 +3242,7 @@
         },
         {
             "name": "symfony/event-dispatcher",
-            "version": "v2.8.35",
+            "version": "v2.8.36",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/event-dispatcher.git",
@@ -3146,7 +3302,7 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v3.4.5",
+            "version": "v3.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
@@ -3194,67 +3350,8 @@
             "time": "2018-02-22T10:48:49+00:00"
         },
         {
-            "name": "symfony/polyfill-mbstring",
-            "version": "v1.7.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "78be803ce01e55d3491c1397cf1c64beb9c1b63b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/78be803ce01e55d3491c1397cf1c64beb9c1b63b",
-                "reference": "78be803ce01e55d3491c1397cf1c64beb9c1b63b",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.3"
-            },
-            "suggest": {
-                "ext-mbstring": "For best performance"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.7-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Mbstring\\": ""
-                },
-                "files": [
-                    "bootstrap.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nicolas Grekas",
-                    "email": "p@tchwork.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony polyfill for the Mbstring extension",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "compatibility",
-                "mbstring",
-                "polyfill",
-                "portable",
-                "shim"
-            ],
-            "time": "2018-01-30T19:27:44+00:00"
-        },
-        {
             "name": "symfony/stopwatch",
-            "version": "v3.4.5",
+            "version": "v3.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/stopwatch.git",
@@ -3303,7 +3400,7 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v3.4.5",
+            "version": "v3.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
@@ -3411,7 +3508,7 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
