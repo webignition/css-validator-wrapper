@@ -96,14 +96,6 @@ class LocalProxyResource
     }
 
     /**
-     * @return Retriever
-     */
-    public function getWebResourceRetriever()
-    {
-        return $this->webResourceRetriever;
-    }
-
-    /**
      * @return HttpException[]
      */
     public function getHttpExceptions()
@@ -192,10 +184,6 @@ class LocalProxyResource
     {
         $webPageContent = $webPage->getContent();
         $hrefs = $this->findStylesheetHrefs($webPageContent);
-
-        if (!isset($hrefs[$index])) {
-            return null;
-        }
 
         $possibleSourceHrefValues = $this->getPossibleSourceHrefValues($hrefs[$index]);
 
