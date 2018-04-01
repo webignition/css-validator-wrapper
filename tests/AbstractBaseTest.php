@@ -12,7 +12,7 @@ abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
     /**
      * @var MockHandler
      */
-    protected $mockHandler;
+    private $mockHandler;
 
     /**
      * @var HttpClient
@@ -40,27 +40,6 @@ abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
         foreach ($httpFixtures as $httpFixture) {
             $this->mockHandler->append($httpFixture);
         }
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return string
-     */
-    protected function loadHtmlDocumentFixture($name)
-    {
-        return file_get_contents(__DIR__ . '/fixtures/html-documents/' . $name . '.html');
-    }
-
-    /**
-     * @param string $contentType
-     * @param string $body
-     *
-     * @return string
-     */
-    protected function createHttpFixture($contentType, $body)
-    {
-        return "HTTP/1.1 200 OK\nContent-type:" . $contentType . "\n\n" . $body;
     }
 
     /**

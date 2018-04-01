@@ -65,7 +65,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
                 'expectedLocalResourcePathExtension' => 'css',
             ],
             'html document' => [
-                'content' => $this->loadHtmlDocumentFixture('minimal-html5'),
+                'content' => FixtureLoader::load('Html/minimal-html5.html'),
                 'expectedLocalResourcePathExtension' => 'html',
             ],
         ];
@@ -465,7 +465,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
                 ],
             ],
             'five stylesheets' => [
-                'sourceDocument' => $this->loadHtmlDocumentFixture('minimal-html5-five-stylesheets'),
+                'sourceDocument' => FixtureLoader::load('Html/minimal-html5-five-stylesheets.html'),
                 'cssHttpFixtures' => [
                     $internalServerErrorResponse,
                     $internalServerErrorResponse,
@@ -480,7 +480,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
                 ],
             ],
             'base element' => [
-                'sourceDocument' => $this->loadHtmlDocumentFixture('base-element'),
+                'sourceDocument' => FixtureLoader::load('Html/base-element.html'),
                 'cssHttpFixtures' => [
                     ResponseFactory::createCssResponse(),
                     ResponseFactory::createCssResponse('body { color: #f0f0f0 }'),
