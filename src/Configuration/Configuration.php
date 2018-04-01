@@ -2,6 +2,8 @@
 
 namespace webignition\CssValidatorWrapper\Configuration;
 
+use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
+
 class Configuration
 {
     const JAVA_JAR_FLAG = '-jar';
@@ -15,9 +17,7 @@ class Configuration
     const CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL = 'vendor-extension-severity-level';
     const CONFIG_KEY_URL_TO_VALIDATE = 'url-to-validate';
     const CONFIG_KEY_CONTENT_TO_VALIDATE = 'content-to-validate';
-    const CONFIG_KEY_FLAGS = 'flags';
-    const CONFIG_KEY_DOMAINS_TO_IGNORE = 'domains-to-ignore';
-    const CONFIG_KEY_HTTP_CLIENT = 'http-client';
+    const CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION = 'output-parser-configuration';
 
     /**
      * @var string
@@ -40,20 +40,14 @@ class Configuration
     private $urlToValidate = null;
 
     /**
-     *
      * @var string
      */
     private $contentToValidate = null;
 
     /**
-     * @var array
+     * @var OutputParserConfiguration
      */
-    private $flags = [];
-
-    /**
-     * @var string[]
-     */
-    private $domainsToIgnore = [];
+    private $outputParserConfiguration;
 
     /**
      * @param array $configurationValues
@@ -68,8 +62,13 @@ class Configuration
             $configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH] = self::DEFAULT_CSS_VALIDATOR_JAR_PATH;
         }
 
+        if (!isset($configurationValues[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION])) {
+            $configurationValues[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION] = new OutputParserConfiguration();
+        }
+
         $this->javaExecutablePath = $configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH];
         $this->cssValidatorJarPath = $configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH];
+        $this->outputParserConfiguration = $configurationValues[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION];
 
         if (array_key_exists(self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL, $configurationValues)) {
             $this->setVendorExtensionSeverityLevel(
@@ -84,16 +83,14 @@ class Configuration
         if (array_key_exists(self::CONFIG_KEY_CONTENT_TO_VALIDATE, $configurationValues)) {
             $this->setContentToValidate($configurationValues[self::CONFIG_KEY_CONTENT_TO_VALIDATE]);
         }
+    }
 
-        if (array_key_exists(self::CONFIG_KEY_FLAGS, $configurationValues)) {
-            foreach ($configurationValues[self::CONFIG_KEY_FLAGS] as $flag) {
-                $this->setFlag($flag);
-            }
-        }
-
-        if (array_key_exists(self::CONFIG_KEY_DOMAINS_TO_IGNORE, $configurationValues)) {
-            $this->setDomainsToIgnore($configurationValues[self::CONFIG_KEY_DOMAINS_TO_IGNORE]);
-        }
+    /**
+     * @return mixed|OutputParserConfiguration
+     */
+    public function getOutputParserConfiguration()
+    {
+        return $this->outputParserConfiguration;
     }
 
     /**
@@ -243,71 +240,5 @@ class Configuration
         }
 
         return $commandOptions;
-    }
-
-    /**
-     * @param string $flag
-     * @throws \InvalidArgumentException
-     */
-    private function setFlag($flag)
-    {
-        if (!Flags::isValid($flag)) {
-            throw new \InvalidArgumentException(
-                'Invalid flag, must be one of ['
-                .implode(', ', Flags::getValidValues())
-                .']',
-                2
-            );
-        }
-
-        $this->flags[$flag] = true;
-    }
-
-    /**
-     * @param string $flag
-     *
-     * @return boolean
-     */
-    public function hasFlag($flag)
-    {
-        return isset($this->flags[$flag]);
-    }
-
-    /**
-     * @param string $flag
-     *
-     * @return self
-     */
-    public function clearFlag($flag)
-    {
-        if ($this->hasFlag($flag)) {
-            unset($this->flags[$flag]);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param string[] $domainsToIgnore
-     */
-    private function setDomainsToIgnore($domainsToIgnore)
-    {
-        $this->domainsToIgnore = $domainsToIgnore;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getDomainsToIgnore()
-    {
-        return $this->domainsToIgnore;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function hasDomainsToIgnore()
-    {
-        return !empty($this->getDomainsToIgnore());
     }
 }
