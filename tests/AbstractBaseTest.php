@@ -27,7 +27,7 @@ abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
         $this->httpClient = new HttpClient(['handler' => HandlerStack::create($this->mockHandler)]);
 
         PHPMockery::mock(
-            'webignition\CssValidatorWrapper',
+            'webignition\WebResource',
             'microtime'
         )->andReturn(1);
     }

@@ -18,6 +18,7 @@ use webignition\WebResource\Exception\InvalidResponseContentTypeException;
 use webignition\WebResource\Exception\TransportException;
 use webignition\WebResource\Retriever as WebResourceRetriever;
 use webignition\WebResource\Retriever;
+use webignition\WebResource\Storage as WebResourceStorage;
 use webignition\WebResource\WebPage\WebPage;
 use webignition\WebResource\WebResource;
 use webignition\WebResourceInterfaces\WebPageInterface;
