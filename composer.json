@@ -23,17 +23,11 @@
             "@composer test"
         ]
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/webignition/web-resource-retriever"
-        }
-    ],
     "require": {
         "php": ">=5.6",
         "webignition/css-validator-output-parser": ">=3,<4",
         "webignition/web-resource-retriever":">=0.6,<1",
-        "webignition/url":"^1.9",
+        "webignition/url": ">=2,<3",
         "guzzlehttp/guzzle":"^6",
         "webignition/html-document-link-finder":"^3",
         "webignition/web-page-model":">=3.1.1,<4",
