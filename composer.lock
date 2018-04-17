@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2efc549a2815bef913e85fc2d38d4f7a",
+    "content-hash": "2133312dc9213b214782059fd21c732a",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -552,22 +552,22 @@
         },
         {
             "name": "webignition/css-validator-output-parser",
-            "version": "3.0",
+            "version": "3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/css-validator-output-parser.git",
-                "reference": "a7d879b91b09349532d1d04ae5d9376e88c03187"
+                "reference": "c7be98857392afaa615f1ba9bc2a6afb0501cf5e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/a7d879b91b09349532d1d04ae5d9376e88c03187",
-                "reference": "a7d879b91b09349532d1d04ae5d9376e88c03187",
+                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/c7be98857392afaa615f1ba9bc2a6afb0501cf5e",
+                "reference": "c7be98857392afaa615f1ba9bc2a6afb0501cf5e",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6.0",
                 "symfony/polyfill-mbstring": "^1.7",
-                "webignition/url": ">=1.0,<2.0"
+                "webignition/url": ">=2,<3"
             },
             "require-dev": {
                 "phpunit/phpunit": "^5",
@@ -596,7 +596,7 @@
                 "parser",
                 "validator"
             ],
-            "time": "2018-03-30T18:35:39+00:00"
+            "time": "2018-04-17T16:08:00+00:00"
         },
         {
             "name": "webignition/disallowed-character-terminated-string",
@@ -688,22 +688,22 @@
         },
         {
             "name": "webignition/html-document-link-finder",
-            "version": "3.0",
+            "version": "3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/html-document-link-url-finder.git",
-                "reference": "8df3d2fd00dcd2008ff234022c17133de3f99f97"
+                "reference": "13809046806e6268a44099e510aad987e0c17e69"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/html-document-link-url-finder/zipball/8df3d2fd00dcd2008ff234022c17133de3f99f97",
-                "reference": "8df3d2fd00dcd2008ff234022c17133de3f99f97",
+                "url": "https://api.github.com/repos/webignition/html-document-link-url-finder/zipball/13809046806e6268a44099e510aad987e0c17e69",
+                "reference": "13809046806e6268a44099e510aad987e0c17e69",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6.0",
                 "webignition/absolute-url-deriver": "^1.4",
-                "webignition/url": "^1.9",
+                "webignition/url": ">2, <3",
                 "webignition/web-page-model": "^3"
             },
             "require-dev": {
@@ -736,7 +736,7 @@
                 "linkifier",
                 "validation"
             ],
-            "time": "2018-03-23T14:14:01+00:00"
+            "time": "2018-04-17T15:54:47+00:00"
         },
         {
             "name": "webignition/internet-media-type",
@@ -929,16 +929,16 @@
         },
         {
             "name": "webignition/url",
-            "version": "1.9.20",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/url.git",
-                "reference": "a4e6044bc6786a59b37d2508e87b540b5074b09a"
+                "reference": "f700fe0bf1b62230313152306d347f37c52480bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/url/zipball/a4e6044bc6786a59b37d2508e87b540b5074b09a",
-                "reference": "a4e6044bc6786a59b37d2508e87b540b5074b09a",
+                "url": "https://api.github.com/repos/webignition/url/zipball/f700fe0bf1b62230313152306d347f37c52480bd",
+                "reference": "f700fe0bf1b62230313152306d347f37c52480bd",
                 "shasum": ""
             },
             "require": {
@@ -974,7 +974,7 @@
             "keywords": [
                 "url"
             ],
-            "time": "2018-03-14T17:25:14+00:00"
+            "time": "2018-03-14T17:19:34+00:00"
         },
         {
             "name": "webignition/web-json-model",
@@ -1178,16 +1178,16 @@
         },
         {
             "name": "webignition/web-resource-retriever",
-            "version": "0.6",
+            "version": "0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-resource-retriever.git",
-                "reference": "547c199c89162a08c31037dbfcbc0fbde4b2b889"
+                "reference": "bfab3b91433d042081b043045af278cbf2457617"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-resource-retriever/zipball/547c199c89162a08c31037dbfcbc0fbde4b2b889",
-                "reference": "547c199c89162a08c31037dbfcbc0fbde4b2b889",
+                "url": "https://api.github.com/repos/webignition/web-resource-retriever/zipball/bfab3b91433d042081b043045af278cbf2457617",
+                "reference": "bfab3b91433d042081b043045af278cbf2457617",
                 "shasum": ""
             },
             "require": {
@@ -1250,10 +1250,10 @@
                 "web-page"
             ],
             "support": {
-                "source": "https://github.com/webignition/web-resource-retriever/tree/0.6",
+                "source": "https://github.com/webignition/web-resource-retriever/tree/0.7",
                 "issues": "https://github.com/webignition/web-resource-retriever/issues"
             },
-            "time": "2018-03-29T18:06:17+00:00"
+            "time": "2018-04-15T21:03:18+00:00"
         },
         {
             "name": "webignition/web-resource-storage",
@@ -3106,7 +3106,7 @@
         },
         {
             "name": "symfony/config",
-            "version": "v3.4.7",
+            "version": "v3.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
@@ -3169,7 +3169,7 @@
         },
         {
             "name": "symfony/console",
-            "version": "v3.4.7",
+            "version": "v3.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
@@ -3238,7 +3238,7 @@
         },
         {
             "name": "symfony/debug",
-            "version": "v3.4.7",
+            "version": "v3.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/debug.git",
@@ -3294,16 +3294,16 @@
         },
         {
             "name": "symfony/event-dispatcher",
-            "version": "v2.8.37",
+            "version": "v2.8.38",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/event-dispatcher.git",
-                "reference": "f5d2d7dcc33b89e20c2696ea9afcbddf6540081c"
+                "reference": "9b69aad7d4c086dc94ebade2d5eb9145da5dac8c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/f5d2d7dcc33b89e20c2696ea9afcbddf6540081c",
-                "reference": "f5d2d7dcc33b89e20c2696ea9afcbddf6540081c",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/9b69aad7d4c086dc94ebade2d5eb9145da5dac8c",
+                "reference": "9b69aad7d4c086dc94ebade2d5eb9145da5dac8c",
                 "shasum": ""
             },
             "require": {
@@ -3350,11 +3350,11 @@
             ],
             "description": "Symfony EventDispatcher Component",
             "homepage": "https://symfony.com",
-            "time": "2018-02-11T16:53:59+00:00"
+            "time": "2018-04-06T07:35:03+00:00"
         },
         {
             "name": "symfony/filesystem",
-            "version": "v3.4.7",
+            "version": "v3.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
@@ -3403,7 +3403,7 @@
         },
         {
             "name": "symfony/stopwatch",
-            "version": "v3.4.7",
+            "version": "v3.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/stopwatch.git",
@@ -3452,7 +3452,7 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v3.4.7",
+            "version": "v3.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
