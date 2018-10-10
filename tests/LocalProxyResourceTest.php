@@ -1,6 +1,6 @@
 <?php
 
-namespace webignition\Tests\CssValidatorWrapper\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Psr7\Request;
@@ -9,9 +9,9 @@ use QueryPath\Exception as QueryPathException;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\LocalProxyResource;
 use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
-use webignition\Tests\CssValidatorWrapper\AbstractBaseTest;
-use webignition\Tests\CssValidatorWrapper\Factory\FixtureLoader;
-use webignition\Tests\CssValidatorWrapper\Factory\ResponseFactory;
+use webignition\CssValidatorWrapper\Tests\AbstractBaseTest;
+use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
+use webignition\CssValidatorWrapper\Tests\Factory\ResponseFactory;
 use webignition\WebResource\Exception\HttpException;
 use webignition\WebResource\Exception\InvalidContentTypeException;
 use webignition\WebResource\Exception\InvalidResponseContentTypeException;
