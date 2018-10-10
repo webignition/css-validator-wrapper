@@ -49,10 +49,7 @@ class Configuration
      */
     private $outputParserConfiguration;
 
-    /**
-     * @param array $configurationValues
-     */
-    public function __construct($configurationValues)
+    public function __construct(array $configurationValues)
     {
         if (!isset($configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH])) {
             $configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH] = self::DEFAULT_JAVA_EXECUTABLE_PATH;
@@ -85,52 +82,32 @@ class Configuration
         }
     }
 
-    /**
-     * @return mixed|OutputParserConfiguration
-     */
-    public function getOutputParserConfiguration()
+    public function getOutputParserConfiguration(): OutputParserConfiguration
     {
         return $this->outputParserConfiguration;
     }
 
-    /**
-     * @param string $content
-     */
-    public function setContentToValidate($content)
+    public function setContentToValidate(string $content)
     {
         $this->contentToValidate = $content;
     }
 
-    /**
-     * @return string
-     */
-    public function getContentToValidate()
+    public function getContentToValidate(): ?string
     {
         return $this->contentToValidate;
     }
 
-    /**
-     * @return string
-     */
-    public function getJavaExecutablePath()
+    public function getJavaExecutablePath(): string
     {
         return (is_null($this->javaExecutablePath)) ? self::DEFAULT_JAVA_EXECUTABLE_PATH : $this->javaExecutablePath;
     }
 
-    /**
-     * @return string
-     */
-    private function getCssValidatorJarPath()
+    private function getCssValidatorJarPath(): string
     {
-        return is_null($this->cssValidatorJarPath)
-            ? self::DEFAULT_CSS_VALIDATOR_JAR_PATH
-            : $this->cssValidatorJarPath;
+        return is_null($this->cssValidatorJarPath) ? self::DEFAULT_CSS_VALIDATOR_JAR_PATH : $this->cssValidatorJarPath;
     }
 
-    /**
-     * @return string
-     */
-    private function getOutputFormat()
+    private function getOutputFormat(): string
     {
         return self::DEFAULT_OUTPUT_FORMAT;
     }
@@ -139,7 +116,7 @@ class Configuration
      * @param string $vendorExtensionSeverityLevel
      * @throws \InvalidArgumentException
      */
-    private function setVendorExtensionSeverityLevel($vendorExtensionSeverityLevel)
+    private function setVendorExtensionSeverityLevel(string $vendorExtensionSeverityLevel)
     {
         if (!VendorExtensionSeverityLevel::isValid($vendorExtensionSeverityLevel)) {
             throw new \InvalidArgumentException(
@@ -153,39 +130,29 @@ class Configuration
         $this->vendorExtensionSeverityLevel = $vendorExtensionSeverityLevel;
     }
 
-    /**
-     * @return string
-     */
-    public function getVendorExtensionSeverityLevel()
+    public function getVendorExtensionSeverityLevel(): string
     {
         return is_null($this->vendorExtensionSeverityLevel)
             ? self::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL
             : $this->vendorExtensionSeverityLevel;
     }
 
-    /**
-     * @param string $url
-     */
-    public function setUrlToValidate($url)
+    public function setUrlToValidate(string $url)
     {
         $this->urlToValidate = trim($url);
     }
 
-
-    /**
-     * @return string
-     */
-    public function getUrlToValidate()
+    public function getUrlToValidate(): string
     {
-        return is_null($this->urlToValidate)
-            ? ''
-            : $this->urlToValidate;
+        return is_null($this->urlToValidate) ? '' : $this->urlToValidate;
     }
 
     /**
      * @return string
+     *
+     * @throws \InvalidArgumentException
      */
-    public function getExecutableCommand()
+    public function getExecutableCommand(): string
     {
         if (!$this->hasUrlToValidate()) {
             throw new \InvalidArgumentException('URL to validate has not been set', 2);
@@ -203,18 +170,12 @@ class Configuration
         return implode(' ', $commandParts);
     }
 
-    /**
-     * @return bool
-     */
-    public function hasUrlToValidate()
+    public function hasUrlToValidate(): bool
     {
         return $this->getUrlToValidate() != '';
     }
 
-    /**
-     * @return string
-     */
-    private function getCommandOptionsString()
+    private function getCommandOptionsString(): string
     {
         $commandOptionsStrings = array();
         foreach ($this->getCommandOptions() as $key => $value) {
@@ -224,10 +185,7 @@ class Configuration
         return implode(' ', $commandOptionsStrings);
     }
 
-    /**
-     * @return array
-     */
-    private function getCommandOptions()
+    private function getCommandOptions(): array
     {
         $commandOptions = array(
             'output' => $this->getOutputFormat(),

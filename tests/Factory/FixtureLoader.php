@@ -4,7 +4,7 @@ namespace webignition\Tests\CssValidatorWrapper\Factory;
 
 class FixtureLoader
 {
-    public static function load($name)
+    public static function load(string $name)
     {
         $fixturePath = realpath(__DIR__ . '/../Fixtures/' . $name);
 

@@ -7,7 +7,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use phpmock\mockery\PHPMockery;
 
-abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
+abstract class AbstractBaseTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var MockHandler
@@ -32,9 +32,6 @@ abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
         )->andReturn(1);
     }
 
-    /**
-     * @param array $httpFixtures
-     */
     protected function appendHttpFixtures(array $httpFixtures)
     {
         foreach ($httpFixtures as $httpFixture) {

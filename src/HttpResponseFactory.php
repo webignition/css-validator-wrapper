@@ -10,24 +10,14 @@ class HttpResponseFactory
     const CSS_CONTENT_TYPE = 'text/css';
     const HTML_CONTENT_TYPE = 'text/html';
 
-    /**
-     * @param string $content
-     *
-     * @return ResponseInterface
-     */
-    public static function create($content)
+    public static function create(string $content): ResponseInterface
     {
         $contentTypeString = self::deriveContentTypeStringFromContent($content);
 
         return new Response(200, ['Content-Type' => $contentTypeString], $content);
     }
 
-    /**
-     * @param string $content
-     *
-     * @return string
-     */
-    private static function deriveContentTypeStringFromContent($content)
+    private static function deriveContentTypeStringFromContent(string $content): string
     {
         if (strip_tags($content) !== $content) {
             return self::HTML_CONTENT_TYPE;

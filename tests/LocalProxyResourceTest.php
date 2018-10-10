@@ -34,7 +34,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
      */
-    public function testPrepareFromContentToValidate($content, $expectedLocalResourcePathExtension)
+    public function testPrepareFromContentToValidate(string $content, string $expectedLocalResourcePathExtension)
     {
         $localProxyResource = new LocalProxyResource(new Configuration([
             Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => $content,
@@ -54,10 +54,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         $this->assertFileExists($this->getLocalPathFromFileUrlToValidate($urlToValidate));
     }
 
-    /**
-     * @return array
-     */
-    public function prepareFromContentToValidateDataProvider()
+    public function prepareFromContentToValidateDataProvider(): array
     {
         return [
             'css document' => [
@@ -111,10 +108,10 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws TransportException
      */
     public function testPrepareWithLinkedStylesheetsReplacesCssLinks(
-        $sourceDocument,
-        $cssHttpFixtures,
-        $expectedSourceCssElements,
-        $expectedPreparedCssElementPatterns
+        string $sourceDocument,
+        array $cssHttpFixtures,
+        array $expectedSourceCssElements,
+        array $expectedPreparedCssElementPatterns
     ) {
         $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
 
@@ -137,10 +134,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         }
     }
 
-    /**
-     * @return array
-     */
-    public function prepareFromHtmlDocumentWithLinkedStylesheetsDataProvider()
+    public function prepareFromHtmlDocumentWithLinkedStylesheetsDataProvider(): array
     {
         return $this->mergePrepareFromLinkedStylesheetsData([
             'single stylesheet' => [
@@ -205,9 +199,9 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws TransportException
      */
     public function testGetHttpExceptions(
-        $sourceDocument,
-        $cssHttpFixtures,
-        $expectedHttpExceptions
+        string $sourceDocument,
+        array $cssHttpFixtures,
+        array $expectedHttpExceptions
     ) {
         $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
         $localProxyResource->prepare();
@@ -226,10 +220,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         }
     }
 
-    /**
-     * @return array
-     */
-    public function getHttpExceptionsDataProvider()
+    public function getHttpExceptionsDataProvider(): array
     {
         return $this->mergePrepareFromLinkedStylesheetsData([
             'single stylesheet' => [
@@ -265,9 +256,9 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws TransportException
      */
     public function testGetTransportExceptions(
-        $sourceDocument,
-        $cssHttpFixtures,
-        $expectedTransportExceptions
+        string $sourceDocument,
+        array $cssHttpFixtures,
+        array $expectedTransportExceptions
     ) {
         $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
         $localProxyResource->prepare();
@@ -287,10 +278,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         }
     }
 
-    /**
-     * @return array
-     */
-    public function getTransportExceptionsDataProvider()
+    public function getTransportExceptionsDataProvider(): array
     {
         return $this->mergePrepareFromLinkedStylesheetsData([
             'single stylesheet' => [
@@ -326,9 +314,9 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws TransportException
      */
     public function testGetInvalidResponseContentTypeExceptions(
-        $sourceDocument,
-        $cssHttpFixtures,
-        $expectedInvalidResponseContentTypeExceptions
+        string $sourceDocument,
+        array $cssHttpFixtures,
+        array $expectedInvalidResponseContentTypeExceptions
     ) {
         $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
         $localProxyResource->prepare();
@@ -354,10 +342,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         }
     }
 
-    /**
-     * @return array
-     */
-    public function getInvalidResponseContentTypeExceptionsDataProvider()
+    public function getInvalidResponseContentTypeExceptionsDataProvider(): array
     {
         return $this->mergePrepareFromLinkedStylesheetsData([
             'single stylesheet' => [
@@ -397,8 +382,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws TransportException
      */
     public function testReset(
-        $sourceDocument,
-        $cssHttpFixtures
+        string $sourceDocument,
+        array $cssHttpFixtures
     ) {
         $localProxyResource = $this->createLocalProxyResource($sourceDocument, $cssHttpFixtures);
         $localPaths = $localProxyResource->prepare();
@@ -414,12 +399,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         }
     }
 
-    /**
-     * @param array $additionalTestData
-     *
-     * @return array
-     */
-    private function mergePrepareFromLinkedStylesheetsData($additionalTestData)
+    private function mergePrepareFromLinkedStylesheetsData(array $additionalTestData): array
     {
         $prepareFromLinkedStylesheetsData = $this->prepareFromLinkedStylesheetsDataProvider();
 
@@ -434,10 +414,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
         return $testData;
     }
 
-    /**
-     * @return array
-     */
-    public function prepareFromLinkedStylesheetsDataProvider()
+    public function prepareFromLinkedStylesheetsDataProvider(): array
     {
         $internalServerErrorResponse = new Response(500);
         $curlUnableToResolveHostResponse = new ConnectException(
@@ -489,14 +466,10 @@ class LocalProxyResourceTest extends AbstractBaseTest
         ];
     }
 
-    /**
-     * @param string $sourceDocumentContent
-     * @param array $cssHttpFixtures
-     *
-     * @return LocalProxyResource
-     */
-    private function createLocalProxyResource($sourceDocumentContent, array $cssHttpFixtures = [])
-    {
+    private function createLocalProxyResource(
+        string $sourceDocumentContent,
+        array $cssHttpFixtures = []
+    ): LocalProxyResource {
         $this->appendHttpFixtures(array_merge(
             [
                 ResponseFactory::createHtmlResponse(),
@@ -518,7 +491,7 @@ class LocalProxyResourceTest extends AbstractBaseTest
      *
      * @return string[]
      */
-    private function getCssLinkElementsFromHtmlDocument($htmlDocument)
+    private function getCssLinkElementsFromHtmlDocument(string $htmlDocument): array
     {
         $htmlDocumentDOM = new \DOMDocument();
         $htmlDocumentDOM->loadHTML($htmlDocument);
@@ -538,22 +511,12 @@ class LocalProxyResourceTest extends AbstractBaseTest
         return $cssLinkElements;
     }
 
-    /**
-     * @param string $urlToValidate
-     *
-     * @return string
-     */
-    private function getLocalPathFromFileUrlToValidate($urlToValidate)
+    private function getLocalPathFromFileUrlToValidate(string $urlToValidate): string
     {
         return str_replace('file:', '', $urlToValidate);
     }
 
-    /**
-     * @param string $fileType
-     *
-     * @return string
-     */
-    private function createLocalResourcePathPattern($fileType)
+    private function createLocalResourcePathPattern(string $fileType): string
     {
         return '/file:' . preg_quote(sys_get_temp_dir(), '/') . '\/[a-f0-9]{32}\.' . $fileType . '/';
     }

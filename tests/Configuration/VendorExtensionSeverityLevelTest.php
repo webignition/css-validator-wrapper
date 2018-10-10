@@ -4,22 +4,19 @@ namespace webignition\Tests\CssValidatorWrapper\Configuration;
 
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 
-class VendorExtensionSeverityLevelTest extends \PHPUnit_Framework_TestCase
+class VendorExtensionSeverityLevelTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @dataProvider isValidDataProvider
      *
      * @param string $severityLevel
      */
-    public function testIsValid($severityLevel)
+    public function testIsValid(string $severityLevel)
     {
         $this->assertTrue(VendorExtensionSeverityLevel::isValid($severityLevel));
     }
 
-    /**
-     * @return array
-     */
-    public function isValidDataProvider()
+    public function isValidDataProvider(): array
     {
         $testData = [];
 
@@ -37,15 +34,12 @@ class VendorExtensionSeverityLevelTest extends \PHPUnit_Framework_TestCase
      *
      * @param string $flag
      */
-    public function testIsInvalidValid($flag)
+    public function testIsInvalidValid(string $flag)
     {
         $this->assertFalse(VendorExtensionSeverityLevel::isValid($flag));
     }
 
-    /**
-     * @return array
-     */
-    public function isInvalidDataProvider()
+    public function isInvalidDataProvider(): array
     {
         return [
             [

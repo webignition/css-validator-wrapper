@@ -11,18 +11,13 @@ class VendorExtensionSeverityLevel
     /**
      * @var string[]
      */
-    private static $validValues = array(
+    private static $validValues = [
         self::LEVEL_ERROR,
         self::LEVEL_WARN,
         self::LEVEL_IGNORE
-    );
+    ];
 
-    /**
-     * @param string $severityLevel
-     *
-     * @return boolean
-     */
-    public static function isValid($severityLevel)
+    public static function isValid(string $severityLevel): bool
     {
         return in_array($severityLevel, self::$validValues);
     }
@@ -30,7 +25,7 @@ class VendorExtensionSeverityLevel
     /**
      * @return string[]
      */
-    public static function getValidValues()
+    public static function getValidValues(): array
     {
         return self::$validValues;
     }
