@@ -60,18 +60,11 @@ class Configuration
         $this->outputParserConfiguration =
             $values[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION] ?? new OutputParserConfiguration();
 
-        $vendorExtensionSeverityLevel =
-            $values[self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL] ?? self::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL;
-
-        $this->setVendorExtensionSeverityLevel($vendorExtensionSeverityLevel);
-
-        if (array_key_exists(self::CONFIG_KEY_URL_TO_VALIDATE, $values)) {
-            $this->setUrlToValidate($values[self::CONFIG_KEY_URL_TO_VALIDATE]);
-        }
-
-        if (array_key_exists(self::CONFIG_KEY_CONTENT_TO_VALIDATE, $values)) {
-            $this->setContentToValidate($values[self::CONFIG_KEY_CONTENT_TO_VALIDATE]);
-        }
+        $this->setVendorExtensionSeverityLevel(
+            $values[self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL] ?? self::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL
+        );
+        $this->setUrlToValidate($values[self::CONFIG_KEY_URL_TO_VALIDATE] ?? '');
+        $this->setContentToValidate($values[self::CONFIG_KEY_CONTENT_TO_VALIDATE] ?? '');
     }
 
     public function getOutputParserConfiguration(): OutputParserConfiguration
@@ -134,7 +127,7 @@ class Configuration
 
     public function getUrlToValidate(): string
     {
-        return is_null($this->urlToValidate) ? '' : $this->urlToValidate;
+        return $this->urlToValidate;
     }
 
     /**
