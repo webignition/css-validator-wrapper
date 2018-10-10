@@ -137,7 +137,7 @@ class Configuration
      */
     public function createExecutableCommand(): string
     {
-        if (!$this->hasUrlToValidate()) {
+        if (empty($this->urlToValidate)) {
             throw new \InvalidArgumentException('URL to validate has not been set', 2);
         }
 
@@ -151,11 +151,6 @@ class Configuration
         );
 
         return implode(' ', $commandParts);
-    }
-
-    public function hasUrlToValidate(): bool
-    {
-        return $this->getUrlToValidate() != '';
     }
 
     private function createCommandOptionsString(): string
