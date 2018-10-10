@@ -1,6 +1,6 @@
 <?php
 
-namespace webignition\Tests\CssValidatorWrapper\Factory;
+namespace webignition\CssValidatorWrapper\Tests\Factory;
 
 class FixtureLoader
 {

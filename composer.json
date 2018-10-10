@@ -12,7 +12,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "webignition\\Tests\\CssValidatorWrapper\\": "tests/"
+            "webignition\\CssValidatorWrapper\\Tests\\": "tests/"
         }
     },
     "scripts": {

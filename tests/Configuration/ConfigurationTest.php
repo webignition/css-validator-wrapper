@@ -1,6 +1,6 @@
 <?php
 
-namespace webignition\Tests\CssValidatorWrapper\Configuration;
+namespace webignition\CssValidatorWrapper\Tests\Configuration;
 
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
