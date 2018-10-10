@@ -49,36 +49,28 @@ class Configuration
      */
     private $outputParserConfiguration;
 
-    public function __construct(array $configurationValues)
+    public function __construct(array $values)
     {
-        if (!isset($configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH])) {
-            $configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH] = self::DEFAULT_JAVA_EXECUTABLE_PATH;
+        $this->javaExecutablePath =
+            $values[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH] ?? self::DEFAULT_JAVA_EXECUTABLE_PATH;
+
+        $this->cssValidatorJarPath =
+            $values[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH] ?? self::DEFAULT_CSS_VALIDATOR_JAR_PATH;
+
+        $this->outputParserConfiguration =
+            $values[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION] ?? new OutputParserConfiguration();
+
+        $vendorExtensionSeverityLevel =
+            $values[self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL] ?? self::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL;
+
+        $this->setVendorExtensionSeverityLevel($vendorExtensionSeverityLevel);
+
+        if (array_key_exists(self::CONFIG_KEY_URL_TO_VALIDATE, $values)) {
+            $this->setUrlToValidate($values[self::CONFIG_KEY_URL_TO_VALIDATE]);
         }
 
-        if (!isset($configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH])) {
-            $configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH] = self::DEFAULT_CSS_VALIDATOR_JAR_PATH;
-        }
-
-        if (!isset($configurationValues[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION])) {
-            $configurationValues[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION] = new OutputParserConfiguration();
-        }
-
-        $this->javaExecutablePath = $configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH];
-        $this->cssValidatorJarPath = $configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH];
-        $this->outputParserConfiguration = $configurationValues[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION];
-
-        if (array_key_exists(self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL, $configurationValues)) {
-            $this->setVendorExtensionSeverityLevel(
-                $configurationValues[self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL]
-            );
-        }
-
-        if (array_key_exists(self::CONFIG_KEY_URL_TO_VALIDATE, $configurationValues)) {
-            $this->setUrlToValidate($configurationValues[self::CONFIG_KEY_URL_TO_VALIDATE]);
-        }
-
-        if (array_key_exists(self::CONFIG_KEY_CONTENT_TO_VALIDATE, $configurationValues)) {
-            $this->setContentToValidate($configurationValues[self::CONFIG_KEY_CONTENT_TO_VALIDATE]);
+        if (array_key_exists(self::CONFIG_KEY_CONTENT_TO_VALIDATE, $values)) {
+            $this->setContentToValidate($values[self::CONFIG_KEY_CONTENT_TO_VALIDATE]);
         }
     }
 
@@ -99,12 +91,12 @@ class Configuration
 
     public function getJavaExecutablePath(): string
     {
-        return (is_null($this->javaExecutablePath)) ? self::DEFAULT_JAVA_EXECUTABLE_PATH : $this->javaExecutablePath;
+        return $this->javaExecutablePath;
     }
 
     private function getCssValidatorJarPath(): string
     {
-        return is_null($this->cssValidatorJarPath) ? self::DEFAULT_CSS_VALIDATOR_JAR_PATH : $this->cssValidatorJarPath;
+        return $this->cssValidatorJarPath;
     }
 
     private function getOutputFormat(): string
@@ -132,9 +124,7 @@ class Configuration
 
     public function getVendorExtensionSeverityLevel(): string
     {
-        return is_null($this->vendorExtensionSeverityLevel)
-            ? self::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL
-            : $this->vendorExtensionSeverityLevel;
+        return $this->vendorExtensionSeverityLevel;
     }
 
     public function setUrlToValidate(string $url)
