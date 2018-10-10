@@ -26,21 +26,21 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
         $this->expectExceptionMessage('URL to validate has not been set');
         $this->expectExceptionCode(2);
 
-        $configuration->getExecutableCommand();
+        $configuration->createExecutableCommand();
     }
 
     /**
-     * @dataProvider getExecutableCommandDataProvider
+     * @dataProvider createExecutableCommandDataProvider
      *
      * @param Configuration $configuration
      * @param string $expectedExecutableCommand
      */
-    public function testGetExecutableCommand(Configuration $configuration, string $expectedExecutableCommand)
+    public function testCreateExecutableCommand(Configuration $configuration, string $expectedExecutableCommand)
     {
-        $this->assertEquals($expectedExecutableCommand, $configuration->getExecutableCommand());
+        $this->assertEquals($expectedExecutableCommand, $configuration->createExecutableCommand());
     }
 
-    public function getExecutableCommandDataProvider(): array
+    public function createExecutableCommandDataProvider(): array
     {
         return [
             'use default' => [

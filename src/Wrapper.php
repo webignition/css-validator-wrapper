@@ -90,7 +90,7 @@ class Wrapper
             }
         }
 
-        $rawValidatorOutput = shell_exec($configuration->getExecutableCommand());
+        $rawValidatorOutput = shell_exec($configuration->createExecutableCommand());
 
         $validatorOutput = $this->replaceLocalFilePathsWithOriginalFilePaths(
             $localProxyResource,

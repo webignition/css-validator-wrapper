@@ -135,7 +135,7 @@ class Configuration
      *
      * @throws \InvalidArgumentException
      */
-    public function getExecutableCommand(): string
+    public function createExecutableCommand(): string
     {
         if (!$this->hasUrlToValidate()) {
             throw new \InvalidArgumentException('URL to validate has not been set', 2);
@@ -145,7 +145,7 @@ class Configuration
             $this->getJavaExecutablePath(),
             self::JAVA_JAR_FLAG,
             $this->getCssValidatorJarPath(),
-            $this->getCommandOptionsString(),
+            $this->createCommandOptionsString(),
             '"'.str_replace('"', '\"', $this->getUrlToValidate()).'"',
             '2>&1'
         );
@@ -158,17 +158,17 @@ class Configuration
         return $this->getUrlToValidate() != '';
     }
 
-    private function getCommandOptionsString(): string
+    private function createCommandOptionsString(): string
     {
         $commandOptionsStrings = array();
-        foreach ($this->getCommandOptions() as $key => $value) {
+        foreach ($this->createCommandOptions() as $key => $value) {
             $commandOptionsStrings[] = '-'.$key.' '.$value;
         }
 
         return implode(' ', $commandOptionsStrings);
     }
 
-    private function getCommandOptions(): array
+    private function createCommandOptions(): array
     {
         $commandOptions = array(
             'output' => $this->getOutputFormat(),
