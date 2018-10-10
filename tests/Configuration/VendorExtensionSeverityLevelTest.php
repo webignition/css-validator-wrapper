@@ -4,7 +4,7 @@ namespace webignition\Tests\CssValidatorWrapper\Configuration;
 
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 
-class VendorExtensionSeverityLevelTest extends \PHPUnit_Framework_TestCase
+class VendorExtensionSeverityLevelTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @dataProvider isValidDataProvider

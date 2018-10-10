@@ -7,7 +7,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use phpmock\mockery\PHPMockery;
 
-abstract class AbstractBaseTest extends \PHPUnit_Framework_TestCase
+abstract class AbstractBaseTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var MockHandler

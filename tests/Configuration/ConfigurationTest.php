@@ -5,7 +5,7 @@ namespace webignition\Tests\CssValidatorWrapper\Configuration;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 
-class ConfigurationTest extends \PHPUnit_Framework_TestCase
+class ConfigurationTest extends \PHPUnit\Framework\TestCase
 {
     public function testSetGetContentToValidate()
     {
