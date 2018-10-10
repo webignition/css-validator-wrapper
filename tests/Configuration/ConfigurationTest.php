@@ -35,15 +35,12 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
      * @param Configuration $configuration
      * @param string $expectedExecutableCommand
      */
-    public function testGetExecutableCommand(Configuration $configuration, $expectedExecutableCommand)
+    public function testGetExecutableCommand(Configuration $configuration, string $expectedExecutableCommand)
     {
         $this->assertEquals($expectedExecutableCommand, $configuration->getExecutableCommand());
     }
 
-    /**
-     * @return array
-     */
-    public function getExecutableCommandDataProvider()
+    public function getExecutableCommandDataProvider(): array
     {
         return [
             'use default' => [
@@ -122,7 +119,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
      *
      * @param string $vendorExtensionSeverityLevel
      */
-    public function testSetInvalidVendorExtensionSeverityLevel($vendorExtensionSeverityLevel)
+    public function testSetInvalidVendorExtensionSeverityLevel(string $vendorExtensionSeverityLevel)
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid severity level, must be one of [error, warn, ignore]');
@@ -134,10 +131,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
         ]);
     }
 
-    /**
-     * @return array
-     */
-    public function invalidVendorExtensionSeverityLevelDataProvider()
+    public function invalidVendorExtensionSeverityLevelDataProvider(): array
     {
         return [
             'foo' => [
@@ -156,8 +150,8 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
      * @param string $expectedVendorExtensionSeverityLevel
      */
     public function testSetVendorExtensionSeverityLevel(
-        $vendorExtensionSeverityLevel,
-        $expectedVendorExtensionSeverityLevel
+        string $vendorExtensionSeverityLevel,
+        string $expectedVendorExtensionSeverityLevel
     ) {
         $configuration = new Configuration([
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
@@ -170,10 +164,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    /**
-     * @return array
-     */
-    public function vendorExtensionSeverityLevelDataProvider()
+    public function vendorExtensionSeverityLevelDataProvider(): array
     {
         $testData = [];
 

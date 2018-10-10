@@ -23,7 +23,7 @@ class WebResourceFactory
      * @throws InternetMediaTypeParseException
      * @throws InvalidContentTypeException
      */
-    public static function create($content, UriInterface $uri)
+    public static function create(string $content, UriInterface $uri): WebResourceInterface
     {
         $httpResponse = HttpResponseFactory::create($content);
 
@@ -39,12 +39,7 @@ class WebResourceFactory
         return new WebResource($httpResponse, $uri);
     }
 
-    /**
-     * @param string $contentTypeString
-     *
-     * @return InternetMediaTypeInterface
-     */
-    private static function createMediaTypeFromContentTypeString($contentTypeString)
+    private static function createMediaTypeFromContentTypeString(string $contentTypeString): InternetMediaTypeInterface
     {
         $mediaType = new InternetMediaType();
         $mediaTypeParts = explode('/', $contentTypeString);

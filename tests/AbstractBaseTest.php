@@ -32,9 +32,6 @@ abstract class AbstractBaseTest extends \PHPUnit\Framework\TestCase
         )->andReturn(1);
     }
 
-    /**
-     * @param array $httpFixtures
-     */
     protected function appendHttpFixtures(array $httpFixtures)
     {
         foreach ($httpFixtures as $httpFixture) {

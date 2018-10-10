@@ -46,7 +46,7 @@ class WrapperTest extends AbstractBaseTest
      * @throws InternetMediaTypeParseException
      * @throws InvalidValidatorOutputException
      */
-    public function testValidateErrorOnRootWebResource($httpFixtures, $expectedExceptionType)
+    public function testValidateErrorOnRootWebResource(array $httpFixtures, string $expectedExceptionType)
     {
         $this->appendHttpFixtures($httpFixtures);
         $configuration = new Configuration([
@@ -61,10 +61,7 @@ class WrapperTest extends AbstractBaseTest
         $this->assertEquals($expectedExceptionType, $output->getException()->getType()->get());
     }
 
-    /**
-     * @return array
-     */
-    public function validateInvalidContentTypeOnRootWebResourceDataProvider()
+    public function validateInvalidContentTypeOnRootWebResourceDataProvider(): array
     {
         $curl6ConnectException = new ConnectException(
             'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
@@ -137,7 +134,7 @@ class WrapperTest extends AbstractBaseTest
      * @throws QueryPathException
      * @throws InvalidValidatorOutputException
      */
-    public function testValidateErrorOnLinkedCssResource($httpFixtures, $expectedErrorMessage)
+    public function testValidateErrorOnLinkedCssResource(array $httpFixtures, string $expectedErrorMessage)
     {
         $this->appendHttpFixtures($httpFixtures);
 
@@ -155,16 +152,14 @@ class WrapperTest extends AbstractBaseTest
 
         $this->assertEquals(1, $output->getErrorCount());
 
+        /* @var array $errorsForLinkedStylesheet */
         $errorsForLinkedStylesheet = $output->getErrorsByUrl('http://example.com/style.css');
 
         $this->assertCount(1, $errorsForLinkedStylesheet);
         $this->assertEquals($expectedErrorMessage, $errorsForLinkedStylesheet[0]->getMessage());
     }
 
-    /**
-     * @return array
-     */
-    public function validateErrorOnLinkedCssResourceDataProvider()
+    public function validateErrorOnLinkedCssResourceDataProvider(): array
     {
         $minimalHtml5SingleStylesheetHttpFixture = ResponseFactory::createHtmlResponse(
             FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
@@ -245,12 +240,12 @@ class WrapperTest extends AbstractBaseTest
      * @throws QueryPathException
      */
     public function testValidateSuccess(
-        $httpFixtures,
-        $cssValidatorRawOutput,
-        $configurationValues,
-        $expectedWarningCount,
-        $expectedErrorCount,
-        $expectedErrorCountByUrl = []
+        array $httpFixtures,
+        string $cssValidatorRawOutput,
+        array $configurationValues,
+        int $expectedWarningCount,
+        int $expectedErrorCount,
+        array $expectedErrorCountByUrl = []
     ) {
         $this->appendHttpFixtures($httpFixtures);
         $this->setCssValidatorRawOutput($cssValidatorRawOutput);
@@ -266,14 +261,14 @@ class WrapperTest extends AbstractBaseTest
         $this->assertEquals($expectedErrorCount, $output->getErrorCount());
 
         foreach ($expectedErrorCountByUrl as $url => $expectedErrorCountForUrl) {
-            $this->assertCount($expectedErrorCountForUrl, $output->getErrorsByUrl($url));
+            /* @var array $errorsByUrl */
+            $errorsByUrl = $output->getErrorsByUrl($url);
+
+            $this->assertCount($expectedErrorCountForUrl, $errorsByUrl);
         }
     }
 
-    /**
-     * @return array
-     */
-    public function validateSuccessDataProvider()
+    public function validateSuccessDataProvider(): array
     {
         $minimalHtml5HttpFixture = ResponseFactory::createHtmlResponse(
             FixtureLoader::load('Html/minimal-html5.html')
@@ -589,10 +584,7 @@ class WrapperTest extends AbstractBaseTest
         ];
     }
 
-    /**
-     * @param string $rawOutput
-     */
-    private function setCssValidatorRawOutput($rawOutput)
+    private function setCssValidatorRawOutput(string $rawOutput)
     {
         PHPMockery::mock(
             'webignition\CssValidatorWrapper',
@@ -602,12 +594,7 @@ class WrapperTest extends AbstractBaseTest
         );
     }
 
-    /**
-     * @param string $name
-     *
-     * @return string
-     */
-    private function loadCssValidatorRawOutputFixture($name)
+    private function loadCssValidatorRawOutputFixture(string $name): string
     {
         return file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
     }

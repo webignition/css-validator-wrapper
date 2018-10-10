@@ -20,7 +20,6 @@ use webignition\WebResource\Retriever as WebResourceRetriever;
 use webignition\WebResource\Retriever;
 use webignition\WebResource\Storage as WebResourceStorage;
 use webignition\WebResource\WebPage\WebPage;
-use webignition\WebResource\WebResource;
 use webignition\WebResourceInterfaces\WebPageInterface;
 use webignition\WebResourceInterfaces\WebResourceInterface;
 
@@ -74,10 +73,6 @@ class LocalProxyResource
      */
     private $invalidResponseContentTypeExceptions = [];
 
-    /**
-     * @param Configuration $sourceConfiguration
-     * @param HttpClient $httpClient
-     */
     public function __construct(Configuration $sourceConfiguration, HttpClient $httpClient = null)
     {
         $this->sourceConfiguration = $sourceConfiguration;
@@ -99,7 +94,7 @@ class LocalProxyResource
     /**
      * @return HttpException[]
      */
-    public function getHttpExceptions()
+    public function getHttpExceptions(): array
     {
         return $this->httpExceptions;
     }
@@ -107,7 +102,7 @@ class LocalProxyResource
     /**
      * @return TransportException[]
      */
-    public function getTransportExceptions()
+    public function getTransportExceptions(): array
     {
         return $this->transportExceptions;
     }
@@ -115,13 +110,13 @@ class LocalProxyResource
     /**
      * @return InvalidResponseContentTypeException[]
      */
-    public function getInvalidResponseContentTypeExceptions()
+    public function getInvalidResponseContentTypeExceptions(): array
     {
         return $this->invalidResponseContentTypeExceptions;
     }
 
     /**
-     * @return array
+     * @return string[]
      *
      * @throws HttpException
      * @throws InternetMediaTypeParseException
@@ -130,7 +125,7 @@ class LocalProxyResource
      * @throws QueryPathException
      * @throws TransportException
      */
-    public function prepare()
+    public function prepare(): array
     {
         $rootWebResource = $this->getRootWebResource();
 
@@ -174,15 +169,11 @@ class LocalProxyResource
         return $paths;
     }
 
-    /**
-     * @param WebPageInterface $webPage
-     * @param int $index
-     * @param string $newUrl
-     *
-     * @return WebResourceInterface|null
-     */
-    private function updateRootWebResourceStylesheetUrl(WebPageInterface $webPage, $index, $newUrl)
-    {
+    private function updateRootWebResourceStylesheetUrl(
+        WebPageInterface $webPage,
+        int $index,
+        string $newUrl
+    ): WebResourceInterface {
         $webPageContent = $webPage->getContent();
         $hrefs = $this->findStylesheetHrefs($webPageContent);
 
@@ -207,12 +198,7 @@ class LocalProxyResource
         return $webPage->setBody($newBody);
     }
 
-    /**
-     * @param string $content
-     *
-     * @return StreamInterface
-     */
-    private function createStreamFromString($content)
+    private function createStreamFromString(string $content): StreamInterface
     {
         $stream = fopen('php://temp', 'r+');
         if ($content !== '') {
@@ -227,7 +213,7 @@ class LocalProxyResource
      *
      * @return string[]
      */
-    private function getPossibleSourceHrefValues($href)
+    private function getPossibleSourceHrefValues(string $href): array
     {
         $urls = [$href];
         if (substr_count($href, '&')) {
@@ -242,7 +228,7 @@ class LocalProxyResource
      *
      * @return string[]
      */
-    private function getPossibleSourceHrefAttributeStrings($hrefValue)
+    private function getPossibleSourceHrefAttributeStrings(string $hrefValue): array
     {
         return [
             'href="'.$hrefValue.'"',
@@ -250,12 +236,7 @@ class LocalProxyResource
         ];
     }
 
-    /**
-     * @param \DOMElement $domElement
-     *
-     * @return boolean
-     */
-    private function isLinkElementStylesheetElementWithHrefAttribute(\DOMelement $domElement)
+    private function isLinkElementStylesheetElementWithHrefAttribute(\DOMelement $domElement): bool
     {
         $hasStylesheetRelAttribute = $domElement->getAttribute('rel') === 'stylesheet';
         $hasNonEmptyHrefAttribute = !empty(trim($domElement->getAttribute('href')));
@@ -270,7 +251,7 @@ class LocalProxyResource
      *
      * @throws QueryPathException
      */
-    private function findStylesheetUrls(WebPageInterface $webPage)
+    private function findStylesheetUrls(WebPageInterface $webPage): array
     {
         $linkFinderConfiguration = new LinkFinderConfiguration([
             LinkFinderConfiguration::CONFIG_KEY_ELEMENT_SCOPE => 'link',
@@ -292,7 +273,7 @@ class LocalProxyResource
      *
      * @return string[]
      */
-    private function findStylesheetHrefs($webPageContent)
+    private function findStylesheetHrefs(string $webPageContent): array
     {
         $hrefs = [];
 
@@ -338,22 +319,19 @@ class LocalProxyResource
         return $rootWebResource;
     }
 
-    /**
-     * @return Configuration
-     */
-    public function getConfiguration()
+    public function getConfiguration(): Configuration
     {
         return $this->configuration;
     }
 
     /**
-     * @param $url
+     * @param string $url
      *
-     * @return null|WebResource
+     * @return WebResourceInterface|null
      *
      * @throws InternetMediaTypeParseException
      */
-    private function retrieveLinkedResource($url)
+    private function retrieveLinkedResource(string $url): ?WebResourceInterface
     {
         $urlHash = UrlHasher::create($url);
 
@@ -384,10 +362,7 @@ class LocalProxyResource
         return $this->linkedResources[$urlHash];
     }
 
-    /**
-     * @return WebResourceStorage
-     */
-    public function getWebResourceStorage()
+    public function getWebResourceStorage(): WebResourceStorage
     {
         return $this->webResourceStorage;
     }

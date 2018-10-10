@@ -4,12 +4,7 @@ namespace webignition\CssValidatorWrapper;
 
 class UrlHasher
 {
-    /**
-     * @param string $url
-     *
-     * @return string
-     */
-    public static function create($url)
+    public static function create(string $url): string
     {
         return md5($url);
     }

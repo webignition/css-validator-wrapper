@@ -32,9 +32,6 @@ class Wrapper
         $this->httpClient = new HttpClient();
     }
 
-    /**
-     * @param HttpClient $httpClient
-     */
     public function setHttpClient(HttpClient $httpClient)
     {
         $this->httpClient = $httpClient;
@@ -49,7 +46,7 @@ class Wrapper
      * @throws InvalidValidatorOutputException
      * @throws QueryPathException
      */
-    public function validate(Configuration $configuration)
+    public function validate(Configuration $configuration): CssValidatorOutput
     {
         $sourceUrl = $configuration->getUrlToValidate();
         $localProxyResource = new LocalProxyResource($configuration, $this->httpClient);
@@ -148,18 +145,11 @@ class Wrapper
         return $output;
     }
 
-    /**
-     * @param LocalProxyResource $localProxyResource
-     * @param string $validatorOutput
-     * @param string $sourceUrl
-     *
-     * @return string
-     */
     private function replaceLocalFilePathsWithOriginalFilePaths(
         LocalProxyResource $localProxyResource,
-        $validatorOutput,
-        $sourceUrl
-    ) {
+        string $validatorOutput,
+        string $sourceUrl
+    ): string {
         $refMatches = [];
         preg_match_all('/ref="file:\/tmp\/[^"]*"/', $validatorOutput, $refMatches);
 
@@ -188,13 +178,7 @@ class Wrapper
         return $validatorOutput;
     }
 
-    /**
-     * @param string $message
-     * @param UriInterface $uri
-     *
-     * @return CssValidatorOutputError
-     */
-    private function createCssValidatorOutputError($message, UriInterface $uri)
+    private function createCssValidatorOutputError(string $message, UriInterface $uri): CssValidatorOutputError
     {
         return new CssValidatorOutputError(
             $message,
