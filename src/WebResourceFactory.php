@@ -4,11 +4,12 @@ namespace webignition\CssValidatorWrapper;
 
 use Psr\Http\Message\UriInterface;
 use webignition\InternetMediaType\InternetMediaType;
-use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
 use webignition\InternetMediaTypeInterface\InternetMediaTypeInterface;
+use webignition\WebPageInspector\UnparseableContentTypeException;
 use webignition\WebResource\Exception\InvalidContentTypeException;
 use webignition\WebResource\WebPage\WebPage;
 use webignition\WebResource\WebResource;
+use webignition\WebResource\WebResourceProperties;
 use webignition\WebResourceInterfaces\WebPageInterface;
 use webignition\WebResourceInterfaces\WebResourceInterface;
 
@@ -20,33 +21,33 @@ class WebResourceFactory
      *
      * @return WebPageInterface|WebResourceInterface
      *
-     * @throws InternetMediaTypeParseException
      * @throws InvalidContentTypeException
+     * @throws UnparseableContentTypeException
      */
     public static function create(string $content, UriInterface $uri): WebResourceInterface
     {
-        $httpResponse = HttpResponseFactory::create($content);
-
-        $contentTypeHeader = $httpResponse->getHeader('Content-Type');
-        $contentTypeString = $contentTypeHeader[0];
-
-        $contentType = self::createMediaTypeFromContentTypeString($contentTypeString);
+        $contentType = self::deriveContentTypeFromContent($content);
 
         if (WebPage::models($contentType)) {
-            return new WebPage($httpResponse, $uri);
+            return new WebPage(WebResourceProperties::create([
+                WebResourceProperties::ARG_URI => $uri,
+                WebResourceProperties::ARG_CONTENT => $content,
+                WebResourceProperties::ARG_CONTENT_TYPE => $contentType
+            ]));
         }
 
-        return new WebResource($httpResponse, $uri);
+        return new WebResource(WebResourceProperties::create([
+            WebResourceProperties::ARG_URI => $uri,
+            WebResourceProperties::ARG_CONTENT => $content,
+            WebResourceProperties::ARG_CONTENT_TYPE => $contentType
+        ]));
     }
 
-    private static function createMediaTypeFromContentTypeString(string $contentTypeString): InternetMediaTypeInterface
+    private static function deriveContentTypeFromContent(string $content): InternetMediaTypeInterface
     {
-        $mediaType = new InternetMediaType();
-        $mediaTypeParts = explode('/', $contentTypeString);
+        $type = 'text';
+        $subtype = strip_tags($content) === $content ? 'css' : 'html';
 
-        $mediaType->setType($mediaTypeParts[0]);
-        $mediaType->setSubtype($mediaTypeParts[1]);
-
-        return $mediaType;
+        return new InternetMediaType($type, $subtype);
     }
 }

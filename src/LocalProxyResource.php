@@ -4,14 +4,13 @@ namespace webignition\CssValidatorWrapper;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\Uri;
-use Psr\Http\Message\StreamInterface;
-use QueryPath\Exception as QueryPathException;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\HtmlDocumentLinkUrlFinder\Configuration as LinkFinderConfiguration;
 use webignition\HtmlDocumentLinkUrlFinder\HtmlDocumentLinkUrlFinder;
 use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
+use webignition\StreamFactory\StreamFactory;
+use webignition\WebPageInspector\UnparseableContentTypeException;
 use webignition\WebResource\Exception\HttpException;
 use webignition\WebResource\Exception\InvalidContentTypeException;
 use webignition\WebResource\Exception\InvalidResponseContentTypeException;
@@ -69,6 +68,11 @@ class LocalProxyResource
     private $webResourceStorage;
 
     /**
+     * @var StreamFactory
+     */
+    private $streamFactory;
+
+    /**
      * @var InvalidResponseContentTypeException[]
      */
     private $invalidResponseContentTypeExceptions = [];
@@ -84,11 +88,12 @@ class LocalProxyResource
 
         $this->webResourceRetriever = new Retriever(
             $httpClient,
-            array_merge(WebPage::getModelledContentTypeStrings(), [HttpResponseFactory::CSS_CONTENT_TYPE]),
+            array_merge(WebPage::getModelledContentTypeStrings(), [self::CSS_CONTENT_TYPE]),
             false
         );
 
         $this->webResourceStorage = new WebResourceStorage();
+        $this->streamFactory = new StreamFactory();
     }
 
     /**
@@ -122,8 +127,8 @@ class LocalProxyResource
      * @throws InternetMediaTypeParseException
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
-     * @throws QueryPathException
      * @throws TransportException
+     * @throws UnparseableContentTypeException
      */
     public function prepare(): array
     {
@@ -193,19 +198,7 @@ class LocalProxyResource
             }
         }
 
-        $newBody = $this->createStreamFromString($webPageContent);
-
-        return $webPage->setBody($newBody);
-    }
-
-    private function createStreamFromString(string $content): StreamInterface
-    {
-        $stream = fopen('php://temp', 'r+');
-        if ($content !== '') {
-            fwrite($stream, $content);
-            fseek($stream, 0);
-        }
-        return new Stream($stream);
+        return $webPage->setContent($webPageContent, $this->streamFactory);
     }
 
     /**
@@ -248,8 +241,6 @@ class LocalProxyResource
      * @param WebPageInterface $webPage
      *
      * @return string[]
-     *
-     * @throws QueryPathException
      */
     private function findStylesheetUrls(WebPageInterface $webPage): array
     {
@@ -299,6 +290,7 @@ class LocalProxyResource
      * @throws TransportException
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
+     * @throws UnparseableContentTypeException
      */
     private function getRootWebResource()
     {

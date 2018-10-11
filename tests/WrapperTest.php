@@ -7,7 +7,6 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Mockery\MockInterface;
 use phpmock\mockery\PHPMockery;
-use QueryPath\Exception as QueryPathException;
 use webignition\CssValidatorOutput\CssValidatorOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
@@ -18,6 +17,7 @@ use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypePars
 use webignition\CssValidatorWrapper\Tests\AbstractBaseTest;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\ResponseFactory;
+use webignition\WebPageInspector\UnparseableContentTypeException;
 
 class WrapperTest extends AbstractBaseTest
 {
@@ -42,9 +42,9 @@ class WrapperTest extends AbstractBaseTest
      * @param array $httpFixtures
      * @param string $expectedExceptionType
      *
-     * @throws QueryPathException
      * @throws InternetMediaTypeParseException
      * @throws InvalidValidatorOutputException
+     * @throws UnparseableContentTypeException
      */
     public function testValidateErrorOnRootWebResource(array $httpFixtures, string $expectedExceptionType)
     {
@@ -131,8 +131,8 @@ class WrapperTest extends AbstractBaseTest
      * @param string $expectedErrorMessage
      *
      * @throws InternetMediaTypeParseException
-     * @throws QueryPathException
      * @throws InvalidValidatorOutputException
+     * @throws UnparseableContentTypeException
      */
     public function testValidateErrorOnLinkedCssResource(array $httpFixtures, string $expectedErrorMessage)
     {
@@ -237,7 +237,7 @@ class WrapperTest extends AbstractBaseTest
      *
      * @throws InternetMediaTypeParseException
      * @throws InvalidValidatorOutputException
-     * @throws QueryPathException
+     * @throws UnparseableContentTypeException
      */
     public function testValidateSuccess(
         array $httpFixtures,
@@ -597,5 +597,12 @@ class WrapperTest extends AbstractBaseTest
     private function loadCssValidatorRawOutputFixture(string $name): string
     {
         return file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+
+        \Mockery::close();
     }
 }

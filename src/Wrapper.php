@@ -4,7 +4,6 @@ namespace webignition\CssValidatorWrapper;
 
 use GuzzleHttp\Client as HttpClient;
 use Psr\Http\Message\UriInterface;
-use QueryPath\Exception as QueryPathException;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorOutput\Message\Error as CssValidatorOutputError;
@@ -13,6 +12,7 @@ use webignition\CssValidatorOutput\CssValidatorOutput;
 use webignition\CssValidatorOutput\ExceptionOutput\ExceptionOutput;
 use webignition\CssValidatorOutput\ExceptionOutput\Type\Type as ExceptionOutputType;
 use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
+use webignition\WebPageInspector\UnparseableContentTypeException;
 use webignition\WebResource\Exception\HttpException;
 use webignition\WebResource\Exception\TransportException;
 use webignition\WebResourceInterfaces\InvalidContentTypeExceptionInterface;
@@ -44,7 +44,7 @@ class Wrapper
      *
      * @throws InternetMediaTypeParseException
      * @throws InvalidValidatorOutputException
-     * @throws QueryPathException
+     * @throws UnparseableContentTypeException
      */
     public function validate(Configuration $configuration): CssValidatorOutput
     {
