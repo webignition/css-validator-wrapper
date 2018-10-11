@@ -49,37 +49,22 @@ class Configuration
      */
     private $outputParserConfiguration;
 
-    public function __construct(array $configurationValues)
+    public function __construct(array $values)
     {
-        if (!isset($configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH])) {
-            $configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH] = self::DEFAULT_JAVA_EXECUTABLE_PATH;
-        }
+        $this->javaExecutablePath =
+            $values[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH] ?? self::DEFAULT_JAVA_EXECUTABLE_PATH;
 
-        if (!isset($configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH])) {
-            $configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH] = self::DEFAULT_CSS_VALIDATOR_JAR_PATH;
-        }
+        $this->cssValidatorJarPath =
+            $values[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH] ?? self::DEFAULT_CSS_VALIDATOR_JAR_PATH;
 
-        if (!isset($configurationValues[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION])) {
-            $configurationValues[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION] = new OutputParserConfiguration();
-        }
+        $this->outputParserConfiguration =
+            $values[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION] ?? new OutputParserConfiguration();
 
-        $this->javaExecutablePath = $configurationValues[self::CONFIG_KEY_JAVA_EXECUTABLE_PATH];
-        $this->cssValidatorJarPath = $configurationValues[self::CONFIG_KEY_CSS_VALIDATOR_JAR_PATH];
-        $this->outputParserConfiguration = $configurationValues[self::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION];
-
-        if (array_key_exists(self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL, $configurationValues)) {
-            $this->setVendorExtensionSeverityLevel(
-                $configurationValues[self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL]
-            );
-        }
-
-        if (array_key_exists(self::CONFIG_KEY_URL_TO_VALIDATE, $configurationValues)) {
-            $this->setUrlToValidate($configurationValues[self::CONFIG_KEY_URL_TO_VALIDATE]);
-        }
-
-        if (array_key_exists(self::CONFIG_KEY_CONTENT_TO_VALIDATE, $configurationValues)) {
-            $this->setContentToValidate($configurationValues[self::CONFIG_KEY_CONTENT_TO_VALIDATE]);
-        }
+        $this->setVendorExtensionSeverityLevel(
+            $values[self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL] ?? self::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL
+        );
+        $this->setUrlToValidate($values[self::CONFIG_KEY_URL_TO_VALIDATE] ?? '');
+        $this->setContentToValidate($values[self::CONFIG_KEY_CONTENT_TO_VALIDATE] ?? '');
     }
 
     public function getOutputParserConfiguration(): OutputParserConfiguration
@@ -99,12 +84,12 @@ class Configuration
 
     public function getJavaExecutablePath(): string
     {
-        return (is_null($this->javaExecutablePath)) ? self::DEFAULT_JAVA_EXECUTABLE_PATH : $this->javaExecutablePath;
+        return $this->javaExecutablePath;
     }
 
     private function getCssValidatorJarPath(): string
     {
-        return is_null($this->cssValidatorJarPath) ? self::DEFAULT_CSS_VALIDATOR_JAR_PATH : $this->cssValidatorJarPath;
+        return $this->cssValidatorJarPath;
     }
 
     private function getOutputFormat(): string
@@ -132,9 +117,7 @@ class Configuration
 
     public function getVendorExtensionSeverityLevel(): string
     {
-        return is_null($this->vendorExtensionSeverityLevel)
-            ? self::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL
-            : $this->vendorExtensionSeverityLevel;
+        return $this->vendorExtensionSeverityLevel;
     }
 
     public function setUrlToValidate(string $url)
@@ -144,7 +127,7 @@ class Configuration
 
     public function getUrlToValidate(): string
     {
-        return is_null($this->urlToValidate) ? '' : $this->urlToValidate;
+        return $this->urlToValidate;
     }
 
     /**
@@ -152,9 +135,9 @@ class Configuration
      *
      * @throws \InvalidArgumentException
      */
-    public function getExecutableCommand(): string
+    public function createExecutableCommand(): string
     {
-        if (!$this->hasUrlToValidate()) {
+        if (empty($this->urlToValidate)) {
             throw new \InvalidArgumentException('URL to validate has not been set', 2);
         }
 
@@ -162,7 +145,7 @@ class Configuration
             $this->getJavaExecutablePath(),
             self::JAVA_JAR_FLAG,
             $this->getCssValidatorJarPath(),
-            $this->getCommandOptionsString(),
+            $this->createCommandOptionsString(),
             '"'.str_replace('"', '\"', $this->getUrlToValidate()).'"',
             '2>&1'
         );
@@ -170,22 +153,17 @@ class Configuration
         return implode(' ', $commandParts);
     }
 
-    public function hasUrlToValidate(): bool
-    {
-        return $this->getUrlToValidate() != '';
-    }
-
-    private function getCommandOptionsString(): string
+    private function createCommandOptionsString(): string
     {
         $commandOptionsStrings = array();
-        foreach ($this->getCommandOptions() as $key => $value) {
+        foreach ($this->createCommandOptions() as $key => $value) {
             $commandOptionsStrings[] = '-'.$key.' '.$value;
         }
 
         return implode(' ', $commandOptionsStrings);
     }
 
-    private function getCommandOptions(): array
+    private function createCommandOptions(): array
     {
         $commandOptions = array(
             'output' => $this->getOutputFormat(),
