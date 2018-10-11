@@ -1,17 +1,16 @@
 <?php
 
-namespace webignition\CssValidatorWrapper\Tests\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests;
 
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use QueryPath\Exception as QueryPathException;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\LocalProxyResource;
 use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
-use webignition\CssValidatorWrapper\Tests\AbstractBaseTest;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\ResponseFactory;
+use webignition\WebPageInspector\UnparseableContentTypeException;
 use webignition\WebResource\Exception\HttpException;
 use webignition\WebResource\Exception\InvalidContentTypeException;
 use webignition\WebResource\Exception\InvalidResponseContentTypeException;
@@ -29,10 +28,10 @@ class LocalProxyResourceTest extends AbstractBaseTest
      *
      * @throws HttpException
      * @throws InternetMediaTypeParseException
-     * @throws QueryPathException
      * @throws TransportException
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
+     * @throws UnparseableContentTypeException
      */
     public function testPrepareFromContentToValidate(string $content, string $expectedLocalResourcePathExtension)
     {
@@ -73,8 +72,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws InternetMediaTypeParseException
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
-     * @throws QueryPathException
      * @throws TransportException
+     * @throws UnparseableContentTypeException
      */
     public function testPrepareWithNoStylesheets()
     {
@@ -104,8 +103,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws InternetMediaTypeParseException
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
-     * @throws QueryPathException
      * @throws TransportException
+     * @throws UnparseableContentTypeException
      */
     public function testPrepareWithLinkedStylesheetsReplacesCssLinks(
         string $sourceDocument,
@@ -195,8 +194,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws InternetMediaTypeParseException
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
-     * @throws QueryPathException
      * @throws TransportException
+     * @throws UnparseableContentTypeException
      */
     public function testGetHttpExceptions(
         string $sourceDocument,
@@ -252,8 +251,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws InternetMediaTypeParseException
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
-     * @throws QueryPathException
      * @throws TransportException
+     * @throws UnparseableContentTypeException
      */
     public function testGetTransportExceptions(
         string $sourceDocument,
@@ -310,8 +309,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws InternetMediaTypeParseException
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
-     * @throws QueryPathException
      * @throws TransportException
+     * @throws UnparseableContentTypeException
      */
     public function testGetInvalidResponseContentTypeExceptions(
         string $sourceDocument,
@@ -378,8 +377,8 @@ class LocalProxyResourceTest extends AbstractBaseTest
      * @throws InternetMediaTypeParseException
      * @throws InvalidContentTypeException
      * @throws InvalidResponseContentTypeException
-     * @throws QueryPathException
      * @throws TransportException
+     * @throws UnparseableContentTypeException
      */
     public function testReset(
         string $sourceDocument,
