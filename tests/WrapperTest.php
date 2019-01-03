@@ -7,7 +7,9 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Mockery\MockInterface;
 use phpmock\mockery\PHPMockery;
-use webignition\CssValidatorOutput\CssValidatorOutput;
+use webignition\CssValidatorOutput\Model\ErrorMessage;
+use webignition\CssValidatorOutput\Model\ExceptionOutput;
+use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
@@ -40,25 +42,24 @@ class WrapperTest extends AbstractBaseTest
      * @dataProvider validateInvalidContentTypeOnRootWebResourceDataProvider
      *
      * @param array $httpFixtures
-     * @param string $expectedExceptionType
+     * @param string $expectedExceptionString
      *
      * @throws InternetMediaTypeParseException
      * @throws InvalidValidatorOutputException
      * @throws UnparseableContentTypeException
      */
-    public function testValidateErrorOnRootWebResource(array $httpFixtures, string $expectedExceptionType)
+    public function testValidateErrorOnRootWebResource(array $httpFixtures, string $expectedExceptionString)
     {
         $this->appendHttpFixtures($httpFixtures);
         $configuration = new Configuration([
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
         ]);
 
+        /* @var ExceptionOutput $output */
         $output = $this->wrapper->validate($configuration);
 
-        $this->assertInstanceOf(CssValidatorOutput::class, $output);
-        $this->assertTrue($output->hasException());
-
-        $this->assertEquals($expectedExceptionType, $output->getException()->getType()->get());
+        $this->assertInstanceOf(ExceptionOutput::class, $output);
+        $this->assertEquals($expectedExceptionString, (string) $output);
     }
 
     public function validateInvalidContentTypeOnRootWebResourceDataProvider(): array
@@ -78,48 +79,48 @@ class WrapperTest extends AbstractBaseTest
                 'httpFixtures' => [
                     ResponseFactory::create('application/pdf'),
                 ],
-                'expectedExceptionType' => 'invalid-content-type:application/pdf'
+                'expectedExceptionString' => 'invalid-content-type:application/pdf'
             ],
             'text/plain' => [
                 'httpFixtures' => [
                     ResponseFactory::create('text/plain'),
                 ],
-                'expectedExceptionType' => 'invalid-content-type:text/plain'
+                'expectedExceptionString' => 'invalid-content-type:text/plain'
             ],
             'http 410' => [
                 'httpFixtures' => [
                     ResponseFactory::createHtmlResponse('', 410),
                     ResponseFactory::createHtmlResponse('', 410),
                 ],
-                'expectedExceptionType' => 'http410',
+                'expectedExceptionString' => 'http:410',
             ],
             'http 404' => [
                 'httpFixtures' => [
                     ResponseFactory::createHtmlResponse('', 404),
                     ResponseFactory::createHtmlResponse('', 404),
                 ],
-                'expectedExceptionType' => 'http404',
+                'expectedExceptionString' => 'http:404',
             ],
             'http 500' => [
                 'httpFixtures' => [
                     ResponseFactory::createHtmlResponse('', 500),
                     ResponseFactory::createHtmlResponse('', 500),
                 ],
-                'expectedExceptionType' => 'http500',
+                'expectedExceptionString' => 'http:500',
             ],
             'curl 6' => [
                 'httpFixtures' => [
                     $curl6ConnectException,
                     $curl6ConnectException,
                 ],
-                'expectedExceptionType' => 'curl6',
+                'expectedExceptionString' => 'curl:6',
             ],
             'curl 28' => [
                 'httpFixtures' => [
                     $curl28ConnectException,
                     $curl28ConnectException,
                 ],
-                'expectedExceptionType' => 'curl28',
+                'expectedExceptionString' => 'curl:28',
             ],
         ];
     }
@@ -146,17 +147,18 @@ class WrapperTest extends AbstractBaseTest
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
         ]);
 
+        /* @var ValidationOutput $output */
         $output = $this->wrapper->validate($configuration);
+        $this->assertInstanceOf(ValidationOutput::class, $output);
 
-        $this->assertInstanceOf(CssValidatorOutput::class, $output);
+        $messageList = $output->getMessages();
+        $this->assertEquals(1, $messageList->getErrorCount());
 
-        $this->assertEquals(1, $output->getErrorCount());
-
-        /* @var array $errorsForLinkedStylesheet */
-        $errorsForLinkedStylesheet = $output->getErrorsByUrl('http://example.com/style.css');
+        /* @var ErrorMessage[] $errorsForLinkedStylesheet */
+        $errorsForLinkedStylesheet = $messageList->getErrorsByRef('http://example.com/style.css');
 
         $this->assertCount(1, $errorsForLinkedStylesheet);
-        $this->assertEquals($expectedErrorMessage, $errorsForLinkedStylesheet[0]->getMessage());
+        $this->assertEquals($expectedErrorMessage, $errorsForLinkedStylesheet[0]->getTitle());
     }
 
     public function validateErrorOnLinkedCssResourceDataProvider(): array
@@ -254,15 +256,17 @@ class WrapperTest extends AbstractBaseTest
             Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
         ], $configurationValues));
 
+        /* @var ValidationOutput $output */
         $output = $this->wrapper->validate($configuration);
+        $this->assertInstanceOf(ValidationOutput::class, $output);
 
-        $this->assertFalse($output->hasException());
-        $this->assertEquals($expectedWarningCount, $output->getWarningCount());
-        $this->assertEquals($expectedErrorCount, $output->getErrorCount());
+        $messageList = $output->getMessages();
+        $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
+        $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
 
         foreach ($expectedErrorCountByUrl as $url => $expectedErrorCountForUrl) {
             /* @var array $errorsByUrl */
-            $errorsByUrl = $output->getErrorsByUrl($url);
+            $errorsByUrl = $messageList->getErrorsByRef($url);
 
             $this->assertCount($expectedErrorCountForUrl, $errorsByUrl);
         }
