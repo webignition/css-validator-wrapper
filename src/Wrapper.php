@@ -4,13 +4,13 @@ namespace webignition\CssValidatorWrapper;
 
 use GuzzleHttp\Client as HttpClient;
 use Psr\Http\Message\UriInterface;
+use webignition\CssValidatorOutput\Model\ErrorMessage;
+use webignition\CssValidatorOutput\Model\ExceptionOutput;
+use webignition\CssValidatorOutput\Model\OutputInterface;
+use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
+use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
-use webignition\CssValidatorOutput\Message\Error as CssValidatorOutputError;
-use webignition\CssValidatorOutput\Parser\Parser as CssValidatorOutputParser;
-use webignition\CssValidatorOutput\CssValidatorOutput;
-use webignition\CssValidatorOutput\ExceptionOutput\ExceptionOutput;
-use webignition\CssValidatorOutput\ExceptionOutput\Type\Type as ExceptionOutputType;
 use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
 use webignition\WebPageInspector\UnparseableContentTypeException;
 use webignition\WebResource\Exception\HttpException;
@@ -40,13 +40,13 @@ class Wrapper
     /**
      * @param Configuration $configuration
      *
-     * @return CssValidatorOutput
+     * @return OutputInterface
      *
      * @throws InternetMediaTypeParseException
      * @throws InvalidValidatorOutputException
      * @throws UnparseableContentTypeException
      */
-    public function validate(Configuration $configuration): CssValidatorOutput
+    public function validate(Configuration $configuration): OutputInterface
     {
         $sourceUrl = $configuration->getUrlToValidate();
         $localProxyResource = new LocalProxyResource($configuration, $this->httpClient);
@@ -54,39 +54,21 @@ class Wrapper
         try {
             $localProxyResource->prepare();
         } catch (InvalidContentTypeExceptionInterface $invalidContentTypeException) {
-            $cssValidatorOutput = new CssValidatorOutput();
-            $cssValidatorOutputException = new ExceptionOutput();
-            $cssValidatorOutputException->setType(
-                new ExceptionOutputType(
-                    'invalid-content-type:'
-                    . $invalidContentTypeException->getContentType()->getTypeSubtypeString()
-                )
+            return new ExceptionOutput(
+                ExceptionOutput::TYPE_UNKNOWN_CONTENT_TYPE,
+                $invalidContentTypeException->getContentType()->getTypeSubtypeString()
             );
-
-            $cssValidatorOutput->setException($cssValidatorOutputException);
-
-            return $cssValidatorOutput;
         } catch (HttpException $httpException) {
-            $cssValidatorOutput = new CssValidatorOutput();
-            $cssValidatorOutputException = new ExceptionOutput();
-            $cssValidatorOutputException->setType(
-                new ExceptionOutputType('http' . $httpException->getCode())
+            return new ExceptionOutput(
+                ExceptionOutput::TYPE_HTTP,
+                (string) $httpException->getCode()
             );
-
-            $cssValidatorOutput->setException($cssValidatorOutputException);
-
-            return $cssValidatorOutput;
         } catch (TransportException $transportException) {
             if ($transportException->isCurlException()) {
-                $cssValidatorOutput = new CssValidatorOutput();
-                $cssValidatorOutputException = new ExceptionOutput();
-                $cssValidatorOutputException->setType(
-                    new ExceptionOutputType('curl' . $transportException->getTransportErrorCode())
+                return new ExceptionOutput(
+                    ExceptionOutput::TYPE_CURL,
+                    (string) $transportException->getTransportErrorCode()
                 );
-
-                $cssValidatorOutput->setException($cssValidatorOutputException);
-
-                return $cssValidatorOutput;
             }
         }
 
@@ -98,12 +80,15 @@ class Wrapper
             $sourceUrl
         );
 
-        $cssValidatorOutputParser = new CssValidatorOutputParser();
+        $cssValidatorOutputParser = new OutputParser();
 
+        /* @var ValidationOutput $output */
         $output = $cssValidatorOutputParser->parse(
             $validatorOutput,
             $configuration->getOutputParserConfiguration()
         );
+
+        $messageList = $output->getMessages();
 
         $httpExceptions = $localProxyResource->getHttpExceptions();
         $transportExceptions = $localProxyResource->getTransportExceptions();
@@ -111,7 +96,7 @@ class Wrapper
 
         if (!empty($httpExceptions)) {
             foreach ($httpExceptions as $httpException) {
-                $output->addMessage($this->createCssValidatorOutputError(
+                $messageList->addMessage($this->createCssValidatorOutputError(
                     'http-error:' . $httpException->getCode(),
                     $httpException->getRequest()->getUri()
                 ));
@@ -121,7 +106,7 @@ class Wrapper
         if (!empty($transportExceptions)) {
             foreach ($transportExceptions as $transportException) {
                 if ($transportException->isCurlException()) {
-                    $output->addMessage($this->createCssValidatorOutputError(
+                    $messageList->addMessage($this->createCssValidatorOutputError(
                         'curl-error:' . $transportException->getTransportErrorCode(),
                         $transportException->getRequest()->getUri()
                     ));
@@ -133,7 +118,7 @@ class Wrapper
             foreach ($invalidResponseContentTypeExceptions as $invalidResponseContentTypeException) {
                 $contentType = $invalidResponseContentTypeException->getContentType();
 
-                $output->addMessage($this->createCssValidatorOutputError(
+                $messageList->addMessage($this->createCssValidatorOutputError(
                     'invalid-content-type:' . $contentType->getTypeSubtypeString(),
                     $invalidResponseContentTypeException->getRequest()->getUri()
                 ));
@@ -178,13 +163,13 @@ class Wrapper
         return $validatorOutput;
     }
 
-    private function createCssValidatorOutputError(string $message, UriInterface $uri): CssValidatorOutputError
+    private function createCssValidatorOutputError(string $message, UriInterface $uri): ErrorMessage
     {
-        return new CssValidatorOutputError(
+        return new ErrorMessage(
             $message,
+            0,
             '',
-            (string)$uri,
-            0
+            (string)$uri
         );
     }
 }

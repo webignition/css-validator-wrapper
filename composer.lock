@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "19a1e509b26af75f4551d1dbabfc4732",
+    "content-hash": "9e46c2ea984f32dc6584f14282fae725",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -612,32 +612,79 @@
             "time": "2014-04-04T13:31:41+00:00"
         },
         {
-            "name": "webignition/css-validator-output-parser",
-            "version": "3.2",
+            "name": "webignition/css-validator-output-models",
+            "version": "0.9",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webignition/css-validator-output-parser.git",
-                "reference": "c7be98857392afaa615f1ba9bc2a6afb0501cf5e"
+                "url": "https://github.com/webignition/css-validator-output-models.git",
+                "reference": "ee007aaacf2587a1b1c5439e4627e01d84a1cb43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/c7be98857392afaa615f1ba9bc2a6afb0501cf5e",
-                "reference": "c7be98857392afaa615f1ba9bc2a6afb0501cf5e",
+                "url": "https://api.github.com/repos/webignition/css-validator-output-models/zipball/ee007aaacf2587a1b1c5439e4627e01d84a1cb43",
+                "reference": "ee007aaacf2587a1b1c5439e4627e01d84a1cb43",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.6.0",
-                "symfony/polyfill-mbstring": "^1.7",
-                "webignition/url": ">=2,<3"
+                "php": ">=7.2.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5",
+                "phpunit/phpunit": "^7",
                 "squizlabs/php_codesniffer": "^3"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "webignition\\CssValidatorOutput\\": "src/"
+                    "webignition\\CssValidatorOutput\\Model\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Models for objects in the W3C CSS validator UCN output",
+            "homepage": "https://github.com/webignition/css-validator-output-models",
+            "keywords": [
+                "UCN",
+                "css",
+                "model",
+                "validator"
+            ],
+            "time": "2019-01-03T12:51:13+00:00"
+        },
+        {
+            "name": "webignition/css-validator-output-parser",
+            "version": "5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/css-validator-output-parser.git",
+                "reference": "c7fd93edced9a54ec774c7d2c873715c79e8eade"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/c7fd93edced9a54ec774c7d2c873715c79e8eade",
+                "reference": "c7fd93edced9a54ec774c7d2c873715c79e8eade",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0",
+                "webignition/css-validator-output-models": ">=0.8,<1",
+                "webignition/url": ">=2,<3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7",
+                "squizlabs/php_codesniffer": "^3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\CssValidatorOutput\\Parser\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -657,7 +704,7 @@
                 "parser",
                 "validator"
             ],
-            "time": "2018-04-17T16:08:00+00:00"
+            "time": "2019-01-03T12:34:51+00:00"
         },
         {
             "name": "webignition/disallowed-character-terminated-string",
@@ -1184,16 +1231,16 @@
         },
         {
             "name": "webignition/web-page-inspector",
-            "version": "0.5",
+            "version": "0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-page-inspector.git",
-                "reference": "80c6625fd33d33e6fb4218cf7989a88735bd8c84"
+                "reference": "778ac9a60d1a0fb52bdd059acdc7bf0bf662ef69"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-page-inspector/zipball/80c6625fd33d33e6fb4218cf7989a88735bd8c84",
-                "reference": "80c6625fd33d33e6fb4218cf7989a88735bd8c84",
+                "url": "https://api.github.com/repos/webignition/web-page-inspector/zipball/778ac9a60d1a0fb52bdd059acdc7bf0bf662ef69",
+                "reference": "778ac9a60d1a0fb52bdd059acdc7bf0bf662ef69",
                 "shasum": ""
             },
             "require": {
@@ -1231,24 +1278,25 @@
                 "inspector",
                 "webpage"
             ],
-            "time": "2018-10-10T16:06:08+00:00"
+            "time": "2018-10-12T17:35:30+00:00"
         },
         {
             "name": "webignition/web-page-model",
-            "version": "5.1",
+            "version": "5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-page-model.git",
-                "reference": "f102746e95613e5654b94c7bf7c99ec2da9ac3dd"
+                "reference": "44b17bb66fbac3649448946d46e64ea48b3e4f37"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-page-model/zipball/f102746e95613e5654b94c7bf7c99ec2da9ac3dd",
-                "reference": "f102746e95613e5654b94c7bf7c99ec2da9ac3dd",
+                "url": "https://api.github.com/repos/webignition/web-page-model/zipball/44b17bb66fbac3649448946d46e64ea48b3e4f37",
+                "reference": "44b17bb66fbac3649448946d46e64ea48b3e4f37",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.2.0",
+                "webignition/absolute-url-deriver": ">=1.5.2,<2",
                 "webignition/character-set-list": "^0.2",
                 "webignition/internet-media-type": "^2",
                 "webignition/internet-media-type-interface": "^0.4",
@@ -1284,7 +1332,7 @@
                 "model",
                 "webpage"
             ],
-            "time": "2018-10-10T11:20:47+00:00"
+            "time": "2018-10-12T16:00:49+00:00"
         },
         {
             "name": "webignition/web-resource-interfaces",
@@ -1450,16 +1498,16 @@
         },
         {
             "name": "webignition/web-resource-storage",
-            "version": "1",
+            "version": "1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-resource-storage.git",
-                "reference": "f597a9ab42f346a3532c10f5fd75efe39e39afc7"
+                "reference": "32e0800d28b089a9089704f26a29089c9a3f24c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-resource-storage/zipball/f597a9ab42f346a3532c10f5fd75efe39e39afc7",
-                "reference": "f597a9ab42f346a3532c10f5fd75efe39e39afc7",
+                "url": "https://api.github.com/repos/webignition/web-resource-storage/zipball/32e0800d28b089a9089704f26a29089c9a3f24c0",
+                "reference": "32e0800d28b089a9089704f26a29089c9a3f24c0",
                 "shasum": ""
             },
             "require": {
@@ -1498,7 +1546,7 @@
                 "web",
                 "web-page"
             ],
-            "time": "2018-10-10T16:59:07+00:00"
+            "time": "2018-10-12T15:18:13+00:00"
         },
         {
             "name": "xrstf/ip-utils",
