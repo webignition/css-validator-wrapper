@@ -129,13 +129,13 @@ class WrapperTest extends AbstractBaseTest
      * @dataProvider validateErrorOnLinkedCssResourceDataProvider
      *
      * @param array $httpFixtures
-     * @param string $expectedErrorMessage
+     * @param ErrorMessage $expectedError
      *
      * @throws InternetMediaTypeParseException
      * @throws InvalidValidatorOutputException
      * @throws UnparseableContentTypeException
      */
-    public function testValidateErrorOnLinkedCssResource(array $httpFixtures, string $expectedErrorMessage)
+    public function testValidateErrorOnLinkedCssResource(array $httpFixtures, ErrorMessage $expectedError)
     {
         $this->appendHttpFixtures($httpFixtures);
 
@@ -158,7 +158,7 @@ class WrapperTest extends AbstractBaseTest
         $errorsForLinkedStylesheet = $messageList->getErrorsByRef('http://example.com/style.css');
 
         $this->assertCount(1, $errorsForLinkedStylesheet);
-        $this->assertEquals($expectedErrorMessage, $errorsForLinkedStylesheet[0]->getTitle());
+        $this->assertEquals($expectedError, $errorsForLinkedStylesheet[0]);
     }
 
     public function validateErrorOnLinkedCssResourceDataProvider(): array
@@ -186,7 +186,12 @@ class WrapperTest extends AbstractBaseTest
                         'text/plain'
                     ),
                 ],
-                'expectedErrorMessage' => 'invalid-content-type:text/plain',
+                'expectedError' => new ErrorMessage(
+                    'invalid-content-type',
+                    0,
+                    'text/plain',
+                    'http://example.com/style.css'
+                ),
             ],
             'http 404' => [
                 'httpFixtures' => [
@@ -195,7 +200,12 @@ class WrapperTest extends AbstractBaseTest
                     new Response(404),
                     new Response(404),
                 ],
-                'expectedErrorMessage' => 'http-error:404',
+                'expectedError' => new ErrorMessage(
+                    'http',
+                    0,
+                    '404',
+                    'http://example.com/style.css'
+                ),
             ],
             'http 500' => [
                 'httpFixtures' => [
@@ -204,7 +214,12 @@ class WrapperTest extends AbstractBaseTest
                     new Response(500),
                     new Response(500),
                 ],
-                'expectedErrorMessage' => 'http-error:500',
+                'expectedError' => new ErrorMessage(
+                    'http',
+                    0,
+                    '500',
+                    'http://example.com/style.css'
+                ),
             ],
             'curl 6' => [
                 'httpFixtures' => [
@@ -213,7 +228,12 @@ class WrapperTest extends AbstractBaseTest
                     $curl6ConnectException,
                     $curl6ConnectException,
                 ],
-                'expectedErrorMessage' => 'curl-error:6',
+                'expectedError' => new ErrorMessage(
+                    'curl',
+                    0,
+                    '6',
+                    'http://example.com/style.css'
+                ),
             ],
             'curl 28' => [
                 'httpFixtures' => [
@@ -222,7 +242,12 @@ class WrapperTest extends AbstractBaseTest
                     $curl28ConnectException,
                     $curl28ConnectException,
                 ],
-                'expectedErrorMessage' => 'curl-error:28',
+                'expectedError' => new ErrorMessage(
+                    'curl',
+                    0,
+                    '28',
+                    'http://example.com/style.css'
+                ),
             ],
         ];
     }
