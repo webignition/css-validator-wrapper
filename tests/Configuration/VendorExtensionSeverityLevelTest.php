@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpDocSignatureInspection */
 
 namespace webignition\CssValidatorWrapper\Tests\Configuration;
 
@@ -8,8 +9,6 @@ class VendorExtensionSeverityLevelTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @dataProvider isValidDataProvider
-     *
-     * @param string $severityLevel
      */
     public function testIsValid(string $severityLevel)
     {
@@ -31,8 +30,6 @@ class VendorExtensionSeverityLevelTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider isInvalidDataProvider
-     *
-     * @param string $flag
      */
     public function testIsInvalidValid(string $flag)
     {

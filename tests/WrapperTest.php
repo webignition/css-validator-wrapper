@@ -1,4 +1,7 @@
 <?php
+/** @noinspection PhpDocSignatureInspection */
+/** @noinspection PhpDocMissingThrowsInspection */
+/** @noinspection PhpUnhandledExceptionInspection */
 
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
@@ -11,15 +14,12 @@ use webignition\CssValidatorOutput\Model\ErrorMessage;
 use webignition\CssValidatorOutput\Model\ExceptionOutput;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
-use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Wrapper;
-use webignition\InternetMediaType\Parser\ParseException as InternetMediaTypeParseException;
 use webignition\CssValidatorWrapper\Tests\AbstractBaseTest;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\ResponseFactory;
-use webignition\WebPageInspector\UnparseableContentTypeException;
 
 class WrapperTest extends AbstractBaseTest
 {
@@ -40,13 +40,6 @@ class WrapperTest extends AbstractBaseTest
 
     /**
      * @dataProvider validateInvalidContentTypeOnRootWebResourceDataProvider
-     *
-     * @param array $httpFixtures
-     * @param string $expectedExceptionString
-     *
-     * @throws InternetMediaTypeParseException
-     * @throws InvalidValidatorOutputException
-     * @throws UnparseableContentTypeException
      */
     public function testValidateErrorOnRootWebResource(array $httpFixtures, string $expectedExceptionString)
     {
@@ -127,13 +120,6 @@ class WrapperTest extends AbstractBaseTest
 
     /**
      * @dataProvider validateErrorOnLinkedCssResourceDataProvider
-     *
-     * @param array $httpFixtures
-     * @param ErrorMessage $expectedError
-     *
-     * @throws InternetMediaTypeParseException
-     * @throws InvalidValidatorOutputException
-     * @throws UnparseableContentTypeException
      */
     public function testValidateErrorOnLinkedCssResource(array $httpFixtures, ErrorMessage $expectedError)
     {
@@ -254,17 +240,6 @@ class WrapperTest extends AbstractBaseTest
 
     /**
      * @dataProvider validateSuccessDataProvider
-     *
-     * @param array $httpFixtures
-     * @param string $cssValidatorRawOutput
-     * @param array $configurationValues
-     * @param int $expectedWarningCount
-     * @param int $expectedErrorCount
-     * @param array $expectedErrorCountByUrl
-     *
-     * @throws InternetMediaTypeParseException
-     * @throws InvalidValidatorOutputException
-     * @throws UnparseableContentTypeException
      */
     public function testValidateSuccess(
         array $httpFixtures,
