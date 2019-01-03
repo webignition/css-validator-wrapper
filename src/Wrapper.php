@@ -88,6 +88,12 @@ class Wrapper
             $configuration->getOutputParserConfiguration()
         );
 
+        if (!$output->isValidationOutput()) {
+            $localProxyResource->reset();
+
+            return $output;
+        }
+
         $messageList = $output->getMessages();
 
         $httpExceptions = $localProxyResource->getHttpExceptions();
