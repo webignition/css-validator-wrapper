@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpDocSignatureInspection */
 
 namespace webignition\CssValidatorWrapper\Tests\Configuration;
 
@@ -31,9 +32,6 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider createExecutableCommandDataProvider
-     *
-     * @param Configuration $configuration
-     * @param string $expectedExecutableCommand
      */
     public function testCreateExecutableCommand(Configuration $configuration, string $expectedExecutableCommand)
     {
@@ -116,8 +114,6 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider invalidVendorExtensionSeverityLevelDataProvider
-     *
-     * @param string $vendorExtensionSeverityLevel
      */
     public function testSetInvalidVendorExtensionSeverityLevel(string $vendorExtensionSeverityLevel)
     {
@@ -145,9 +141,6 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider vendorExtensionSeverityLevelDataProvider
-     *
-     * @param string $vendorExtensionSeverityLevel
-     * @param string $expectedVendorExtensionSeverityLevel
      */
     public function testSetVendorExtensionSeverityLevel(
         string $vendorExtensionSeverityLevel,

@@ -103,7 +103,8 @@ class Wrapper
         if (!empty($httpExceptions)) {
             foreach ($httpExceptions as $httpException) {
                 $messageList->addMessage($this->createCssValidatorOutputError(
-                    'http-error:' . $httpException->getCode(),
+                    ExceptionOutput::TYPE_HTTP,
+                    $httpException->getCode(),
                     $httpException->getRequest()->getUri()
                 ));
             }
@@ -113,7 +114,8 @@ class Wrapper
             foreach ($transportExceptions as $transportException) {
                 if ($transportException->isCurlException()) {
                     $messageList->addMessage($this->createCssValidatorOutputError(
-                        'curl-error:' . $transportException->getTransportErrorCode(),
+                        ExceptionOutput::TYPE_CURL,
+                        $transportException->getTransportErrorCode(),
                         $transportException->getRequest()->getUri()
                     ));
                 }
@@ -125,7 +127,8 @@ class Wrapper
                 $contentType = $invalidResponseContentTypeException->getContentType();
 
                 $messageList->addMessage($this->createCssValidatorOutputError(
-                    'invalid-content-type:' . $contentType->getTypeSubtypeString(),
+                    ExceptionOutput::TYPE_UNKNOWN_CONTENT_TYPE,
+                    $contentType->getTypeSubtypeString(),
                     $invalidResponseContentTypeException->getRequest()->getUri()
                 ));
             }
@@ -169,13 +172,13 @@ class Wrapper
         return $validatorOutput;
     }
 
-    private function createCssValidatorOutputError(string $message, UriInterface $uri): ErrorMessage
+    private function createCssValidatorOutputError(string $message, $context, UriInterface $uri): ErrorMessage
     {
         return new ErrorMessage(
             $message,
             0,
-            '',
-            (string)$uri
+            $context,
+            (string) $uri
         );
     }
 }
