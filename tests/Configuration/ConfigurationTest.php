@@ -8,17 +8,6 @@ use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 
 class ConfigurationTest extends \PHPUnit\Framework\TestCase
 {
-    public function testSetGetContentToValidate()
-    {
-        $contentToValidate = 'foo';
-
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_CONTENT_TO_VALIDATE => $contentToValidate,
-        ]);
-
-        $this->assertEquals($configuration->getContentToValidate(), $contentToValidate);
-    }
-
     public function testGetExecutableCommandWithoutSettingUrlToValidate()
     {
         $configuration = new Configuration([]);

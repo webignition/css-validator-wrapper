@@ -16,7 +16,6 @@ class Configuration
     const CONFIG_KEY_CSS_VALIDATOR_JAR_PATH = 'css-validator-jar-path';
     const CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL = 'vendor-extension-severity-level';
     const CONFIG_KEY_URL_TO_VALIDATE = 'url-to-validate';
-    const CONFIG_KEY_CONTENT_TO_VALIDATE = 'content-to-validate';
     const CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION = 'output-parser-configuration';
 
     /**
@@ -40,11 +39,6 @@ class Configuration
     private $urlToValidate = null;
 
     /**
-     * @var string
-     */
-    private $contentToValidate = null;
-
-    /**
      * @var OutputParserConfiguration
      */
     private $outputParserConfiguration;
@@ -64,22 +58,11 @@ class Configuration
             $values[self::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL] ?? self::DEFAULT_VENDOR_EXTENSION_SEVERITY_LEVEL
         );
         $this->setUrlToValidate($values[self::CONFIG_KEY_URL_TO_VALIDATE] ?? '');
-        $this->setContentToValidate($values[self::CONFIG_KEY_CONTENT_TO_VALIDATE] ?? '');
     }
 
     public function getOutputParserConfiguration(): OutputParserConfiguration
     {
         return $this->outputParserConfiguration;
-    }
-
-    public function setContentToValidate(string $content)
-    {
-        $this->contentToValidate = $content;
-    }
-
-    public function getContentToValidate(): ?string
-    {
-        return $this->contentToValidate;
     }
 
     public function getJavaExecutablePath(): string
