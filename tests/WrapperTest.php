@@ -9,6 +9,8 @@ use Mockery\MockInterface;
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
+use webignition\CssValidatorOutput\Parser\OutputParser;
+use webignition\CssValidatorWrapper\CommandFactory;
 use webignition\CssValidatorWrapper\Configuration\Configuration;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Wrapper;
@@ -26,32 +28,25 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->wrapper = new Wrapper();
-    }
 
-    public function testFoo()
-    {
-        $this->assertTrue(true);
+        $this->wrapper = new Wrapper(new CommandFactory(), new OutputParser());
     }
 
     /**
      * @dataProvider validateSuccessDataProvider
      */
-    public function testValidateSuccess(
+    public function testValidate(
         string $cssValidatorRawOutput,
-        array $configurationValues,
+        Configuration $configuration,
+        OutputParserConfiguration $outputParserConfiguration,
         int $expectedWarningCount,
         int $expectedErrorCount,
         array $expectedErrorCountByUrl = []
     ) {
         $this->setCssValidatorRawOutput($cssValidatorRawOutput);
 
-        $configuration = new Configuration(array_merge([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-        ], $configurationValues));
-
         /* @var ValidationOutput $output */
-        $output = $this->wrapper->validate($configuration);
+        $output = $this->wrapper->validate('http://example.com', $configuration, $outputParserConfiguration);
         $this->assertInstanceOf(ValidationOutput::class, $output);
 
         $messageList = $output->getMessages();
@@ -68,63 +63,74 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
     public function validateSuccessDataProvider(): array
     {
+        $javaExecutablePath = '/usr/bin/java';
+        $cssValidatorJarPath = 'css-validator.jar';
+        $vendorExtensionSeverityLevel = VendorExtensionSeverityLevel::LEVEL_WARN;
+
+        $configuration = new Configuration(
+            $javaExecutablePath,
+            $cssValidatorJarPath,
+            $vendorExtensionSeverityLevel
+        );
+
         return [
             'ignore false image data url messages' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
                     'incorrect-data-url-background-image-errors'
                 ),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_FALSE_DATA_URL_MESSAGES => true,
-                    ]),
-                ],
+                'configuration' => $configuration,
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_FALSE_DATA_URL_MESSAGES => true,
+                ]),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'ignore warnings' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('single-warning'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                    ]),
-                ],
+                'configuration' => $configuration,
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+                ]),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension issues:warn and ignore warnings' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                        OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
-                    ]),
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_WARN,
-                ],
+                'configuration' => new Configuration(
+                    $javaExecutablePath,
+                    $cssValidatorJarPath,
+                    VendorExtensionSeverityLevel::LEVEL_WARN
+                ),
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+                    OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
+                ]),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension warnings' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                    ]),
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_IGNORE,
-                ],
+                'configuration' => new Configuration(
+                    $javaExecutablePath,
+                    $cssValidatorJarPath,
+                    VendorExtensionSeverityLevel::LEVEL_WARN
+                ),
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+                ]),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension errors' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_VENDOR_EXTENSION_ISSUES => true,
-                    ]),
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_IGNORE,
-                ],
+                'configuration' => new Configuration(
+                    $javaExecutablePath,
+                    $cssValidatorJarPath,
+                    VendorExtensionSeverityLevel::LEVEL_IGNORE
+                ),
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_VENDOR_EXTENSION_ISSUES => true,
+                ]),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
@@ -229,45 +235,50 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 //                'expectedWarningCount' => 0,
 //                'expectedErrorCount' => 0,
 //            ],
+
+
             'html5 no css no linked resources' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-                'configurationValues' => [],
+                'configuration' => $configuration,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: default' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'configurationValues' => [],
+                'configuration' => $configuration,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
                 'expectedWarningCount' => 3,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: warn' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_WARN,
-                ],
+                'configuration' => $configuration,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
                 'expectedWarningCount' => 3,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: error' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_ERROR,
-                ],
+                'configuration' => new Configuration(
+                    $javaExecutablePath,
+                    $cssValidatorJarPath,
+                    VendorExtensionSeverityLevel::LEVEL_ERROR
+                ),
+                'outputParserConfiguration' => new OutputParserConfiguration([]),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 3,
             ],
             'vendor extension warnings: warn, with at-rule errors that should be warnings' => [
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_WARN,
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
-                    ]),
-                ],
+                'configuration' => new Configuration(
+                    $javaExecutablePath,
+                    $cssValidatorJarPath,
+                    VendorExtensionSeverityLevel::LEVEL_ERROR
+                ),
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
+                ]),
                 'expectedWarningCount' => 12,
                 'expectedErrorCount' => 0,
             ],
