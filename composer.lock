@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ef9749fd510e52820277e10029c289fe",
+    "content-hash": "ca0b07b4336868bc0fe45ea49f15e7c6",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -59,6 +59,376 @@
                 "lib"
             ],
             "time": "2014-02-15T12:42:32+00:00"
+        },
+        {
+            "name": "psr/http-message",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/http-message.git",
+                "reference": "f6561bf28d520154e4b0ec72be95418abe6d9363"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/http-message/zipball/f6561bf28d520154e4b0ec72be95418abe6d9363",
+                "reference": "f6561bf28d520154e4b0ec72be95418abe6d9363",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Http\\Message\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP messages",
+            "homepage": "https://github.com/php-fig/http-message",
+            "keywords": [
+                "http",
+                "http-message",
+                "psr",
+                "psr-7",
+                "request",
+                "response"
+            ],
+            "time": "2016-08-06T14:39:51+00:00"
+        },
+        {
+            "name": "symfony/css-selector",
+            "version": "v4.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/css-selector.git",
+                "reference": "76dac1dbe2830213e95892c7c2ec1edd74113ea4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/76dac1dbe2830213e95892c7c2ec1edd74113ea4",
+                "reference": "76dac1dbe2830213e95892c7c2ec1edd74113ea4",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\CssSelector\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jean-François Simon",
+                    "email": "jeanfrancois.simon@sensiolabs.com"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony CssSelector Component",
+            "homepage": "https://symfony.com",
+            "time": "2019-01-03T09:07:35+00:00"
+        },
+        {
+            "name": "symfony/dom-crawler",
+            "version": "v4.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/dom-crawler.git",
+                "reference": "8dc06251d5ad98d8494e1f742bec9cfdb9e42044"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/8dc06251d5ad98d8494e1f742bec9cfdb9e42044",
+                "reference": "8dc06251d5ad98d8494e1f742bec9cfdb9e42044",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.3",
+                "symfony/polyfill-ctype": "~1.8",
+                "symfony/polyfill-mbstring": "~1.0"
+            },
+            "require-dev": {
+                "symfony/css-selector": "~3.4|~4.0"
+            },
+            "suggest": {
+                "symfony/css-selector": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\DomCrawler\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony DomCrawler Component",
+            "homepage": "https://symfony.com",
+            "time": "2019-01-03T09:07:35+00:00"
+        },
+        {
+            "name": "symfony/polyfill-ctype",
+            "version": "v1.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-ctype.git",
+                "reference": "e3d826245268269cd66f8326bd8bc066687b4a19"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/e3d826245268269cd66f8326bd8bc066687b4a19",
+                "reference": "e3d826245268269cd66f8326bd8bc066687b4a19",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "suggest": {
+                "ext-ctype": "For best performance"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.9-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Polyfill\\Ctype\\": ""
+                },
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                },
+                {
+                    "name": "Gert de Pagter",
+                    "email": "BackEndTea@gmail.com"
+                }
+            ],
+            "description": "Symfony polyfill for ctype functions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "ctype",
+                "polyfill",
+                "portable"
+            ],
+            "time": "2018-08-06T14:22:27+00:00"
+        },
+        {
+            "name": "symfony/polyfill-mbstring",
+            "version": "v1.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-mbstring.git",
+                "reference": "c79c051f5b3a46be09205c73b80b346e4153e494"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/c79c051f5b3a46be09205c73b80b346e4153e494",
+                "reference": "c79c051f5b3a46be09205c73b80b346e4153e494",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "suggest": {
+                "ext-mbstring": "For best performance"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.9-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Polyfill\\Mbstring\\": ""
+                },
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill for the Mbstring extension",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "mbstring",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "time": "2018-09-21T13:07:52+00:00"
+        },
+        {
+            "name": "webignition/absolute-url-deriver",
+            "version": "2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/absolute-url-deriver.git",
+                "reference": "eb31641e006947476b519da99c7d181efa82f3c5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/absolute-url-deriver/zipball/eb31641e006947476b519da99c7d181efa82f3c5",
+                "reference": "eb31641e006947476b519da99c7d181efa82f3c5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2",
+                "webignition/url": "^2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7",
+                "squizlabs/php_codesniffer": "^3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\AbsoluteUrlDeriver\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Derives an absolute URL from relative and source URLs",
+            "homepage": "https://github.com/webignition/absolute-url-deriver",
+            "keywords": [
+                "absolute",
+                "url"
+            ],
+            "time": "2018-09-27T09:10:17+00:00"
+        },
+        {
+            "name": "webignition/character-set-list",
+            "version": "0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/character-set-list.git",
+                "reference": "bb7b4b8626972fb3b7c66dcbe69c7a6849b9ce8c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/character-set-list/zipball/bb7b4b8626972fb3b7c66dcbe69c7a6849b9ce8c",
+                "reference": "bb7b4b8626972fb3b7c66dcbe69c7a6849b9ce8c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*",
+                "symfony/class-loader": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "webignition\\Tests": "tests/",
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "List of official names for character sets",
+            "homepage": "https://github.com/webignition/character-set-list",
+            "keywords": [
+                "character",
+                "list",
+                "set"
+            ],
+            "time": "2014-04-04T13:31:41+00:00"
         },
         {
             "name": "webignition/css-validator-output-models",
@@ -156,6 +526,281 @@
             "time": "2019-01-03T12:34:51+00:00"
         },
         {
+            "name": "webignition/disallowed-character-terminated-string",
+            "version": "1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/disallowed-character-terminated-string.git",
+                "reference": "25d12868c82b56bc0d04278e31594385ba4dddc4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/disallowed-character-terminated-string/zipball/25d12868c82b56bc0d04278e31594385ba4dddc4",
+                "reference": "25d12868c82b56bc0d04278e31594385ba4dddc4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "A string terminated by one or more disallowed characters",
+            "homepage": "https://github.com/webignition/disallowed-character-terminated-string",
+            "keywords": [
+                "string",
+                "terminated"
+            ],
+            "time": "2012-07-16T21:29:50+00:00"
+        },
+        {
+            "name": "webignition/internet-media-type",
+            "version": "2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/internet-media-type.git",
+                "reference": "d9fa880260a9689477f132f9b2310233ecc9b30f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/internet-media-type/zipball/d9fa880260a9689477f132f9b2310233ecc9b30f",
+                "reference": "d9fa880260a9689477f132f9b2310233ecc9b30f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0",
+                "webignition/internet-media-type-interface": ">=0.4,<1.0",
+                "webignition/quoted-string": ">=0.2.1,<1.0",
+                "webignition/string-parser": ">=0.2.3,<1.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7",
+                "squizlabs/php_codesniffer": "^3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\InternetMediaType\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "PHP model of an http://en.wikipedia.org/wiki/Internet_media_type",
+            "homepage": "https://github.com/webignition/internet-media-type",
+            "keywords": [
+                "content type",
+                "content-type",
+                "internet media type",
+                "media type",
+                "media-type"
+            ],
+            "time": "2018-10-09T10:03:45+00:00"
+        },
+        {
+            "name": "webignition/internet-media-type-interface",
+            "version": "0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/internet-media-type-interface.git",
+                "reference": "dde668e8fa9e0c49b9925a4eeadfa0bc65b26747"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/internet-media-type-interface/zipball/dde668e8fa9e0c49b9925a4eeadfa0bc65b26747",
+                "reference": "dde668e8fa9e0c49b9925a4eeadfa0bc65b26747",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\InternetMediaTypeInterface\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "PHP interfaces for a model of an http://en.wikipedia.org/wiki/Internet_media_type",
+            "homepage": "https://github.com/webignition/internet-media-type-interface",
+            "keywords": [
+                "content type",
+                "content-type",
+                "internet media type",
+                "media type",
+                "media-type"
+            ],
+            "time": "2018-10-09T09:16:21+00:00"
+        },
+        {
+            "name": "webignition/quoted-string",
+            "version": "0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/quoted-string.git",
+                "reference": "88b36b7be067796683ab3668e175322842dd5313"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/quoted-string/zipball/88b36b7be067796683ab3668e175322842dd5313",
+                "reference": "88b36b7be067796683ab3668e175322842dd5313",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0",
+                "webignition/string-parser": ">=0.2.3,<1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0",
+                "squizlabs/php_codesniffer": "3.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\QuotedString\\": "src/",
+                    "webignition\\Tests\\QuotedString\\": "tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "A parser for string values that are encapsulated in double quotes (ASCII 34)",
+            "homepage": "https://github.com/webignition/quoted-string",
+            "keywords": [
+                "parser",
+                "quoted-string"
+            ],
+            "time": "2017-05-11T11:41:31+00:00"
+        },
+        {
+            "name": "webignition/stream-factory-interface",
+            "version": "0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/stream-factory-interface.git",
+                "reference": "c2e7d8fdb0b129db1a47e0c28f47793758b4fc0d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/stream-factory-interface/zipball/c2e7d8fdb0b129db1a47e0c28f47793758b4fc0d",
+                "reference": "c2e7d8fdb0b129db1a47e0c28f47793758b4fc0d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0",
+                "psr/http-message": "~1.0"
+            },
+            "require-dev": {
+                "squizlabs/php_codesniffer": "^3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\StreamFactoryInterface\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Interface for a factory to create Psr\\Http\\Message\\StreamInterface objects",
+            "homepage": "https://github.com/webignition/stream-factory-interfaces",
+            "keywords": [
+                "psr-7",
+                "stream"
+            ],
+            "time": "2018-10-11T15:16:36+00:00"
+        },
+        {
+            "name": "webignition/string-parser",
+            "version": "0.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/string-parser.git",
+                "reference": "8591e28c05bd250bcc67b8001f3588995b9ef74b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/string-parser/zipball/8591e28c05bd250bcc67b8001f3588995b9ef74b",
+                "reference": "8591e28c05bd250bcc67b8001f3588995b9ef74b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0",
+                "webignition/disallowed-character-terminated-string": ">=1.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0",
+                "squizlabs/php_codesniffer": "3.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\StringParser\\": "src/",
+                    "webignition\\Tests\\StringParser\\": "tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Abstract state-based string parser",
+            "homepage": "https://github.com/webignition/string-parser",
+            "keywords": [
+                "parser",
+                "string"
+            ],
+            "time": "2017-05-11T10:04:12+00:00"
+        },
+        {
             "name": "webignition/url",
             "version": "2.2",
             "source": {
@@ -203,6 +848,214 @@
                 "url"
             ],
             "time": "2018-10-09T17:17:09+00:00"
+        },
+        {
+            "name": "webignition/web-page-inspector",
+            "version": "1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/web-page-inspector.git",
+                "reference": "238020662cefa5631f8c972abd1b6820d0767d1f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/web-page-inspector/zipball/238020662cefa5631f8c972abd1b6820d0767d1f",
+                "reference": "238020662cefa5631f8c972abd1b6820d0767d1f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0",
+                "symfony/css-selector": "^4.1",
+                "symfony/dom-crawler": "^4.1",
+                "webignition/internet-media-type": "^2",
+                "webignition/internet-media-type-interface": "^0.4",
+                "webignition/web-resource-interfaces": ">=3.3,<4"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1",
+                "phpunit/phpunit": "^7",
+                "squizlabs/php_codesniffer": "^3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\WebPageInspector\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Convenience inspector for getting information out of a WebPageInterface instance",
+            "homepage": "https://github.com/webignition/web-page-inspector",
+            "keywords": [
+                "inspector",
+                "webpage"
+            ],
+            "time": "2019-01-08T10:30:29+00:00"
+        },
+        {
+            "name": "webignition/web-page-model",
+            "version": "5.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/web-page-model.git",
+                "reference": "4816d14667ab5fa2b8a5febc86866623e9c213b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/web-page-model/zipball/4816d14667ab5fa2b8a5febc86866623e9c213b4",
+                "reference": "4816d14667ab5fa2b8a5febc86866623e9c213b4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0",
+                "webignition/absolute-url-deriver": ">=2,<3",
+                "webignition/character-set-list": "^0.2",
+                "webignition/internet-media-type": "^2",
+                "webignition/internet-media-type-interface": "^0.4",
+                "webignition/web-page-inspector": ">=1,<2",
+                "webignition/web-resource-interfaces": ">=3.3,<4",
+                "webignition/web-resource-model": ">=5.2,<6"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1",
+                "phpunit/phpunit": "^7",
+                "squizlabs/php_codesniffer": "^3",
+                "webignition/web-resource-testing-tools": "^0.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\WebResource\\WebPage\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Model of a web page, based off webignition/web-resource-model",
+            "homepage": "https://github.com/webignition/web-page-model",
+            "keywords": [
+                "model",
+                "webpage"
+            ],
+            "time": "2019-01-08T10:42:11+00:00"
+        },
+        {
+            "name": "webignition/web-resource-interfaces",
+            "version": "3.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/web-resource-interfaces.git",
+                "reference": "07ed13f213d9251a89a82a9de988291bfb82d60a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/web-resource-interfaces/zipball/07ed13f213d9251a89a82a9de988291bfb82d60a",
+                "reference": "07ed13f213d9251a89a82a9de988291bfb82d60a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0",
+                "psr/http-message": "~1.0",
+                "webignition/internet-media-type-interface": ">=0.1,<1",
+                "webignition/stream-factory-interface": ">=0.2,<1"
+            },
+            "require-dev": {
+                "squizlabs/php_codesniffer": "^3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\WebResourceInterfaces\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Interfaces for web resource models and services to retrieve and create them",
+            "homepage": "https://github.com/webignition/web-resource-interfaces",
+            "keywords": [
+                "Sitemap",
+                "json-document",
+                "model",
+                "psr-7",
+                "web-page"
+            ],
+            "time": "2018-10-11T16:17:06+00:00"
+        },
+        {
+            "name": "webignition/web-resource-model",
+            "version": "5.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/web-resource-model.git",
+                "reference": "62bf5a135ce021ec0790725385a5cdbc5a47eabd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/web-resource-model/zipball/62bf5a135ce021ec0790725385a5cdbc5a47eabd",
+                "reference": "62bf5a135ce021ec0790725385a5cdbc5a47eabd",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2",
+                "psr/http-message": "^1",
+                "webignition/internet-media-type": "^2",
+                "webignition/internet-media-type-interface": "^0.4",
+                "webignition/stream-factory-interface": ">=0.2,<1",
+                "webignition/web-resource-interfaces": ">=3.4,<4"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1",
+                "phpunit/phpunit": "^7",
+                "squizlabs/php_codesniffer": "^3",
+                "webignition/web-resource-testing-tools": "^0.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\WebResource\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Model of a web-based resource",
+            "homepage": "https://github.com/webignition/web-resource-model",
+            "keywords": [
+                "modem",
+                "psr-7",
+                "web"
+            ],
+            "time": "2018-10-11T16:29:19+00:00"
         },
         {
             "name": "xrstf/ip-utils",
@@ -1903,64 +2756,6 @@
                 "standards"
             ],
             "time": "2018-12-19T23:57:18+00:00"
-        },
-        {
-            "name": "symfony/polyfill-ctype",
-            "version": "v1.10.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "e3d826245268269cd66f8326bd8bc066687b4a19"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/e3d826245268269cd66f8326bd8bc066687b4a19",
-                "reference": "e3d826245268269cd66f8326bd8bc066687b4a19",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.3"
-            },
-            "suggest": {
-                "ext-ctype": "For best performance"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.9-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Ctype\\": ""
-                },
-                "files": [
-                    "bootstrap.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                },
-                {
-                    "name": "Gert de Pagter",
-                    "email": "BackEndTea@gmail.com"
-                }
-            ],
-            "description": "Symfony polyfill for ctype functions",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "compatibility",
-                "ctype",
-                "polyfill",
-                "portable"
-            ],
-            "time": "2018-08-06T14:22:27+00:00"
         },
         {
             "name": "theseer/tokenizer",
