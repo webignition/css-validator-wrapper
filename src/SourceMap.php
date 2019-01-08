@@ -6,6 +6,13 @@ class SourceMap
 {
     private $mappings = [];
 
+    public function __construct(array $mappings = [])
+    {
+        foreach ($mappings as $sourcePath => $localPath) {
+            $this->addMapping($sourcePath, $localPath);
+        }
+    }
+
     public function addMapping(string $sourcePath, string $localPath)
     {
         $this->mappings[$sourcePath] = $localPath;

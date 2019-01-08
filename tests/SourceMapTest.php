@@ -5,18 +5,14 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use webignition\CssValidatorWrapper\SourceMap;
 
-class SourcePathTest extends \PHPUnit\Framework\TestCase
+class SourceMapTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @dataProvider getLocalPathDataProvider
      */
     public function testGetLocalPath(array $mappings, string $sourcePath, ?string $expectedLocalPath)
     {
-        $sourceMap = new SourceMap();
-
-        foreach ($mappings as $hydrateSourcePath => $localPath) {
-            $sourceMap->addMapping($hydrateSourcePath, $localPath);
-        }
+        $sourceMap = new SourceMap($mappings);
 
         $this->assertEquals($expectedLocalPath, $sourceMap->getLocalPath($sourcePath));
     }
