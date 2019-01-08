@@ -7,38 +7,45 @@ use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorOutput\Parser\OutputParser;
-use webignition\CssValidatorWrapper\Configuration\Configuration;
 
 class Wrapper
 {
     private $commandFactory;
     private $outputParser;
+    private $javaExecutablePath;
+    private $cssValidatorJarPath;
 
-    public function __construct(CommandFactory $commandFactory, OutputParser $outputParser)
-    {
+    public function __construct(
+        CommandFactory $commandFactory,
+        OutputParser $outputParser,
+        string $javaExecutablePath,
+        string $cssValidatorJarPath
+    ) {
         $this->commandFactory = $commandFactory;
         $this->outputParser = $outputParser;
+        $this->javaExecutablePath = $javaExecutablePath;
+        $this->cssValidatorJarPath = $cssValidatorJarPath;
     }
 
     /**
      * @param string $url
-     * @param Configuration $configuration
-     *
+     * @param string $vendorExtensionSeverityLevel
      * @param OutputParserConfiguration|null $outputParserConfiguration
+     *
      * @return OutputInterface
      *
      * @throws InvalidValidatorOutputException
      */
     public function validate(
         string $url,
-        Configuration $configuration,
+        string $vendorExtensionSeverityLevel,
         ?OutputParserConfiguration $outputParserConfiguration = null
     ): OutputInterface {
         $command = $this->commandFactory->create(
             $url,
-            $configuration->getJavaExecutablePath(),
-            $configuration->getCssValidatorJarPath(),
-            $configuration->getVendorExtensionSeverityLevel()
+            $this->javaExecutablePath,
+            $this->cssValidatorJarPath,
+            $vendorExtensionSeverityLevel
         );
 
         $validatorOutput = shell_exec($command);
