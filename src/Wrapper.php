@@ -7,6 +7,7 @@ use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorOutput\Parser\OutputParser;
+use webignition\WebResourceInterfaces\WebPageInterface;
 
 class Wrapper
 {
@@ -28,7 +29,7 @@ class Wrapper
     }
 
     /**
-     * @param string $url
+     * @param WebPageInterface $webPage
      * @param string $vendorExtensionSeverityLevel
      * @param OutputParserConfiguration|null $outputParserConfiguration
      *
@@ -37,12 +38,12 @@ class Wrapper
      * @throws InvalidValidatorOutputException
      */
     public function validate(
-        string $url,
+        WebPageInterface $webPage,
         string $vendorExtensionSeverityLevel,
         ?OutputParserConfiguration $outputParserConfiguration = null
     ): OutputInterface {
         $command = $this->commandFactory->create(
-            $url,
+            (string) $webPage->getUri(),
             $this->javaExecutablePath,
             $this->cssValidatorJarPath,
             $vendorExtensionSeverityLevel
