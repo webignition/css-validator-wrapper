@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ca0b07b4336868bc0fe45ea49f15e7c6",
+    "content-hash": "f94dfeac5c063586f37e9d5158a542b7",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -59,6 +59,55 @@
                 "lib"
             ],
             "time": "2014-02-15T12:42:32+00:00"
+        },
+        {
+            "name": "mso/idna-convert",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phlylabs/idna-convert.git",
+                "reference": "a6dfb6f87611e3a89d2eec4924a0f51db755c573"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phlylabs/idna-convert/zipball/a6dfb6f87611e3a89d2eec4924a0f51db755c573",
+                "reference": "a6dfb6f87611e3a89d2eec4924a0f51db755c573",
+                "shasum": ""
+            },
+            "require": {
+                "ext-pcre": "*",
+                "php": ">=5.6.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Mso\\IdnaConvert\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.1+"
+            ],
+            "authors": [
+                {
+                    "name": "Matthias Sommerfeld",
+                    "email": "mso@phlylabs.de",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A library for encoding and decoding internationalized domain names",
+            "homepage": "http://idnaconv.net/",
+            "keywords": [
+                "idn",
+                "idna",
+                "php"
+            ],
+            "time": "2016-06-19T18:08:43+00:00"
         },
         {
             "name": "psr/http-message",
@@ -339,21 +388,21 @@
         },
         {
             "name": "webignition/absolute-url-deriver",
-            "version": "2.0",
+            "version": "3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/absolute-url-deriver.git",
-                "reference": "eb31641e006947476b519da99c7d181efa82f3c5"
+                "reference": "edfe9406e39bfe2676784929a7857e1562edb77b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/absolute-url-deriver/zipball/eb31641e006947476b519da99c7d181efa82f3c5",
-                "reference": "eb31641e006947476b519da99c7d181efa82f3c5",
+                "url": "https://api.github.com/repos/webignition/absolute-url-deriver/zipball/edfe9406e39bfe2676784929a7857e1562edb77b",
+                "reference": "edfe9406e39bfe2676784929a7857e1562edb77b",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.2",
-                "webignition/url": "^2"
+                "webignition/uri": ">=0.3,<1"
             },
             "require-dev": {
                 "phpunit/phpunit": "^7",
@@ -381,7 +430,7 @@
                 "absolute",
                 "url"
             ],
-            "time": "2018-09-27T09:10:17+00:00"
+            "time": "2019-01-09T18:03:54+00:00"
         },
         {
             "name": "webignition/character-set-list",
@@ -801,6 +850,61 @@
             "time": "2017-05-11T10:04:12+00:00"
         },
         {
+            "name": "webignition/uri",
+            "version": "0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/uri.git",
+                "reference": "18fe8ca5a6f266699ae65224f04237b5765e8327"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/uri/zipball/18fe8ca5a6f266699ae65224f04237b5765e8327",
+                "reference": "18fe8ca5a6f266699ae65224f04237b5765e8327",
+                "shasum": ""
+            },
+            "require": {
+                "mso/idna-convert": "^1",
+                "php": ">=7.2",
+                "psr/http-message": "^1",
+                "xrstf/ip-utils": "v1.0.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1",
+                "php-mock/php-mock-mockery": "^1",
+                "phpunit/phpunit": "^7",
+                "squizlabs/php_codesniffer": "3.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\Uri\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "A PSR-7 UriInterface implementation. A normalizer for applying sixteen lossy and lossless normalizations.",
+            "homepage": "https://github.com/webignition/uri",
+            "keywords": [
+                "normalise",
+                "normaliser",
+                "normalize",
+                "normalizer",
+                "psr-7",
+                "uri",
+                "url"
+            ],
+            "time": "2019-01-09T16:54:07+00:00"
+        },
+        {
             "name": "webignition/url",
             "version": "2.2",
             "source": {
@@ -851,16 +955,16 @@
         },
         {
             "name": "webignition/web-page-inspector",
-            "version": "1.0",
+            "version": "1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-page-inspector.git",
-                "reference": "238020662cefa5631f8c972abd1b6820d0767d1f"
+                "reference": "14fadb2cb909885e0a8ba0c34f0fcccba625e26a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-page-inspector/zipball/238020662cefa5631f8c972abd1b6820d0767d1f",
-                "reference": "238020662cefa5631f8c972abd1b6820d0767d1f",
+                "url": "https://api.github.com/repos/webignition/web-page-inspector/zipball/14fadb2cb909885e0a8ba0c34f0fcccba625e26a",
+                "reference": "14fadb2cb909885e0a8ba0c34f0fcccba625e26a",
                 "shasum": ""
             },
             "require": {
@@ -898,25 +1002,25 @@
                 "inspector",
                 "webpage"
             ],
-            "time": "2019-01-08T10:30:29+00:00"
+            "time": "2019-01-10T10:22:34+00:00"
         },
         {
             "name": "webignition/web-page-model",
-            "version": "5.6",
+            "version": "5.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/web-page-model.git",
-                "reference": "4816d14667ab5fa2b8a5febc86866623e9c213b4"
+                "reference": "5ac8018fdb0ae5e21551c8cbe2020131272d5f43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/web-page-model/zipball/4816d14667ab5fa2b8a5febc86866623e9c213b4",
-                "reference": "4816d14667ab5fa2b8a5febc86866623e9c213b4",
+                "url": "https://api.github.com/repos/webignition/web-page-model/zipball/5ac8018fdb0ae5e21551c8cbe2020131272d5f43",
+                "reference": "5ac8018fdb0ae5e21551c8cbe2020131272d5f43",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.2.0",
-                "webignition/absolute-url-deriver": ">=2,<3",
+                "webignition/absolute-url-deriver": ">=3,<4",
                 "webignition/character-set-list": "^0.2",
                 "webignition/internet-media-type": "^2",
                 "webignition/internet-media-type-interface": "^0.4",
@@ -952,7 +1056,7 @@
                 "model",
                 "webpage"
             ],
-            "time": "2019-01-08T10:42:11+00:00"
+            "time": "2019-01-09T18:39:52+00:00"
         },
         {
             "name": "webignition/web-resource-interfaces",
