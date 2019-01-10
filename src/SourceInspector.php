@@ -14,7 +14,7 @@ class SourceInspector
      *
      * @return string[]
      */
-    public function findStylesheetUrls(WebPage $webPage): array
+    public static function findStylesheetUrls(WebPage $webPage): array
     {
         $stylesheetUrls = [];
         $selector = 'link[rel=stylesheet][href]';

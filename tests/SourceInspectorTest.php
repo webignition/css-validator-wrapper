@@ -8,18 +8,15 @@ use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\WebResource\WebPage\WebPage;
-use webignition\WebResourceInterfaces\WebPageInterface;
 
 class SourceInspectorTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @dataProvider findStylesheetUrlsDataProvider
      */
-    public function testFindStylesheetUrls(WebPageInterface $webPage, array $expectedStylesheetUrls)
+    public function testFindStylesheetUrls(WebPage $webPage, array $expectedStylesheetUrls)
     {
-        $sourceInspector = new SourceInspector();
-
-        $this->assertEquals($expectedStylesheetUrls, $sourceInspector->findStylesheetUrls($webPage));
+        $this->assertEquals($expectedStylesheetUrls, SourceInspector::findStylesheetUrls($webPage));
     }
 
     public function findStylesheetUrlsDataProvider()
@@ -64,7 +61,7 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    private function createWebPage(string $content, UriInterface $uri): WebPageInterface
+    private function createWebPage(string $content, UriInterface $uri): WebPage
     {
         /* @var WebPage $webPage */
         $webPage = WebPage::createFromContent($content);
