@@ -12,16 +12,34 @@ use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfigura
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandFactory;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
+use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Wrapper;
 use webignition\WebResource\WebPage\WebPage;
 
 class WrapperTest extends \PHPUnit\Framework\TestCase
 {
+    const JAVA_EXECUTABLE_PATH = '/usr/bin/java';
+    const CSS_VALIDATOR_JAR_PATH = 'css-validator.jar';
+
+    public function testValidateUnknownSourceExceptionForWebPage()
+    {
+        $webPage = $this->createWebPage('http://example.com/', 'content');
+        $wrapper = $this->createWrapper();
+
+        $this->expectException(UnknownSourceException::class);
+        $this->expectExceptionCode(UnknownSourceException::CODE);
+        $this->expectExceptionMessage('Unknown source "http://example.com/"');
+
+        $wrapper->validate($webPage, new SourceMap(), VendorExtensionSeverityLevel::LEVEL_WARN);
+    }
+
     /**
      * @dataProvider validateDataProvider
      */
     public function testValidate(
+        SourceMap $sourceMap,
         string $sourceFixture,
         string $sourceUrl,
         string $cssValidatorRawOutput,
@@ -31,30 +49,15 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         int $expectedErrorCount,
         array $expectedErrorCountByUrl = []
     ) {
-        $uri = \Mockery::mock(UriInterface::class);
-        $uri
-            ->shouldReceive('__toString')
-            ->andReturn($sourceUrl);
-
-        /* @var WebPage $webPage */
-        $webPage = WebPage::createFromContent($sourceFixture);
-        $webPage = $webPage->setUri($uri);
-
-        $javaExecutablePath = '/usr/bin/java';
-        $cssValidatorJarPath = 'css-validator.jar';
-
-        $wrapper = new Wrapper(
-            new CommandFactory(),
-            new OutputParser(),
-            $javaExecutablePath,
-            $cssValidatorJarPath
-        );
+        $webPage = $this->createWebPage($sourceUrl, $sourceFixture);
+        $wrapper = $this->createWrapper();
 
         $this->setCssValidatorRawOutput($cssValidatorRawOutput);
 
         /* @var ValidationOutput $output */
         $output = $wrapper->validate(
             $webPage,
+            $sourceMap,
             $vendorExtensionSeverityLevel,
             $outputParserConfiguration
         );
@@ -77,6 +80,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     {
         return [
             'ignore false image data url messages' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
@@ -90,6 +96,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'ignore warnings' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('single-warning'),
@@ -101,6 +110,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'vendor extension issues:warn and ignore warnings' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
@@ -113,6 +125,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension warnings' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
@@ -124,6 +139,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension errors' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
@@ -241,6 +259,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
 
             'html5 no css no linked resources' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
@@ -250,6 +271,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: default' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
@@ -259,6 +283,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: warn' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
@@ -268,6 +295,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: error' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
@@ -277,6 +307,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 3,
             ],
             'vendor extension warnings: warn, with at-rule errors that should be warnings' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+                ]),
                 'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
@@ -303,6 +336,30 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     private function loadCssValidatorRawOutputFixture(string $name): string
     {
         return file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
+    }
+
+    private function createWrapper(): Wrapper
+    {
+        return new Wrapper(
+            new CommandFactory(),
+            new OutputParser(),
+            self::JAVA_EXECUTABLE_PATH,
+            self::CSS_VALIDATOR_JAR_PATH
+        );
+    }
+
+    private function createWebPage(string $url, string $content): WebPage
+    {
+        $uri = \Mockery::mock(UriInterface::class);
+        $uri
+            ->shouldReceive('__toString')
+            ->andReturn($url);
+
+        /* @var WebPage $webPage */
+        $webPage = WebPage::createFromContent($content);
+        $webPage = $webPage->setUri($uri);
+
+        return $webPage;
     }
 
     protected function tearDown()

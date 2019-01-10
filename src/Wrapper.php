@@ -7,6 +7,7 @@ use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorOutput\Parser\OutputParser;
+use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\WebResourceInterfaces\WebPageInterface;
 
 class Wrapper
@@ -30,18 +31,28 @@ class Wrapper
 
     /**
      * @param WebPageInterface $webPage
+     * @param SourceMap $sourceMap
      * @param string $vendorExtensionSeverityLevel
      * @param OutputParserConfiguration|null $outputParserConfiguration
      *
      * @return OutputInterface
      *
      * @throws InvalidValidatorOutputException
+     * @throws UnknownSourceException
      */
     public function validate(
         WebPageInterface $webPage,
+        SourceMap $sourceMap,
         string $vendorExtensionSeverityLevel,
         ?OutputParserConfiguration $outputParserConfiguration = null
     ): OutputInterface {
+        $webPageUri = (string) $webPage->getUri();
+        $webPageLocalPath = $sourceMap->getLocalPath($webPageUri);
+
+        if (empty($webPageLocalPath)) {
+            throw new UnknownSourceException($webPageUri);
+        }
+
         $command = $this->commandFactory->create(
             (string) $webPage->getUri(),
             $this->javaExecutablePath,
