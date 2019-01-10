@@ -29,6 +29,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $path = $resourceStorage->store($url, $content, $type);
 
         $this->assertStoredFile($expectedPath, $path, $content);
+        $this->assertEquals($path, $resourceStorage->getPath($url));
 
         $resourceStorage->deleteAll();
 
@@ -77,6 +78,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $path = $resourceStorage->duplicate($url, $localPath, $type);
 
         $this->assertStoredFile($expectedPath, $path, $content);
+        $this->assertEquals($path, $resourceStorage->getPath($url));
 
         $resourceStorage->deleteAll();
 

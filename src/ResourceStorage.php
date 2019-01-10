@@ -20,6 +20,11 @@ class ResourceStorage
         });
     }
 
+    public function getPath(string $url): ?string
+    {
+        return $this->paths[$url] ?? null;
+    }
+
     private function persist(string $url, string $hashInput, string $type, callable $persister): string
     {
         $path = $this->createPath($hashInput, $type);
