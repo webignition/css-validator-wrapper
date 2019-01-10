@@ -7,7 +7,6 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
-use webignition\WebPageInspector\WebPageInspector;
 use webignition\WebResource\WebPage\WebPage;
 use webignition\WebResourceInterfaces\WebPageInterface;
 
@@ -18,11 +17,9 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
      */
     public function testFindStylesheetUrls(WebPageInterface $webPage, array $expectedStylesheetUrls)
     {
-        $webPageInspector = new WebPageInspector($webPage);
+        $sourceInspector = new SourceInspector();
 
-        $sourceInspector = new SourceInspector($webPageInspector);
-
-        $this->assertEquals($expectedStylesheetUrls, $sourceInspector->findStylesheetUrls());
+        $this->assertEquals($expectedStylesheetUrls, $sourceInspector->findStylesheetUrls($webPage));
     }
 
     public function findStylesheetUrlsDataProvider()

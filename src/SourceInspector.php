@@ -5,29 +5,23 @@ namespace webignition\CssValidatorWrapper;
 use webignition\AbsoluteUrlDeriver\AbsoluteUrlDeriver;
 use webignition\Uri\Normalizer;
 use webignition\Uri\Uri;
-use webignition\WebPageInspector\WebPageInspector;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourceInspector
 {
-    private $webPageInspector;
-
-    public function __construct(WebPageInspector $webPageInspector)
-    {
-        $this->webPageInspector = $webPageInspector;
-    }
-
     /**
+     * @param WebPage $webPage
+     *
      * @return string[]
      */
-    public function findStylesheetUrls(): array
+    public function findStylesheetUrls(WebPage $webPage): array
     {
         $stylesheetUrls = [];
-
         $selector = 'link[rel=stylesheet][href]';
+        $webPageInspector = $webPage->getInspector();
 
         /* @var \DOMElement[] $stylesheetLinkElements */
-        $stylesheetLinkElements = $this->webPageInspector->querySelectorAll($selector);
+        $stylesheetLinkElements = $webPageInspector->querySelectorAll($selector);
         if (empty($stylesheetLinkElements)) {
             return $stylesheetUrls;
         }
@@ -36,8 +30,6 @@ class SourceInspector
             return $stylesheetUrls;
         }
 
-        /* @var WebPage $webPage */
-        $webPage = $this->webPageInspector->getWebPage();
         $baseUri = new Uri($webPage->getBaseUrl());
 
         foreach ($stylesheetLinkElements as $stylesheetLinkElement) {
