@@ -75,20 +75,29 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @dataProvider prepareDataProvider
+     * @dataProvider prepareSuccessDataProvider
      */
-    public function testPrepare(WebPage $webPage, SourceMap $sourceMap, string $expectedPreparedContent)
-    {
+    public function testPrepareSuccess(
+        array $sources,
+        WebPage $webPage,
+        SourceMap $sourceMap,
+        string $expectedPreparedContent
+    ) {
+        foreach ($sources as $filename => $content) {
+            file_put_contents($filename, $content);
+        }
+
         $preparer = new SourcePreparer();
         $preparer->prepare($webPage, $sourceMap);
 
         $this->assertEquals($expectedPreparedContent, $webPage->getContent());
     }
 
-    public function prepareDataProvider()
+    public function prepareSuccessDataProvider()
     {
         return [
             'no linked resources' => [
+                'sources' => [],
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5.html'),
                     $this->createUri('http://example.com/')
@@ -97,24 +106,32 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
                 'expectedPreparedContent' => FixtureLoader::load('Html/minimal-html5.html'),
             ],
             'single linked stylesheet' => [
+                'sources' => [
+                    '/tmp/style.css' => 'html {}',
+                ],
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
                     $this->createUri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/style.css' => 'file:/tmp/style.css',
+                    'http://example.com/style.css' => '/tmp/style.css',
                 ]),
                 'expectedPreparedContent' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
             ],
             'three linked stylesheets' => [
+                'sources' => [
+                    '/tmp/one.css' => 'html {}',
+                    '/tmp/two.css' => 'html {}',
+                    '/tmp/three.css' => 'html {}',
+                ],
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
                     $this->createUri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/one.css' => 'file:/tmp/one.css',
-                    'http://example.com/two.css' => 'file:/tmp/two.css',
-                    'http://example.com/three.css?foo=bar&foobar=foobar' => 'file:/tmp/three.css',
+                    'http://example.com/one.css' => '/tmp/one.css',
+                    'http://example.com/two.css' => '/tmp/two.css',
+                    'http://example.com/three.css?foo=bar&foobar=foobar' => '/tmp/three.css',
                 ]),
                 'expectedPreparedContent' => FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
             ],

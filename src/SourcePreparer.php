@@ -2,11 +2,7 @@
 
 namespace webignition\CssValidatorWrapper;
 
-use webignition\AbsoluteUrlDeriver\AbsoluteUrlDeriver;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
-use webignition\Uri\Normalizer;
-use webignition\Uri\Uri;
-use webignition\WebPageInspector\WebPageInspector;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourcePreparer
@@ -32,6 +28,20 @@ class SourcePreparer
                 }
             }
         }
+
+        $resourceStorage = new ResourceStorage();
+
+        $webPageResourcePath = $resourceStorage->store((string) $webPage->getContent(), 'html');
+
+        $cssResourceTemporaryPaths = [];
+
+        foreach ($stylesheetUrls as $stylesheetUrl) {
+            $localPath = $sourceMap->getLocalPath($stylesheetUrl);
+
+            $cssResourceTemporaryPaths[] = $resourceStorage->duplicate($localPath, 'css');
+        }
+
+        $resourceStorage->deleteAll();
 
         return $preparedWebPage;
     }
