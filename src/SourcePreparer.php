@@ -11,14 +11,12 @@ class SourcePreparer
      * @param WebPage $webPage
      * @param SourceMap $sourceMap
      *
-     * @return WebPage
+     * @return ResourceStorage
      *
      * @throws UnknownSourceException
      */
-    public function prepare(WebPage $webPage, SourceMap $sourceMap): WebPage
+    public function prepare(WebPage $webPage, SourceMap $sourceMap): ResourceStorage
     {
-        $preparedWebPage = clone $webPage;
-
         $stylesheetUrls = SourceInspector::findStylesheetUrls($webPage);
 
         if (count($stylesheetUrls)) {
@@ -31,18 +29,19 @@ class SourcePreparer
 
         $resourceStorage = new ResourceStorage();
 
-        $webPageResourcePath = $resourceStorage->store((string) $webPage->getContent(), 'html');
+        $resourceStorage->store(
+            (string) $webPage->getUri(),
+            (string) $webPage->getContent(),
+            'html'
+        );
 
         $cssResourceTemporaryPaths = [];
 
         foreach ($stylesheetUrls as $stylesheetUrl) {
             $localPath = $sourceMap->getLocalPath($stylesheetUrl);
-
-            $cssResourceTemporaryPaths[] = $resourceStorage->duplicate($localPath, 'css');
+            $cssResourceTemporaryPaths[] = $resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
         }
 
-        $resourceStorage->deleteAll();
-
-        return $preparedWebPage;
+        return $resourceStorage;
     }
 }

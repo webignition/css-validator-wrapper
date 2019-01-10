@@ -20,6 +20,14 @@ class ResourceStorage
         });
     }
 
+    /**
+     * @return string[]
+     */
+    public function getPaths(): array
+    {
+        return $this->paths;
+    }
+
     public function getPath(string $url): ?string
     {
         return $this->paths[$url] ?? null;
