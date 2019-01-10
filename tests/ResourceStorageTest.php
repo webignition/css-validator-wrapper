@@ -13,7 +13,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider storeDataProvider
      */
-    public function testStore(string $content, string $type, string $filenameHash, string $expectedPath)
+    public function testStore(string $url, string $content, string $type, string $filenameHash, string $expectedPath)
     {
         if (file_exists($expectedPath)) {
             unlink($expectedPath);
@@ -26,9 +26,10 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
 
         $resourceStorage = new ResourceStorage();
 
-        $path = $resourceStorage->store($content, $type);
+        $path = $resourceStorage->store($url, $content, $type);
 
         $this->assertStoredFile($expectedPath, $path, $content);
+        $this->assertEquals($path, $resourceStorage->getPath($url));
 
         $resourceStorage->deleteAll();
 
@@ -39,12 +40,14 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
     {
         return [
             'html file' => [
+                'url' => 'http://example.com/index.html',
                 'content' => '<!doctype html><html></html>',
                 'type' => 'html',
                 'filenameHash' => 'file-hash-1',
                 'expectedPath' => '/tmp/file-hash-1.html',
             ],
             'css file' => [
+                'url' => 'http://example.com/style.css',
                 'content' => 'html {}',
                 'type' => 'css',
                 'filenameHash' => 'file-hash-2',
@@ -55,6 +58,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
 
     public function testDuplicate()
     {
+        $url = 'http://example.com/index.html';
         $content = '<!doctype html><html></html>';
         $type = 'html';
         $filenameHash = 'file-hash';
@@ -71,9 +75,10 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
 
         $resourceStorage = new ResourceStorage();
 
-        $path = $resourceStorage->duplicate($localPath, $type);
+        $path = $resourceStorage->duplicate($url, $localPath, $type);
 
         $this->assertStoredFile($expectedPath, $path, $content);
+        $this->assertEquals($path, $resourceStorage->getPath($url));
 
         $resourceStorage->deleteAll();
 
