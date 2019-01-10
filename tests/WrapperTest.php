@@ -40,9 +40,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @dataProvider validateDataProvider
+     * @dataProvider validateSuccessDataProvider
      */
-    public function testValidate(
+    public function testValidateSuccess(
         SourceMap $sourceMap,
         string $sourceFixture,
         string $sourceUrl,
@@ -81,7 +81,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    public function validateDataProvider(): array
+    public function validateSuccessDataProvider(): array
     {
         return [
             'ignore false image data url messages' => [

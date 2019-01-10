@@ -57,9 +57,10 @@ class Wrapper
         }
 
         $resourceStorage = $this->sourcePreparer->prepare($webPage, $sourceMap);
+        $webPageLocalUri = 'file:' . $resourceStorage->getPath($webPageUri);
 
         $command = $this->commandFactory->create(
-            (string) $webPage->getUri(),
+            $webPageLocalUri,
             $this->javaExecutablePath,
             $this->cssValidatorJarPath,
             $vendorExtensionSeverityLevel
