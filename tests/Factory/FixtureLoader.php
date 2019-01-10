@@ -6,6 +6,11 @@ class FixtureLoader
 {
     public static function load(string $name)
     {
+        return file_get_contents(self::getPath($name));
+    }
+
+    public static function getPath(string $name)
+    {
         $fixturePath = realpath(__DIR__ . '/../Fixtures/' . $name);
 
         if (empty($fixturePath)) {
@@ -15,6 +20,6 @@ class FixtureLoader
             ));
         }
 
-        return file_get_contents($fixturePath);
+        return $fixturePath;
     }
 }
