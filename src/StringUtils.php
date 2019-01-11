@@ -7,8 +7,8 @@ class StringUtils
     public static function findClosestAdjoiningStringStartingWith(
         string $content,
         string $target,
-        int $offset,
-        string $encoding
+        string $encoding,
+        ?int $offset
     ) {
         $fragment = mb_substr(
             $content,

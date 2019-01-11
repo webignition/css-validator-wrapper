@@ -13,13 +13,13 @@ class StringUtilsTest extends \PHPUnit\Framework\TestCase
     public function testFindClosestAdjoiningStringStartingWith(
         string $content,
         string $target,
-        int $offset,
         string $encoding,
+        ?int $offset,
         ?string $expectedReturnValue
     ) {
         $this->assertEquals(
             $expectedReturnValue,
-            StringUtils::findClosestAdjoiningStringStartingWith($content, $target, $offset, $encoding)
+            StringUtils::findClosestAdjoiningStringStartingWith($content, $target, $encoding, $offset)
         );
     }
 
@@ -29,8 +29,8 @@ class StringUtilsTest extends \PHPUnit\Framework\TestCase
             'empty' => [
                 'content' => '',
                 'target' => '',
-                'offset' => 0,
                 'encoding' => 'utf-8',
+                'offset' => null,
                 'expectedReturnValue' => '',
             ],
             'single stylesheet content, offset within meta element' => [
@@ -39,8 +39,8 @@ class StringUtilsTest extends \PHPUnit\Framework\TestCase
                     '<link href="/style.css" rel="stylesheet">',
                 ]),
                 'target' => '<link',
-                'offset' => strlen('<meta href="'),
                 'encoding' => 'utf-8',
+                'offset' => strlen('<meta href="'),
                 'expectedReturnValue' => null,
             ],
             'single stylesheet content, offset within link element' => [
@@ -49,15 +49,15 @@ class StringUtilsTest extends \PHPUnit\Framework\TestCase
                     '<link href="/style.css" rel="stylesheet">',
                 ]),
                 'target' => '<link',
-                'offset' => strlen('<meta href="/style.css" rel="stylesheet">' . "\n" . '<link href="'),
                 'encoding' => 'utf-8',
+                'offset' => strlen('<meta href="/style.css" rel="stylesheet">' . "\n" . '<link href="'),
                 'expectedReturnValue' => '<link href="',
             ],
             'stylesheet partial reference, locate href' => [
                 'content' => '<link href="/style.css',
                 'target' => 'href',
-                'offset' => strlen('<link href="/style.css'),
                 'encoding' => 'utf-8',
+                'offset' => null,
                 'expectedReturnValue' => 'href="/style.css',
             ],
         ];
