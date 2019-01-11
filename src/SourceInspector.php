@@ -83,69 +83,78 @@ class SourceInspector
     }
 
     /**
-     * @param string $webPageContent
+     * @param string $content
      * @param string $hrefValue
      * @param string $encoding
      *
      * @return null
      */
-    private static function findStylesheetUrlReference(
-        string $webPageContent,
-        string $hrefValue,
-        string $encoding
-    ) {
-        $hrefValueStartPosition = mb_strpos($webPageContent, $hrefValue, 0, $encoding);
+    private static function findStylesheetUrlReference(string $content, string $hrefValue, string $encoding)
+    {
+        $hrefValueStartPosition = mb_strpos($content, $hrefValue, 0, $encoding);
 
         if (false === $hrefValueStartPosition) {
             return null;
         }
 
-        $hrefValueLength = mb_strlen($hrefValue, $encoding);
-        $linkIdentifier = '<link';
-        $linkIdentifierLength = strlen($linkIdentifier);
-        $linkStartPosition = null;
-
         $hrefValueEndPosition = $hrefValueStartPosition + mb_strlen($hrefValue, $encoding);
 
-        $webPageFragment = mb_substr(
-            $webPageContent,
-            0,
-            $hrefValueEndPosition - $hrefValueLength,
+        $hrefLinkPrefix = self::findClosestAdjoiningStringStartingWith(
+            $content,
+            '<link',
+            $hrefValueStartPosition,
             $encoding
         );
 
-        $linkStartPositionOffset = 0;
-
-        $mutableWebPageFragment = $webPageFragment;
-
-        while (mb_strlen($mutableWebPageFragment) > 0 && null === $linkStartPosition) {
-            $possibleLinkIdentifier = mb_substr($mutableWebPageFragment, ($linkIdentifierLength * -1), null, $encoding);
-
-            if ($possibleLinkIdentifier === $linkIdentifier) {
-                $linkStartPosition = $hrefValueStartPosition - $linkStartPositionOffset;
-            } else {
-                $mutableWebPageFragment = mb_substr(
-                    $mutableWebPageFragment,
-                    0,
-                    mb_strlen($mutableWebPageFragment) - 1,
-                    $encoding
-                );
-                $linkStartPositionOffset++;
-            }
-        }
-
-        if (null === $linkStartPosition) {
+        if (null === $hrefLinkPrefix) {
             return self::findStylesheetUrlReference(
-                mb_substr($webPageContent, $hrefValueEndPosition, null, $encoding),
+                mb_substr($content, $hrefValueEndPosition, null, $encoding),
                 $hrefValue,
                 $encoding
             );
         }
 
-        return
-            $linkIdentifier .
-            mb_substr($webPageFragment, $linkStartPosition, $hrefValueEndPosition, $encoding) .
-            $hrefValue;
+        return $hrefLinkPrefix . $hrefValue;
+    }
+
+    private static function findClosestAdjoiningStringStartingWith(
+        string $content,
+        string $target,
+        int $offset,
+        string $encoding
+    ) {
+        $fragment = mb_substr(
+            $content,
+            0,
+            $offset,
+            $encoding
+        );
+
+        $targetStartPosition = null;
+        $targetStartPositionOffset = 0;
+        $targetLength = mb_strlen($target);
+
+        $mutableFragment = $fragment;
+
+        while (mb_strlen($mutableFragment) > 0 && null === $targetStartPosition) {
+            $possibleTarget = mb_substr($mutableFragment, ($targetLength * -1), null, $encoding);
+
+            if ($possibleTarget === $target) {
+                $targetStartPosition = $offset - $targetStartPositionOffset;
+            } else {
+                $mutableFragment = mb_substr(
+                    $mutableFragment,
+                    0,
+                    mb_strlen($mutableFragment) - 1,
+                    $encoding
+                );
+                $targetStartPositionOffset++;
+            }
+        }
+
+        return null === $targetStartPosition
+            ? null
+            : $target . mb_substr($fragment, $targetStartPosition, null, $encoding);
     }
 
     private static function findStylesheetUrlHrefValues(WebPage $webPage): array
