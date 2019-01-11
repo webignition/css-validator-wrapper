@@ -72,13 +72,13 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
     public function findStylesheetUrlReferencesDataProvider()
     {
         return [
-            'no linked resources' => [
-                'webPage' => $this->createWebPage(
-                    FixtureLoader::load('Html/minimal-html5.html'),
-                    $this->createUri('http://example.com/')
-                ),
-                'expectedStylesheetUrlReferences' => [],
-            ],
+//            'no linked resources' => [
+//                'webPage' => $this->createWebPage(
+//                    FixtureLoader::load('Html/minimal-html5.html'),
+//                    $this->createUri('http://example.com/')
+//                ),
+//                'expectedStylesheetUrlReferences' => [],
+//            ],
             'single linked stylesheet' => [
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),

@@ -78,8 +78,6 @@ class SourceInspector
     }
 
     /**
-     * currently finds single occurrence only ... need to cover multiple occurrences
-     *
      * @param string $webPageContent
      * @param string $hrefAttributeValue
      * @param string $encoding
@@ -115,7 +113,6 @@ class SourceInspector
 
         $mutableWebPageFragment = $webPageFragment;
 
-
         while (mb_strlen($mutableWebPageFragment) > 0 && null === $linkStartPosition) {
             $possibleLinkIdentifier = mb_substr($mutableWebPageFragment, ($linkIdentifierLength * -1), null, $encoding);
 
@@ -130,6 +127,14 @@ class SourceInspector
                 );
                 $linkStartPositionOffset++;
             }
+        }
+
+        if (null === $linkStartPosition) {
+            return self::findStylesheetUrlReference(
+                mb_substr($webPageContent, $attributeValueEndPosition, null, $encoding),
+                $hrefAttributeValue,
+                $encoding
+            );
         }
 
         return
