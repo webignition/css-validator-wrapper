@@ -17,17 +17,17 @@ class StringUtils
             $encoding
         );
 
-        $targetStartPosition = null;
-        $targetStartPositionOffset = 0;
+        $targetPosition = null;
+        $targetPositionOffset = 0;
         $targetLength = mb_strlen($target, $encoding);
 
         $mutableFragment = $fragment;
 
-        while (mb_strlen($mutableFragment) > 0 && null === $targetStartPosition) {
+        while (mb_strlen($mutableFragment) > 0 && null === $targetPosition) {
             $possibleTarget = mb_substr($mutableFragment, ($targetLength * -1), null, $encoding);
 
             if ($possibleTarget === $target) {
-                $targetStartPosition = $offset - $targetStartPositionOffset;
+                $targetPosition = $offset - $targetPositionOffset;
             } else {
                 $mutableFragment = mb_substr(
                     $mutableFragment,
@@ -35,13 +35,13 @@ class StringUtils
                     mb_strlen($mutableFragment) - 1,
                     $encoding
                 );
-                $targetStartPositionOffset++;
+                $targetPositionOffset++;
             }
         }
 
-        return null === $targetStartPosition
+        return null === $targetPosition
             ? null
-            : $target . mb_substr($fragment, $targetStartPosition, null, $encoding);
+            : $target . mb_substr($fragment, $targetPosition, null, $encoding);
     }
 
     public static function findNextAdjoiningStringEndingWith(
