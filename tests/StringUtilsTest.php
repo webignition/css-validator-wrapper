@@ -19,7 +19,7 @@ class StringUtilsTest extends \PHPUnit\Framework\TestCase
     ) {
         $this->assertEquals(
             $expectedReturnValue,
-            StringUtils::findClosestAdjoiningStringStartingWith($content, $target, $encoding, $offset)
+            StringUtils::findPreviousAdjoiningStringStartingWith($content, $target, $encoding, $offset)
         );
     }
 

@@ -4,7 +4,7 @@ namespace webignition\CssValidatorWrapper;
 
 class StringUtils
 {
-    public static function findClosestAdjoiningStringStartingWith(
+    public static function findPreviousAdjoiningStringStartingWith(
         string $content,
         string $target,
         string $encoding,

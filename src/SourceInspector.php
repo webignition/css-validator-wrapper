@@ -99,7 +99,7 @@ class SourceInspector
 
         $hrefValueEndPosition = $hrefValueStartPosition + mb_strlen($hrefValue, $encoding);
 
-        $hrefLinkPrefix = StringUtils::findClosestAdjoiningStringStartingWith(
+        $hrefLinkPrefix = StringUtils::findPreviousAdjoiningStringStartingWith(
             $content,
             '<link',
             $encoding,
