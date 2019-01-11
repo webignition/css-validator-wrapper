@@ -103,7 +103,6 @@ class SourceInspector
             $content,
             '<link',
             $hrefValueStartPosition,
-            $hrefValueEndPosition,
             $encoding
         );
 
@@ -121,28 +120,27 @@ class SourceInspector
     private static function findClosestAdjoiningStringStartingWith(
         string $content,
         string $target,
-        int $startOffset,
-        int $endOffset,
+        int $offset,
         string $encoding
     ) {
         $fragment = mb_substr(
             $content,
             0,
-            $startOffset,
+            $offset,
             $encoding
         );
 
-        $linkStartPositionOffset = 0;
         $targetStartPosition = null;
+        $targetStartPositionOffset = 0;
         $targetLength = mb_strlen($target);
 
         $mutableFragment = $fragment;
 
         while (mb_strlen($mutableFragment) > 0 && null === $targetStartPosition) {
-            $possibleTargetIdentifier = mb_substr($mutableFragment, ($targetLength * -1), null, $encoding);
+            $possibleTarget = mb_substr($mutableFragment, ($targetLength * -1), null, $encoding);
 
-            if ($possibleTargetIdentifier === $target) {
-                $targetStartPosition = $startOffset - $linkStartPositionOffset;
+            if ($possibleTarget === $target) {
+                $targetStartPosition = $offset - $targetStartPositionOffset;
             } else {
                 $mutableFragment = mb_substr(
                     $mutableFragment,
@@ -150,13 +148,13 @@ class SourceInspector
                     mb_strlen($mutableFragment) - 1,
                     $encoding
                 );
-                $linkStartPositionOffset++;
+                $targetStartPositionOffset++;
             }
         }
 
         return null === $targetStartPosition
             ? null
-            : $target . mb_substr($fragment, $targetStartPosition, $endOffset, $encoding);
+            : $target . mb_substr($fragment, $targetStartPosition, null, $encoding);
     }
 
     private static function findStylesheetUrlHrefValues(WebPage $webPage): array
