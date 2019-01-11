@@ -99,11 +99,11 @@ class SourceInspector
 
         $hrefValueEndPosition = $hrefValueStartPosition + mb_strlen($hrefValue, $encoding);
 
-        $hrefLinkPrefix = self::findClosestAdjoiningStringStartingWith(
+        $hrefLinkPrefix = StringUtils::findClosestAdjoiningStringStartingWith(
             $content,
             '<link',
-            $hrefValueStartPosition,
-            $encoding
+            $encoding,
+            $hrefValueStartPosition
         );
 
         if (null === $hrefLinkPrefix) {
@@ -115,46 +115,6 @@ class SourceInspector
         }
 
         return $hrefLinkPrefix . $hrefValue;
-    }
-
-    private static function findClosestAdjoiningStringStartingWith(
-        string $content,
-        string $target,
-        int $offset,
-        string $encoding
-    ) {
-        $fragment = mb_substr(
-            $content,
-            0,
-            $offset,
-            $encoding
-        );
-
-        $targetStartPosition = null;
-        $targetStartPositionOffset = 0;
-        $targetLength = mb_strlen($target);
-
-        $mutableFragment = $fragment;
-
-        while (mb_strlen($mutableFragment) > 0 && null === $targetStartPosition) {
-            $possibleTarget = mb_substr($mutableFragment, ($targetLength * -1), null, $encoding);
-
-            if ($possibleTarget === $target) {
-                $targetStartPosition = $offset - $targetStartPositionOffset;
-            } else {
-                $mutableFragment = mb_substr(
-                    $mutableFragment,
-                    0,
-                    mb_strlen($mutableFragment) - 1,
-                    $encoding
-                );
-                $targetStartPositionOffset++;
-            }
-        }
-
-        return null === $targetStartPosition
-            ? null
-            : $target . mb_substr($fragment, $targetStartPosition, null, $encoding);
     }
 
     private static function findStylesheetUrlHrefValues(WebPage $webPage): array
