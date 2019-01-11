@@ -69,25 +69,13 @@ class SourceInspector
         foreach ($modifiedHrefAttributes as $hrefValue) {
             $webPageFragment = $webPageContent;
 
-            $stylesheetUrlReference = self::findStylesheetUrlReference(
-                $webPageFragment,
-                $hrefValue,
-                $encoding
-            );
+            while (null !== ($reference = self::findStylesheetUrlReference($webPageFragment, $hrefValue, $encoding))) {
+                $references[] = $reference;
 
-            while (null !== $stylesheetUrlReference) {
-                $references[] = $stylesheetUrlReference;
-
-                $referencePosition = mb_strpos($webPageFragment, $stylesheetUrlReference, null, $encoding);
-                $referenceLength = mb_strlen($stylesheetUrlReference);
+                $referencePosition = mb_strpos($webPageFragment, $reference, null, $encoding);
+                $referenceLength = mb_strlen($reference);
 
                 $webPageFragment = mb_substr($webPageFragment, $referencePosition + $referenceLength, null, $encoding);
-
-                $stylesheetUrlReference = self::findStylesheetUrlReference(
-                    $webPageFragment,
-                    $hrefValue,
-                    $encoding
-                );
             }
         }
 
@@ -96,33 +84,33 @@ class SourceInspector
 
     /**
      * @param string $webPageContent
-     * @param string $hrefAttributeValue
+     * @param string $hrefValue
      * @param string $encoding
      *
      * @return null
      */
     private static function findStylesheetUrlReference(
         string $webPageContent,
-        string $hrefAttributeValue,
+        string $hrefValue,
         string $encoding
     ) {
-        $attributeValueStartPosition = mb_strpos($webPageContent, $hrefAttributeValue, 0, $encoding);
+        $hrefValueStartPosition = mb_strpos($webPageContent, $hrefValue, 0, $encoding);
 
-        if (false === $attributeValueStartPosition) {
+        if (false === $hrefValueStartPosition) {
             return null;
         }
 
-        $hrefAttributeValueLength = mb_strlen($hrefAttributeValue, $encoding);
+        $hrefValueLength = mb_strlen($hrefValue, $encoding);
         $linkIdentifier = '<link';
         $linkIdentifierLength = strlen($linkIdentifier);
         $linkStartPosition = null;
 
-        $attributeValueEndPosition = $attributeValueStartPosition + mb_strlen($hrefAttributeValue, $encoding);
+        $hrefValueEndPosition = $hrefValueStartPosition + mb_strlen($hrefValue, $encoding);
 
         $webPageFragment = mb_substr(
             $webPageContent,
             0,
-            $attributeValueEndPosition - $hrefAttributeValueLength,
+            $hrefValueEndPosition - $hrefValueLength,
             $encoding
         );
 
@@ -134,7 +122,7 @@ class SourceInspector
             $possibleLinkIdentifier = mb_substr($mutableWebPageFragment, ($linkIdentifierLength * -1), null, $encoding);
 
             if ($possibleLinkIdentifier === $linkIdentifier) {
-                $linkStartPosition = $attributeValueStartPosition - $linkStartPositionOffset;
+                $linkStartPosition = $hrefValueStartPosition - $linkStartPositionOffset;
             } else {
                 $mutableWebPageFragment = mb_substr(
                     $mutableWebPageFragment,
@@ -148,16 +136,16 @@ class SourceInspector
 
         if (null === $linkStartPosition) {
             return self::findStylesheetUrlReference(
-                mb_substr($webPageContent, $attributeValueEndPosition, null, $encoding),
-                $hrefAttributeValue,
+                mb_substr($webPageContent, $hrefValueEndPosition, null, $encoding),
+                $hrefValue,
                 $encoding
             );
         }
 
         return
             $linkIdentifier .
-            mb_substr($webPageFragment, $linkStartPosition, $attributeValueEndPosition, $encoding) .
-            $hrefAttributeValue;
+            mb_substr($webPageFragment, $linkStartPosition, $hrefValueEndPosition, $encoding) .
+            $hrefValue;
     }
 
     private static function findStylesheetUrlHrefValues(WebPage $webPage): array
