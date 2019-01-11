@@ -66,8 +66,6 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
      */
     public function testFindStylesheetUrlReferences(WebPage $webPage, array $expectedStylesheetUrlReferences)
     {
-//        var_dump($expectedStylesheetUrlReferences, SourceInspector::findStylesheetUrlReferences($webPage));
-//        $this->assertTrue(true);
         $this->assertEquals($expectedStylesheetUrlReferences, SourceInspector::findStylesheetUrlReferences($webPage));
     }
 
