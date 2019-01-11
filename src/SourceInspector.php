@@ -46,10 +46,24 @@ class SourceInspector
         $stylesheetUrls = [];
         $stylesheetHrefAttributes = self::findStylesheetUrlHrefAttributes($webPage);
 
+        $foo = [];
+
+        foreach ($stylesheetHrefAttributes as $stylesheetHrefAttribute) {
+            if ('' === trim($stylesheetHrefAttribute)) {
+                $foo[] = '"' . $stylesheetHrefAttribute . '"';
+                $foo[] = "'" . $stylesheetHrefAttribute . "'";
+            } else {
+                $foo[] = $stylesheetHrefAttribute;
+            }
+        }
+
+//        var_dump($foo);
+//        exit();
+
         $webPageContent = $webPage->getContent();
         $encoding = $webPage->getCharacterSet();
 
-        foreach ($stylesheetHrefAttributes as $hrefAttributeValue) {
+        foreach ($foo as $hrefAttributeValue) {
             $webPageFragment = $webPageContent;
 
             $stylesheetUrlReference = self::findStylesheetUrlReference(
@@ -74,7 +88,7 @@ class SourceInspector
             }
         }
 
-        return $stylesheetUrls;
+        return array_values(array_unique($stylesheetUrls));
     }
 
     /**

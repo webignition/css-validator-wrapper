@@ -66,19 +66,21 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
      */
     public function testFindStylesheetUrlReferences(WebPage $webPage, array $expectedStylesheetUrlReferences)
     {
+//        var_dump($expectedStylesheetUrlReferences, SourceInspector::findStylesheetUrlReferences($webPage));
+//        $this->assertTrue(true);
         $this->assertEquals($expectedStylesheetUrlReferences, SourceInspector::findStylesheetUrlReferences($webPage));
     }
 
     public function findStylesheetUrlReferencesDataProvider()
     {
         return [
-//            'no linked resources' => [
-//                'webPage' => $this->createWebPage(
-//                    FixtureLoader::load('Html/minimal-html5.html'),
-//                    $this->createUri('http://example.com/')
-//                ),
-//                'expectedStylesheetUrlReferences' => [],
-//            ],
+            'no linked resources' => [
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [],
+            ],
             'single linked stylesheet' => [
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
@@ -88,17 +90,21 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     '<link href="/style.css',
                 ],
             ],
-//            'three linked stylesheets' => [
-//                'webPage' => $this->createWebPage(
-//                    FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
-//                    $this->createUri('http://example.com/')
-//                ),
-//                'expectedStylesheetUrlReferences' => [
-//                    'http://example.com/one.css',
-//                    'http://example.com/two.css',
-//                    'http://example.com/three.css?foo=bar&foobar=foobar',
-//                ],
-//            ],
+            'three linked stylesheets' => [
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link href=""',
+                    "<link href=''",
+                    '<link href=" "',
+                    "<link href=' '",
+                    '<link href="/one.css',
+                    '<link href="/two.css',
+                    // '<link href="/three.css?foo=bar&amp;foobar=foobar"'
+                ],
+            ],
 //            'single linked stylesheet, malformed markup' => [
 //                'webPage' => $this->createWebPage(
 //                    FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
