@@ -16,24 +16,24 @@ class SourceInspector
      */
     public static function findStylesheetUrls(WebPage $webPage): array
     {
-        $stylesheetUrls = [];
-        $stylesheetHrefAttributes = self::findStylesheetUrlHrefAttributes($webPage);
+        $urls = [];
+        $hrefValues = self::findStylesheetUrlHrefValues($webPage);
 
         $baseUri = new Uri($webPage->getBaseUrl());
 
-        foreach ($stylesheetHrefAttributes as $hrefAttributeValue) {
-            $hrefAttributeValue = trim($hrefAttributeValue);
+        foreach ($hrefValues as $hrefValue) {
+            $hrefValue = trim($hrefValue);
 
-            if (!empty($hrefAttributeValue)) {
-                $uri = AbsoluteUrlDeriver::derive($baseUri, new Uri($hrefAttributeValue));
+            if (!empty($hrefValue)) {
+                $uri = AbsoluteUrlDeriver::derive($baseUri, new Uri($hrefValue));
                 $uri = Normalizer::normalize($uri);
                 $uri = Normalizer::normalize($uri, Normalizer::REMOVE_FRAGMENT);
 
-                $stylesheetUrls[] = (string) $uri;
+                $urls[] = (string) $uri;
             }
         }
 
-        return array_unique($stylesheetUrls);
+        return array_unique($urls);
     }
 
     /**
@@ -43,37 +43,40 @@ class SourceInspector
      */
     public static function findStylesheetUrlReferences(WebPage $webPage): array
     {
-        $stylesheetUrls = [];
-        $stylesheetHrefAttributes = self::findStylesheetUrlHrefAttributes($webPage);
+        $encoding = $webPage->getCharacterSet();
+        $references = [];
+        $hrefValues = self::findStylesheetUrlHrefValues($webPage);
 
-        $foo = [];
-
-        foreach ($stylesheetHrefAttributes as $stylesheetHrefAttribute) {
-            if ('' === trim($stylesheetHrefAttribute)) {
-                $foo[] = '"' . $stylesheetHrefAttribute . '"';
-                $foo[] = "'" . $stylesheetHrefAttribute . "'";
-            } else {
-                $foo[] = $stylesheetHrefAttribute;
+        foreach ($hrefValues as $hrefValue) {
+            if (mb_substr_count($hrefValue, '&', $encoding)) {
+                $hrefValues[] = str_replace('&', '&amp;', $hrefValue);
             }
         }
 
-//        var_dump($foo);
-//        exit();
+        $modifiedHrefAttributes = [];
+
+        foreach ($hrefValues as $hrefValue) {
+            if ('' === trim($hrefValue)) {
+                $modifiedHrefAttributes[] = '"' . $hrefValue . '"';
+                $modifiedHrefAttributes[] = "'" . $hrefValue . "'";
+            } else {
+                $modifiedHrefAttributes[] = $hrefValue;
+            }
+        }
 
         $webPageContent = $webPage->getContent();
-        $encoding = $webPage->getCharacterSet();
 
-        foreach ($foo as $hrefAttributeValue) {
+        foreach ($modifiedHrefAttributes as $hrefValue) {
             $webPageFragment = $webPageContent;
 
             $stylesheetUrlReference = self::findStylesheetUrlReference(
                 $webPageFragment,
-                $hrefAttributeValue,
+                $hrefValue,
                 $encoding
             );
 
             while (null !== $stylesheetUrlReference) {
-                $stylesheetUrls[] = $stylesheetUrlReference;
+                $references[] = $stylesheetUrlReference;
 
                 $referencePosition = mb_strpos($webPageFragment, $stylesheetUrlReference, null, $encoding);
                 $referenceLength = mb_strlen($stylesheetUrlReference);
@@ -82,13 +85,13 @@ class SourceInspector
 
                 $stylesheetUrlReference = self::findStylesheetUrlReference(
                     $webPageFragment,
-                    $hrefAttributeValue,
+                    $hrefValue,
                     $encoding
                 );
             }
         }
 
-        return array_values(array_unique($stylesheetUrls));
+        return array_values(array_unique($references));
     }
 
     /**
@@ -157,7 +160,7 @@ class SourceInspector
             $hrefAttributeValue;
     }
 
-    private static function findStylesheetUrlHrefAttributes(WebPage $webPage): array
+    private static function findStylesheetUrlHrefValues(WebPage $webPage): array
     {
         $hrefAttributes = [];
         $selector = 'link[rel=stylesheet][href]';

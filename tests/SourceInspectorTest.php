@@ -102,18 +102,18 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     "<link href=' '",
                     '<link href="/one.css',
                     '<link href="/two.css',
-                    // '<link href="/three.css?foo=bar&amp;foobar=foobar"'
+                    '<link href="/three.css?foo=bar&amp;foobar=foobar'
                 ],
             ],
-//            'single linked stylesheet, malformed markup' => [
-//                'webPage' => $this->createWebPage(
-//                    FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
-//                    $this->createUri('http://example.com/')
-//                ),
-//                'expectedStylesheetUrlReferences' => [
-//                    'http://example.com/style.css',
-//                ],
-//            ],
+            'single linked stylesheet, malformed markup' => [
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link href="/style.css',
+                ],
+            ],
         ];
     }
 
