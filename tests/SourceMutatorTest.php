@@ -22,7 +22,7 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         SourceMap $sourceMap,
         array $stylesheetReferences
     ) {
-        $sourceInspector = new SourceInspector();
+        $sourceInspector = new SourceInspector($webPage);
         $mutator = new SourceMutator($sourceInspector);
         $returnedWebPage = $mutator->replaceStylesheetUrls($webPage, $sourceMap, $stylesheetReferences);
 
@@ -54,7 +54,7 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         array $stylesheetReferences,
         string $expectedWebPageContent
     ) {
-        $sourceInspector = new SourceInspector();
+        $sourceInspector = new SourceInspector($webPage);
         $mutator = new SourceMutator($sourceInspector);
         $mutatedWebPage = $mutator->replaceStylesheetUrls($webPage, $sourceMap, $stylesheetReferences);
 

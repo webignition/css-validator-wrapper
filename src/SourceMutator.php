@@ -37,7 +37,7 @@ class SourceMutator
 
                 $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
             } else {
-                $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($webPage, $reference);
+                $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
 
                 foreach ($referenceFragments as $fragment) {
                     $fragmentReplacement = preg_replace(
