@@ -24,7 +24,9 @@ class SourcePreparer
      */
     public function prepare(WebPage $webPage, SourceMap $sourceMap): ResourceStorage
     {
-        $stylesheetUrls = SourceInspector::findStylesheetUrls($webPage);
+        $this->sourceInspector->setWebPage($webPage);
+
+        $stylesheetUrls = $this->sourceInspector->findStylesheetUrls();
 
         if (count($stylesheetUrls)) {
             foreach ($stylesheetUrls as $stylesheetUrl) {
