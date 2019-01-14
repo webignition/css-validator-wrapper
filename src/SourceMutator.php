@@ -8,6 +8,13 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceMutator
 {
+    private $sourceInspector;
+
+    public function __construct(SourceInspector $sourceInspector)
+    {
+        $this->sourceInspector = $sourceInspector;
+    }
+
     public function replaceStylesheetUrls(WebPage $webPage, SourceMap $sourceMap, array $stylesheetReferences): WebPage
     {
         if (empty($stylesheetReferences)) {
@@ -30,7 +37,7 @@ class SourceMutator
 
                 $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
             } else {
-                $referenceFragments = SourceInspector::findStylesheetReferenceFragments($webPage, $reference);
+                $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($webPage, $reference);
 
                 foreach ($referenceFragments as $fragment) {
                     $fragmentReplacement = preg_replace(
