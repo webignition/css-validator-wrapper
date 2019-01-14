@@ -17,9 +17,9 @@ use webignition\WebResourceInterfaces\WebPageInterface;
 class SourcePreparerTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @dataProvider prepareUnknownSourceExceptionDataProvider
+     * @dataProvider storeLinkedCssResourcesUnknownSourceExceptionDataProvider
      */
-    public function testPrepareUnknownSourceException(
+    public function testStoreLinkedCssResourcesUnknownSourceException(
         WebPage $webPage,
         SourceMap $sourceMap,
         string $expectedExceptionMessage
@@ -33,10 +33,10 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
         $this->expectExceptionCode(UnknownSourceException::CODE);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $preparer->prepare($sourceMap, $resourceStorage, $stylesheetUrls);
+        $preparer->storeLinkedCssResources($sourceMap, $resourceStorage, $stylesheetUrls);
     }
 
-    public function prepareUnknownSourceExceptionDataProvider()
+    public function storeLinkedCssResourcesUnknownSourceExceptionDataProvider()
     {
         return [
             'single linked stylesheet' => [
@@ -80,9 +80,9 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @dataProvider prepareSuccessDataProvider
+     * @dataProvider storeLinkedCssResourcesSuccessDataProvider
      */
-    public function testPrepareSuccess(
+    public function testStoreLinkedCssResourcesSuccess(
         array $sources,
         WebPage $webPage,
         SourceMap $sourceMap,
@@ -96,7 +96,7 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
         $preparer = new SourcePreparer();
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
         $resourceStorage = new ResourceStorage();
-        $preparer->prepare($sourceMap, $resourceStorage, $stylesheetUrls);
+        $preparer->storeLinkedCssResources($sourceMap, $resourceStorage, $stylesheetUrls);
 
         $this->assertInstanceOf(ResourceStorage::class, $resourceStorage);
         $this->assertEquals(count($expectedStoredResources), count($resourceStorage->getPaths()));
@@ -111,7 +111,7 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
         $resourceStorage->deleteAll();
     }
 
-    public function prepareSuccessDataProvider()
+    public function storeLinkedCssResourcesSuccessDataProvider()
     {
         return [
             'no linked resources' => [

@@ -13,7 +13,7 @@ class SourcePreparer
      *
      * @throws UnknownSourceException
      */
-    public function prepare(
+    public function storeLinkedCssResources(
         SourceMap $sourceMap,
         ResourceStorage $resourceStorage,
         array $stylesheetUrls
