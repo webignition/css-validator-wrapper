@@ -83,6 +83,43 @@ class SourceInspector
     }
 
     /**
+     * @param WebPage $webPage
+     * @param string $reference
+     *
+     * @return string[]
+     */
+    public static function findStylesheetReferenceFragments(WebPage $webPage, string $reference): array
+    {
+        $encoding = $webPage->getCharacterSet();
+        $fragments = [];
+
+        $content = $webPage->getContent();
+
+        $referenceStartPosition = mb_strpos($content, $reference, null, $encoding);
+
+        if (false === $referenceStartPosition) {
+            return $fragments;
+        }
+
+        $mutableContent = mb_substr($content, $referenceStartPosition, null, $encoding);
+
+        while (false !== ($referenceExistsInContent = mb_substr_count($mutableContent, $reference, $encoding) > 0)) {
+            $fragment = StringUtils::findNextAdjoiningStringEndingWith(
+                $mutableContent,
+                'stylesheet',
+                $encoding
+            );
+
+            $fragments[] = trim($fragment);
+
+            $fragmentLength = mb_strlen($fragment);
+            $mutableContent = mb_substr($mutableContent, $fragmentLength, null, $encoding);
+        }
+
+        return $fragments;
+    }
+
+    /**
      * @param string $content
      * @param string $hrefValue
      * @param string $encoding
