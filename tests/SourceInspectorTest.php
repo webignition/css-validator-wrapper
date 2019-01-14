@@ -115,6 +115,75 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
+    /**
+     * @dataProvider findStylesheetReferenceFragmentsDataProvider
+     */
+    public function testFindStylesheetReferenceFragments(
+        WebPage $webPage,
+        string $reference,
+        array $expectedStylesheetUrlReferences
+    ) {
+        $this->assertEquals(
+            $expectedStylesheetUrlReferences,
+            SourceInspector::findStylesheetReferenceFragments($webPage, $reference)
+        );
+    }
+
+    public function findStylesheetReferenceFragmentsDataProvider()
+    {
+        return [
+            'reference not present in content' => [
+                'webPage' => $this->createWebPage(
+                    '<!doctype html><html><head><meta charset=utf-8></head></html>',
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => '<link href="/style.css',
+                'expectedStylesheetReferenceFragments' => [],
+            ],
+            'single linked stylesheet' => [
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => '<link href="/style.css',
+                'expectedStylesheetReferenceFragments' => [
+                    '<link href="/style.css" rel="stylesheet',
+                ],
+            ],
+            'three linked stylesheets (1)' => [
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => '<link href=""',
+                'expectedStylesheetUrlReferences' => [
+                    '<link href="" accesskey="1" rel="stylesheet',
+                    '">'."\n".'        <link href="" accesskey="2" rel="stylesheet',
+                ],
+            ],
+            'three linked stylesheets (2)' => [
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => "<link href=''",
+                'expectedStylesheetUrlReferences' => [
+                    '<link href=\'\' rel="stylesheet',
+                ],
+            ],
+            'three linked stylesheets (3)' => [
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => "<link href=' '",
+                'expectedStylesheetUrlReferences' => [
+                    '<link href=\' \' rel="stylesheet',
+                ],
+            ],
+        ];
+    }
+
     private function createWebPage(string $content, UriInterface $uri): WebPage
     {
         /* @var WebPage $webPage */
