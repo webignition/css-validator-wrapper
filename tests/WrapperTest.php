@@ -56,7 +56,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $this->expectExceptionMessage('Unknown source "http://example.com/style.css"');
 
         $wrapper->validate($sourceHandler, VendorExtensionSeverityLevel::LEVEL_WARN);
-
     }
 
     /**
