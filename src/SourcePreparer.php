@@ -7,30 +7,34 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourcePreparer
 {
+    private $webPage;
+    private $sourceMap;
     private $sourceInspector;
 
-    public function __construct(SourceInspector $sourceInspector)
+    public function __construct(WebPage $webPage, SourceMap $sourceMap, SourceInspector $sourceInspector)
     {
+        $this->webPage = $webPage;
+        $this->sourceMap = $sourceMap;
         $this->sourceInspector = $sourceInspector;
     }
 
+    public function getWebPage(): WebPage
+    {
+        return $this->webPage;
+    }
+
     /**
-     * @param WebPage $webPage
-     * @param SourceMap $sourceMap
-     *
      * @return ResourceStorage
      *
      * @throws UnknownSourceException
      */
-    public function prepare(WebPage $webPage, SourceMap $sourceMap): ResourceStorage
+    public function prepare(): ResourceStorage
     {
-        $this->sourceInspector->setWebPage($webPage);
-
         $stylesheetUrls = $this->sourceInspector->findStylesheetUrls();
 
         if (count($stylesheetUrls)) {
             foreach ($stylesheetUrls as $stylesheetUrl) {
-                if (!$sourceMap->getLocalPath($stylesheetUrl)) {
+                if (!$this->sourceMap->getLocalPath($stylesheetUrl)) {
                     throw new UnknownSourceException($stylesheetUrl);
                 }
             }
@@ -39,15 +43,15 @@ class SourcePreparer
         $resourceStorage = new ResourceStorage();
 
         $resourceStorage->store(
-            (string) $webPage->getUri(),
-            (string) $webPage->getContent(),
+            (string) $this->webPage->getUri(),
+            (string) $this->webPage->getContent(),
             'html'
         );
 
         $cssResourceTemporaryPaths = [];
 
         foreach ($stylesheetUrls as $stylesheetUrl) {
-            $localPath = $sourceMap->getLocalPath($stylesheetUrl);
+            $localPath = $this->sourceMap->getLocalPath($stylesheetUrl);
             $cssResourceTemporaryPaths[] = $resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
         }
 
