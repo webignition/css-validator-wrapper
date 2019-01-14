@@ -22,6 +22,16 @@ class SourceHandler
         $this->preparer = new SourcePreparer($webPage, $sourceMap, $this->inspector);
     }
 
+    public function getWebPage(): WebPage
+    {
+        return $this->webPage;
+    }
+
+    public function getSourceMap(): SourceMap
+    {
+        return $this->sourceMap;
+    }
+
     public function getInspector(): SourceInspector
     {
         return $this->inspector;
