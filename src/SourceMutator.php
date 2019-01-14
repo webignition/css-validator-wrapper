@@ -8,31 +8,38 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceMutator
 {
+    private $webPage;
+    private $sourceMap;
     private $sourceInspector;
 
-    public function __construct(SourceInspector $sourceInspector)
+    public function __construct(WebPage $webPage, SourceMap $sourceMap, SourceInspector $sourceInspector)
     {
+        $this->webPage = $webPage;
+        $this->sourceMap = $sourceMap;
         $this->sourceInspector = $sourceInspector;
     }
 
-    public function replaceStylesheetUrls(WebPage $webPage, SourceMap $sourceMap, array $stylesheetReferences): WebPage
+    public function getWebPage(): WebPage
+    {
+        return $this->webPage;
+    }
+
+    public function replaceStylesheetUrls(array $stylesheetReferences): WebPage
     {
         if (empty($stylesheetReferences)) {
-            return $webPage;
+            return $this->webPage;
         }
 
-        $this->sourceInspector->setWebPage($webPage);
-
-        $webPageContent = $webPage->getContent();
-        $encoding = $webPage->getCharacterSet();
-        $baseUrl = $webPage->getBaseUrl();
+        $webPageContent = $this->webPage->getContent();
+        $encoding = $this->webPage->getCharacterSet();
+        $baseUrl = $this->webPage->getBaseUrl();
 
         foreach ($stylesheetReferences as $reference) {
             $hrefUrl = $this->getReferenceHrefValue($reference, $encoding);
 
             if ($hrefUrl) {
                 $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
-                $localPath = $sourceMap->getLocalPath($referenceAbsoluteUrl);
+                $localPath = $this->sourceMap->getLocalPath($referenceAbsoluteUrl);
                 $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
 
                 $referenceReplacement = $referenceWithoutHrefValue . 'file:' . $localPath;
@@ -55,7 +62,7 @@ class SourceMutator
 
         /* @var WebPage $mutatedWebPage */
         /** @noinspection PhpUnhandledExceptionInspection */
-        $mutatedWebPage = $webPage->setContent($webPageContent);
+        $mutatedWebPage = $this->webPage->setContent($webPageContent);
 
         return $mutatedWebPage;
     }

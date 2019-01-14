@@ -22,9 +22,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         SourceMap $sourceMap,
         array $stylesheetReferences
     ) {
-        $sourceInspector = new SourceInspector();
-        $mutator = new SourceMutator($sourceInspector);
-        $returnedWebPage = $mutator->replaceStylesheetUrls($webPage, $sourceMap, $stylesheetReferences);
+        $sourceInspector = new SourceInspector($webPage);
+        $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
+        $returnedWebPage = $mutator->replaceStylesheetUrls($stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $returnedWebPage);
         $this->assertSame($webPage, $returnedWebPage);
@@ -54,9 +54,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         array $stylesheetReferences,
         string $expectedWebPageContent
     ) {
-        $sourceInspector = new SourceInspector();
-        $mutator = new SourceMutator($sourceInspector);
-        $mutatedWebPage = $mutator->replaceStylesheetUrls($webPage, $sourceMap, $stylesheetReferences);
+        $sourceInspector = new SourceInspector($webPage);
+        $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
+        $mutatedWebPage = $mutator->replaceStylesheetUrls($stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
         $this->assertNotSame($webPage, $mutatedWebPage);
