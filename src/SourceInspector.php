@@ -14,10 +14,10 @@ class SourceInspector
      *
      * @return string[]
      */
-    public static function findStylesheetUrls(WebPage $webPage): array
+    public function findStylesheetUrls(WebPage $webPage): array
     {
         $urls = [];
-        $hrefValues = self::findStylesheetUrlHrefValues($webPage);
+        $hrefValues = $this->findStylesheetUrlHrefValues($webPage);
 
         $baseUri = new Uri($webPage->getBaseUrl());
 
@@ -41,11 +41,11 @@ class SourceInspector
      *
      * @return string[]
      */
-    public static function findStylesheetReferences(WebPage $webPage): array
+    public function findStylesheetReferences(WebPage $webPage): array
     {
         $encoding = $webPage->getCharacterSet();
         $references = [];
-        $hrefValues = self::findStylesheetUrlHrefValues($webPage);
+        $hrefValues = $this->findStylesheetUrlHrefValues($webPage);
 
         foreach ($hrefValues as $hrefValue) {
             if (mb_substr_count($hrefValue, '&', $encoding)) {
@@ -69,7 +69,7 @@ class SourceInspector
         foreach ($modifiedHrefAttributes as $hrefValue) {
             $webPageFragment = $webPageContent;
 
-            while (null !== ($reference = self::findStylesheetUrlReference($webPageFragment, $hrefValue, $encoding))) {
+            while (null !== ($reference = $this->findStylesheetUrlReference($webPageFragment, $hrefValue, $encoding))) {
                 $references[] = $reference;
 
                 $referencePosition = mb_strpos($webPageFragment, $reference, null, $encoding);
@@ -88,7 +88,7 @@ class SourceInspector
      *
      * @return string[]
      */
-    public static function findStylesheetReferenceFragments(WebPage $webPage, string $reference): array
+    public function findStylesheetReferenceFragments(WebPage $webPage, string $reference): array
     {
         $encoding = $webPage->getCharacterSet();
         $fragments = [];
@@ -126,7 +126,7 @@ class SourceInspector
      *
      * @return null
      */
-    private static function findStylesheetUrlReference(string $content, string $hrefValue, string $encoding)
+    private function findStylesheetUrlReference(string $content, string $hrefValue, string $encoding)
     {
         $hrefValueStartPosition = mb_strpos($content, $hrefValue, 0, $encoding);
 
@@ -144,7 +144,7 @@ class SourceInspector
         );
 
         if (null === $hrefLinkPrefix) {
-            return self::findStylesheetUrlReference(
+            return $this->findStylesheetUrlReference(
                 mb_substr($content, $hrefValueEndPosition, null, $encoding),
                 $hrefValue,
                 $encoding
@@ -154,7 +154,7 @@ class SourceInspector
         return $hrefLinkPrefix . $hrefValue;
     }
 
-    private static function findStylesheetUrlHrefValues(WebPage $webPage): array
+    private function findStylesheetUrlHrefValues(WebPage $webPage): array
     {
         $hrefAttributes = [];
         $selector = 'link[rel=stylesheet][href]';
