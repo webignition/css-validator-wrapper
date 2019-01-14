@@ -10,16 +10,24 @@ use webignition\WebResource\WebPage\WebPage;
 class SourceInspector
 {
     /**
-     * @param WebPage $webPage
-     *
+     * @var WebPage
+     */
+    private $webPage;
+
+    public function setWebPage(WebPage $webPage)
+    {
+        $this->webPage = $webPage;
+    }
+
+    /**
      * @return string[]
      */
-    public static function findStylesheetUrls(WebPage $webPage): array
+    public function findStylesheetUrls(): array
     {
         $urls = [];
-        $hrefValues = self::findStylesheetUrlHrefValues($webPage);
+        $hrefValues = $this->findStylesheetUrlHrefValues();
 
-        $baseUri = new Uri($webPage->getBaseUrl());
+        $baseUri = new Uri($this->webPage->getBaseUrl());
 
         foreach ($hrefValues as $hrefValue) {
             $hrefValue = trim($hrefValue);
@@ -37,15 +45,13 @@ class SourceInspector
     }
 
     /**
-     * @param WebPage $webPage
-     *
      * @return string[]
      */
-    public static function findStylesheetReferences(WebPage $webPage): array
+    public function findStylesheetReferences(): array
     {
-        $encoding = $webPage->getCharacterSet();
+        $encoding = $this->webPage->getCharacterSet();
         $references = [];
-        $hrefValues = self::findStylesheetUrlHrefValues($webPage);
+        $hrefValues = $this->findStylesheetUrlHrefValues();
 
         foreach ($hrefValues as $hrefValue) {
             if (mb_substr_count($hrefValue, '&', $encoding)) {
@@ -64,12 +70,12 @@ class SourceInspector
             }
         }
 
-        $webPageContent = $webPage->getContent();
+        $webPageContent = $this->webPage->getContent();
 
         foreach ($modifiedHrefAttributes as $hrefValue) {
             $webPageFragment = $webPageContent;
 
-            while (null !== ($reference = self::findStylesheetUrlReference($webPageFragment, $hrefValue, $encoding))) {
+            while (null !== ($reference = $this->findStylesheetUrlReference($webPageFragment, $hrefValue, $encoding))) {
                 $references[] = $reference;
 
                 $referencePosition = mb_strpos($webPageFragment, $reference, null, $encoding);
@@ -83,17 +89,16 @@ class SourceInspector
     }
 
     /**
-     * @param WebPage $webPage
      * @param string $reference
      *
      * @return string[]
      */
-    public static function findStylesheetReferenceFragments(WebPage $webPage, string $reference): array
+    public function findStylesheetReferenceFragments(string $reference): array
     {
-        $encoding = $webPage->getCharacterSet();
+        $encoding = $this->webPage->getCharacterSet();
         $fragments = [];
 
-        $content = $webPage->getContent();
+        $content = $this->webPage->getContent();
 
         $referenceStartPosition = mb_strpos($content, $reference, null, $encoding);
 
@@ -126,7 +131,7 @@ class SourceInspector
      *
      * @return null
      */
-    private static function findStylesheetUrlReference(string $content, string $hrefValue, string $encoding)
+    private function findStylesheetUrlReference(string $content, string $hrefValue, string $encoding)
     {
         $hrefValueStartPosition = mb_strpos($content, $hrefValue, 0, $encoding);
 
@@ -144,7 +149,7 @@ class SourceInspector
         );
 
         if (null === $hrefLinkPrefix) {
-            return self::findStylesheetUrlReference(
+            return $this->findStylesheetUrlReference(
                 mb_substr($content, $hrefValueEndPosition, null, $encoding),
                 $hrefValue,
                 $encoding
@@ -154,11 +159,11 @@ class SourceInspector
         return $hrefLinkPrefix . $hrefValue;
     }
 
-    private static function findStylesheetUrlHrefValues(WebPage $webPage): array
+    private function findStylesheetUrlHrefValues(): array
     {
         $hrefAttributes = [];
         $selector = 'link[rel=stylesheet][href]';
-        $webPageInspector = $webPage->getInspector();
+        $webPageInspector = $this->webPage->getInspector();
 
         /* @var \DOMElement[] $stylesheetLinkElements */
         $stylesheetLinkElements = $webPageInspector->querySelectorAll($selector);

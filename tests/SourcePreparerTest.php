@@ -7,6 +7,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\ResourceStorage;
+use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourcePreparer;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
@@ -23,7 +24,8 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
         SourceMap $sourceMap,
         string $expectedExceptionMessage
     ) {
-        $preparer = new SourcePreparer();
+        $sourceInspector = new SourceInspector();
+        $preparer = new SourcePreparer($sourceInspector);
 
         $this->expectException(UnknownSourceException::class);
         $this->expectExceptionCode(UnknownSourceException::CODE);
@@ -88,7 +90,8 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
             file_put_contents($filename, $content);
         }
 
-        $preparer = new SourcePreparer();
+        $sourceInspector = new SourceInspector();
+        $preparer = new SourcePreparer($sourceInspector);
         $resourceStorage = $preparer->prepare($webPage, $sourceMap);
 
         $this->assertInstanceOf(ResourceStorage::class, $resourceStorage);

@@ -6,6 +6,7 @@
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use Psr\Http\Message\UriInterface;
+use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
@@ -21,7 +22,8 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         SourceMap $sourceMap,
         array $stylesheetReferences
     ) {
-        $mutator = new SourceMutator();
+        $sourceInspector = new SourceInspector();
+        $mutator = new SourceMutator($sourceInspector);
         $returnedWebPage = $mutator->replaceStylesheetUrls($webPage, $sourceMap, $stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $returnedWebPage);
@@ -52,7 +54,8 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         array $stylesheetReferences,
         string $expectedWebPageContent
     ) {
-        $mutator = new SourceMutator();
+        $sourceInspector = new SourceInspector();
+        $mutator = new SourceMutator($sourceInspector);
         $mutatedWebPage = $mutator->replaceStylesheetUrls($webPage, $sourceMap, $stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
