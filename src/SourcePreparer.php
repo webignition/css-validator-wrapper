@@ -7,6 +7,13 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourcePreparer
 {
+    private $sourceInspector;
+
+    public function __construct(SourceInspector $sourceInspector)
+    {
+        $this->sourceInspector = $sourceInspector;
+    }
+
     /**
      * @param WebPage $webPage
      * @param SourceMap $sourceMap

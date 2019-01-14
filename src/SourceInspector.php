@@ -16,6 +16,8 @@ class SourceInspector
         $this->webPage = $webPage;
     }
 
+    public function setWebPage($web)
+
     /**
      * @return string[]
      */
