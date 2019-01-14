@@ -39,6 +39,26 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $wrapper->validate($sourceHandler, VendorExtensionSeverityLevel::LEVEL_WARN);
     }
 
+    public function testValidateUnknownSourceExceptionForLinkedCssResource()
+    {
+        $webPage = $this->createWebPage(
+            'http://example.com/',
+            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+        );
+        $wrapper = $this->createWrapper();
+
+        $sourceHandler = new SourceHandler($webPage, new SourceMap([
+            'http://example.com/' => 'non-empty string',
+        ]));
+
+        $this->expectException(UnknownSourceException::class);
+        $this->expectExceptionCode(UnknownSourceException::CODE);
+        $this->expectExceptionMessage('Unknown source "http://example.com/style.css"');
+
+        $wrapper->validate($sourceHandler, VendorExtensionSeverityLevel::LEVEL_WARN);
+
+    }
+
     /**
      * @dataProvider validateSuccessDataProvider
      */
