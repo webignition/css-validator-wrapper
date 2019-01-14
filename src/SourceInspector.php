@@ -9,14 +9,15 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceInspector
 {
+    /**
+     * @var WebPage
+     */
     private $webPage;
 
-    public function __construct(WebPage $webPage)
+    public function setWebPage(WebPage $webPage)
     {
         $this->webPage = $webPage;
     }
-
-    public function setWebPage($web)
 
     /**
      * @return string[]

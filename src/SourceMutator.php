@@ -21,6 +21,8 @@ class SourceMutator
             return $webPage;
         }
 
+        $this->sourceInspector->setWebPage($webPage);
+
         $webPageContent = $webPage->getContent();
         $encoding = $webPage->getCharacterSet();
         $baseUrl = $webPage->getBaseUrl();

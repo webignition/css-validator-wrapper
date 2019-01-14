@@ -16,7 +16,8 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
      */
     public function testFindStylesheetUrls(WebPage $webPage, array $expectedStylesheetUrls)
     {
-        $sourceInspector = new SourceInspector($webPage);
+        $sourceInspector = new SourceInspector();
+        $sourceInspector->setWebPage($webPage);
 
         $this->assertEquals($expectedStylesheetUrls, $sourceInspector->findStylesheetUrls());
     }
@@ -68,7 +69,8 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
      */
     public function testFindStylesheetUrlReferences(WebPage $webPage, array $expectedStylesheetUrlReferences)
     {
-        $sourceInspector = new SourceInspector($webPage);
+        $sourceInspector = new SourceInspector();
+        $sourceInspector->setWebPage($webPage);
 
         $this->assertEquals($expectedStylesheetUrlReferences, $sourceInspector->findStylesheetReferences());
     }
@@ -127,7 +129,8 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
         string $reference,
         array $expectedStylesheetUrlReferences
     ) {
-        $sourceInspector = new SourceInspector($webPage);
+        $sourceInspector = new SourceInspector();
+        $sourceInspector->setWebPage($webPage);
 
         $this->assertEquals(
             $expectedStylesheetUrlReferences,
