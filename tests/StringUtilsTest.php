@@ -8,9 +8,9 @@ use webignition\CssValidatorWrapper\StringUtils;
 class StringUtilsTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @dataProvider findClosestAdjoiningStringStartingWithDataProvider
+     * @dataProvider findPreviousAdjoiningStringStartingWithDataProvider
      */
-    public function testFindClosestAdjoiningStringStartingWith(
+    public function testFindPreviousAdjoiningStringStartingWith(
         string $content,
         string $target,
         string $encoding,
@@ -19,11 +19,11 @@ class StringUtilsTest extends \PHPUnit\Framework\TestCase
     ) {
         $this->assertEquals(
             $expectedReturnValue,
-            StringUtils::findClosestAdjoiningStringStartingWith($content, $target, $encoding, $offset)
+            StringUtils::findPreviousAdjoiningStringStartingWith($content, $target, $encoding, $offset)
         );
     }
 
-    public function findClosestAdjoiningStringStartingWithDataProvider(): array
+    public function findPreviousAdjoiningStringStartingWithDataProvider(): array
     {
         return [
             'empty' => [
@@ -59,6 +59,54 @@ class StringUtilsTest extends \PHPUnit\Framework\TestCase
                 'encoding' => 'utf-8',
                 'offset' => null,
                 'expectedReturnValue' => 'href="/style.css',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider findNextAdjoiningStringEndingWithDataProvider
+     */
+    public function testFindNextAdjoiningStringEndingWith(
+        string $content,
+        string $target,
+        string $encoding,
+        ?int $offset,
+        ?string $expectedReturnValue
+    ) {
+        $this->assertEquals(
+            $expectedReturnValue,
+            StringUtils::findNextAdjoiningStringEndingWith($content, $target, $encoding, $offset)
+        );
+    }
+
+    public function findNextAdjoiningStringEndingWithDataProvider(): array
+    {
+        return [
+            'empty' => [
+                'content' => '',
+                'target' => '',
+                'encoding' => 'utf-8',
+                'offset' => null,
+                'expectedReturnValue' => '',
+            ],
+            'single-line link element' => [
+                'content' => '<link href="" rel="stylesheet">',
+                'target' => 'stylesheet',
+                'encoding' => 'utf-8',
+                'offset' => strlen('<link href=""'),
+                'expectedReturnValue' => ' rel="stylesheet',
+            ],
+            'single stylesheet content, offset within link element' => [
+                'content' => implode("\n", [
+                    '<meta href="/style.css" w="x" rel="stylesheet">',
+                    '<link href="/style.css" y="z" rel="stylesheet">',
+                ]),
+                'target' => 'stylesheet',
+                'encoding' => 'utf-8',
+                'offset' => strlen(
+                    '<meta href="/style.css" w="x" rel="stylesheet">' . "\n" . '<link href="/style.css'
+                ),
+                'expectedReturnValue' => '" y="z" rel="stylesheet',
             ],
         ];
     }
