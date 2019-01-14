@@ -20,13 +20,28 @@ class SourceMutator
 
         foreach ($stylesheetReferences as $reference) {
             $hrefUrl = $this->getReferenceHrefValue($reference, $encoding);
-            $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
-            $localPath = $sourceMap->getLocalPath($referenceAbsoluteUrl);
-            $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
 
-            $referenceReplacement = $referenceWithoutHrefValue . 'file:' . $localPath;
+            if ($hrefUrl) {
+                $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
+                $localPath = $sourceMap->getLocalPath($referenceAbsoluteUrl);
+                $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
 
-            $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
+                $referenceReplacement = $referenceWithoutHrefValue . 'file:' . $localPath;
+
+                $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
+            } else {
+                $referenceFragments = SourceInspector::findStylesheetReferenceFragments($webPage, $reference);
+
+                foreach ($referenceFragments as $fragment) {
+                    $fragmentReplacement = preg_replace(
+                        '/href\s*=\s*("|\')\s*("|\')/',
+                        'href="file:/"',
+                        $fragment
+                    );
+
+                    $webPageContent = str_replace($fragment, $fragmentReplacement, $webPageContent);
+                }
+            }
         }
 
         /* @var WebPage $mutatedWebPage */
@@ -43,7 +58,7 @@ class SourceMutator
 
     private function getReferenceHrefValue(string $reference, string $encoding): string
     {
-        $hrefAndValue = StringUtils::findClosestAdjoiningStringStartingWith($reference, 'href', $encoding);
+        $hrefAndValue = StringUtils::findPreviousAdjoiningStringStartingWith($reference, 'href', $encoding);
 
         return ltrim(
             preg_replace('/^href/', '', $hrefAndValue),
