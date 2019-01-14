@@ -41,7 +41,7 @@ class SourceInspector
      *
      * @return string[]
      */
-    public static function findStylesheetUrlReferences(WebPage $webPage): array
+    public static function findStylesheetReferences(WebPage $webPage): array
     {
         $encoding = $webPage->getCharacterSet();
         $references = [];
