@@ -84,6 +84,19 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     public function validateSuccessDataProvider(): array
     {
         return [
+            'html5 with single linked CSS resource, no messages' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html'),
+                    'http://example.com/style.css' => FixtureLoader::getPath('Css/valid-no-messages.css'),
+                ]),
+                'sourceFixture' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
             'ignore false image data url messages' => [
                 'sourceMap' => new SourceMap([
                     'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
