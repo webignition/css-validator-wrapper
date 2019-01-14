@@ -24,14 +24,14 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
         SourceMap $sourceMap,
         string $expectedExceptionMessage
     ) {
-        $sourceInspector = new SourceInspector();
-        $preparer = new SourcePreparer($sourceInspector);
+        $sourceInspector = new SourceInspector($webPage);
+        $preparer = new SourcePreparer($webPage, $sourceMap, $sourceInspector);
 
         $this->expectException(UnknownSourceException::class);
         $this->expectExceptionCode(UnknownSourceException::CODE);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $preparer->prepare($webPage, $sourceMap);
+        $preparer->prepare();
     }
 
     public function prepareUnknownSourceExceptionDataProvider()
@@ -90,9 +90,9 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
             file_put_contents($filename, $content);
         }
 
-        $sourceInspector = new SourceInspector();
-        $preparer = new SourcePreparer($sourceInspector);
-        $resourceStorage = $preparer->prepare($webPage, $sourceMap);
+        $sourceInspector = new SourceInspector($webPage);
+        $preparer = new SourcePreparer($webPage, $sourceMap, $sourceInspector);
+        $resourceStorage = $preparer->prepare();
 
         $this->assertInstanceOf(ResourceStorage::class, $resourceStorage);
         $this->assertEquals(count($expectedStoredResources), count($resourceStorage->getPaths()));
