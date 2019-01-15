@@ -42,6 +42,41 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
+    /**
+     * @dataProvider getSourcePathDataProvider
+     */
+    public function testGetSourcePath(array $mappings, string $localPath, ?string $expectedSourcePath)
+    {
+        $sourceMap = new SourceMap($mappings);
+
+        $this->assertEquals($expectedSourcePath, $sourceMap->getSourcePath($localPath));
+    }
+
+    public function getSourcePathDataProvider(): array
+    {
+        return [
+            'no mappings' => [
+                'mappings' => [],
+                'localPath' => 'file:///foo.css',
+                'expectedSourcePath' => null,
+            ],
+            'no matching mapping' => [
+                'mappings' => [
+                    'http://example.com/foo.css' => 'file:///foo.css',
+                ],
+                'localPath' => 'file:///bar.css',
+                'expectedSourcePath' => null,
+            ],
+            'has matching mapping' => [
+                'mappings' => [
+                    'http://example.com/foo.css' => 'file:///foo.css',
+                ],
+                'localPath' => 'file:///foo.css',
+                'expectedSourcePath' => 'http://example.com/foo.css',
+            ],
+        ];
+    }
+
     public function testOffsetSetInvalidOffsetType()
     {
         $sourceMap = new SourceMap();
