@@ -104,19 +104,37 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
     public function validateSuccessDataProvider(): array
     {
+        $singleStylesheetHtml = FixtureLoader::load('Html/minimal-html5-single-stylesheet.html');
+        $cssNoMessagesPath = FixtureLoader::getPath('Css/valid-no-messages.css');
+
+        $singleStylesheetValidNoMessagesSourceMap = new SourceMap([
+            'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html'),
+            'http://example.com/style.css' => $cssNoMessagesPath,
+        ]);
+
         return [
             'html5 with single linked CSS resource, no messages' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         'http://example.com/' => '/tmp/web-page-hash.html',
                         'http://example.com/style.css' => '/tmp/valid-ss-no-messages-hash.css',
-                    ])
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssNoMessagesPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
                 ),
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html'),
-                    'http://example.com/style.css' => FixtureLoader::getPath('Css/valid-no-messages.css'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
@@ -418,23 +436,49 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         return $sourceStorage;
     }
 
-    private function createSourceStorageWithValidateExpectations(SourceMap $getPathsSourceMap)
-    {
+    private function createSourceStorageWithValidateExpectations(
+        SourceMap $getPathsSourceMap,
+        string $expectedStoreWebPageContent,
+        SourceMap $expectedStoreSourceMap,
+        array $expectedStoreStylesheetUrls
+    ) {
         $sourceStorage = $this->createSourceStorage();
 
-        $this->createSourceStorageStoreExpectation($sourceStorage);
+        $this->createSourceStorageStoreExpectation(
+            $sourceStorage,
+            $expectedStoreWebPageContent,
+            $expectedStoreSourceMap,
+            $expectedStoreStylesheetUrls
+        );
+
         $this->createSourceStorageGetPathsExpectation($sourceStorage, $getPathsSourceMap);
         $this->createSourceStorageDeleteAllExpectation($sourceStorage);
 
         return $sourceStorage;
     }
 
-    private function createSourceStorageStoreExpectation(MockInterface $sourceStorageMock)
-    {
+    private function createSourceStorageStoreExpectation(
+        MockInterface $sourceStorageMock,
+        string $expectedWebPageContent,
+        SourceMap $expectedSourceMap,
+        array $expectedStylesheetUrls
+    ) {
         $sourceStorageMock
             ->shouldReceive('store')
             ->once()
-            ->withArgs(function () {
+            ->withArgs(function (
+                WebPage $webPage,
+                SourceMap $sourceMap,
+                array $stylesheetUrls
+            ) use (
+                $expectedWebPageContent,
+                $expectedSourceMap,
+                $expectedStylesheetUrls
+            ) {
+                $this->assertEquals($expectedWebPageContent, $webPage->getContent());
+                $this->assertSame($expectedSourceMap, $sourceMap);
+                $this->assertEquals($expectedStylesheetUrls, $stylesheetUrls);
+
                 return true;
             });
 
