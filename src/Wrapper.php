@@ -71,10 +71,8 @@ class Wrapper
         $stylesheetReferences = $sourceInspector->findStylesheetReferences();
         $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($stylesheetReferences);
 
-        $resourceStorage = new ResourceStorage();
-        $resourceStorage->store($webPageUri, $mutatedWebPage->getContent(), 'html');
+        $resourceStorage = $this->sourcePreparer->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
 
-        $this->sourcePreparer->storeLinkedCssResources($sourceMap, $resourceStorage, $stylesheetUrls);
         $webPageLocalTempPath = $resourceStorage->getPath($webPageUri);
 
         $webPageLocalUri = 'file:' . $webPageLocalTempPath;

@@ -3,21 +3,30 @@
 namespace webignition\CssValidatorWrapper;
 
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\WebResourceInterfaces\WebPageInterface;
 
 class SourcePreparer
 {
+    private $resourceStorage;
+
+    public function __construct()
+    {
+        $this->resourceStorage = new ResourceStorage();
+    }
+
     /**
+     * @param WebPageInterface $webPage
      * @param SourceMap $sourceMap
-     * @param ResourceStorage $resourceStorage
      * @param array $stylesheetUrls
+     *
+     * @return ResourceStorage
      *
      * @throws UnknownSourceException
      */
-    public function storeLinkedCssResources(
-        SourceMap $sourceMap,
-        ResourceStorage $resourceStorage,
-        array $stylesheetUrls
-    ) {
+    public function store(WebPageInterface $webPage, SourceMap $sourceMap, array $stylesheetUrls): ResourceStorage
+    {
+        $this->resourceStorage->store((string) $webPage->getUri(), $webPage->getContent(), 'html');
+
         if (count($stylesheetUrls)) {
             foreach ($stylesheetUrls as $stylesheetUrl) {
                 if (!$sourceMap->getLocalPath($stylesheetUrl)) {
@@ -30,7 +39,9 @@ class SourcePreparer
 
         foreach ($stylesheetUrls as $stylesheetUrl) {
             $localPath = $sourceMap->getLocalPath($stylesheetUrl);
-            $cssResourceTemporaryPaths[] = $resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
+            $cssResourceTemporaryPaths[] = $this->resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
         }
+
+        return $this->resourceStorage;
     }
 }
