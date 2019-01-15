@@ -4,7 +4,12 @@ namespace webignition\CssValidatorWrapper;
 
 class ResourceStorage
 {
-    private $paths = [];
+    private $paths;
+
+    public function __construct(SourceMap $paths)
+    {
+        $this->paths = $paths;
+    }
 
     public function store(string $url, string $content, string $type): string
     {
@@ -18,19 +23,6 @@ class ResourceStorage
         return $this->persist($url, $localPath, $type, function (string $path, string $localPath) {
             copy($localPath, $path);
         });
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getPaths(): array
-    {
-        return $this->paths;
-    }
-
-    public function getPath(string $url): ?string
-    {
-        return $this->paths[$url] ?? null;
     }
 
     private function persist(string $url, string $hashInput, string $type, callable $persister): string

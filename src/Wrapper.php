@@ -71,9 +71,11 @@ class Wrapper
         $stylesheetReferences = $sourceInspector->findStylesheetReferences();
         $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($stylesheetReferences);
 
-        $resourceStorage = $this->sourceStorage->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
+        $this->sourceStorage->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
 
-        $webPageLocalTempPath = $resourceStorage->getPath($webPageUri);
+        $resourcePaths = $this->sourceStorage->getPaths();
+
+        $webPageLocalTempPath = $resourcePaths[$webPageUri];
 
         $webPageLocalUri = 'file:' . $webPageLocalTempPath;
 
@@ -92,7 +94,7 @@ class Wrapper
             $outputParserConfiguration ?? new OutputParserConfiguration()
         );
 
-        $resourceStorage->deleteAll();
+        $this->sourceStorage->deleteAll();
 
         return $output;
     }
