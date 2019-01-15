@@ -15,6 +15,7 @@ use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceMap;
+use webignition\CssValidatorWrapper\SourcePreparer;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Wrapper;
 use webignition\WebResource\WebPage\WebPage;
@@ -38,10 +39,29 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $wrapper->validate($sourceHandler, VendorExtensionSeverityLevel::LEVEL_WARN);
     }
 
+    public function testValidateUnknownSourceExceptionForLinkedCssResource()
+    {
+        $webPage = $this->createWebPage(
+            'http://example.com/',
+            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+        );
+        $wrapper = $this->createWrapper();
+
+        $sourceHandler = new SourceHandler($webPage, new SourceMap([
+            'http://example.com/' => 'non-empty string',
+        ]));
+
+        $this->expectException(UnknownSourceException::class);
+        $this->expectExceptionCode(UnknownSourceException::CODE);
+        $this->expectExceptionMessage('Unknown source "http://example.com/style.css"');
+
+        $wrapper->validate($sourceHandler, VendorExtensionSeverityLevel::LEVEL_WARN);
+    }
+
     /**
-     * @dataProvider validateDataProvider
+     * @dataProvider validateSuccessDataProvider
      */
-    public function testValidate(
+    public function testValidateSuccess(
         SourceMap $sourceMap,
         string $sourceFixture,
         string $sourceUrl,
@@ -80,9 +100,22 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    public function validateDataProvider(): array
+    public function validateSuccessDataProvider(): array
     {
         return [
+            'html5 with single linked CSS resource, no messages' => [
+                'sourceMap' => new SourceMap([
+                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html'),
+                    'http://example.com/style.css' => FixtureLoader::getPath('Css/valid-no-messages.css'),
+                ]),
+                'sourceFixture' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
             'ignore false image data url messages' => [
                 'sourceMap' => new SourceMap([
                     'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
@@ -345,6 +378,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     private function createWrapper(): Wrapper
     {
         return new Wrapper(
+            new SourcePreparer(),
             new CommandFactory(),
             new OutputParser(),
             self::JAVA_EXECUTABLE_PATH,

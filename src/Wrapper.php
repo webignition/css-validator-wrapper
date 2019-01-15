@@ -11,17 +11,20 @@ use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 
 class Wrapper
 {
+    private $sourcePreparer;
     private $commandFactory;
     private $outputParser;
     private $javaExecutablePath;
     private $cssValidatorJarPath;
 
     public function __construct(
+        SourcePreparer $sourcePreparer,
         CommandFactory $commandFactory,
         OutputParser $outputParser,
         string $javaExecutablePath,
         string $cssValidatorJarPath
     ) {
+        $this->sourcePreparer = $sourcePreparer;
         $this->commandFactory = $commandFactory;
         $this->outputParser = $outputParser;
         $this->javaExecutablePath = $javaExecutablePath;
@@ -45,6 +48,7 @@ class Wrapper
     ): OutputInterface {
         $webPage = $sourceHandler->getWebPage();
         $sourceMap = $sourceHandler->getSourceMap();
+        $sourceInspector = $sourceHandler->getInspector();
 
         $webPageUri = (string) $webPage->getUri();
         $webPageLocalPath = $sourceMap->getLocalPath($webPageUri);
@@ -53,8 +57,30 @@ class Wrapper
             throw new UnknownSourceException($webPageUri);
         }
 
+        $stylesheetUrls = $sourceInspector->findStylesheetUrls();
+        if (count($stylesheetUrls)) {
+            foreach ($stylesheetUrls as $stylesheetUrl) {
+                if (!$sourceMap->getLocalPath($stylesheetUrl)) {
+                    throw new UnknownSourceException($stylesheetUrl);
+                }
+            }
+        }
+
+        $sourceMutator = $sourceHandler->getMutator();
+
+        $stylesheetReferences = $sourceInspector->findStylesheetReferences();
+        $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($stylesheetReferences);
+
+        $resourceStorage = new ResourceStorage();
+        $resourceStorage->store($webPageUri, $mutatedWebPage->getContent(), 'html');
+
+        $this->sourcePreparer->storeLinkedCssResources($sourceMap, $resourceStorage, $stylesheetUrls);
+        $webPageLocalTempPath = $resourceStorage->getPath($webPageUri);
+
+        $webPageLocalUri = 'file:' . $webPageLocalTempPath;
+
         $command = $this->commandFactory->create(
-            (string) $webPage->getUri(),
+            $webPageLocalUri,
             $this->javaExecutablePath,
             $this->cssValidatorJarPath,
             $vendorExtensionSeverityLevel
@@ -67,6 +93,8 @@ class Wrapper
             $validatorOutput,
             $outputParserConfiguration ?? new OutputParserConfiguration()
         );
+
+        $resourceStorage->deleteAll();
 
         return $output;
     }
