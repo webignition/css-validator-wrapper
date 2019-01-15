@@ -6,7 +6,6 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
-use webignition\CssValidatorWrapper\ResourceStorage;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceStorage;
@@ -95,19 +94,21 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         $sourceStorage = new SourceStorage();
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
 
-        $resourceStorage = $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
+        $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
 
-        $this->assertInstanceOf(ResourceStorage::class, $resourceStorage);
-        $this->assertEquals(count($expectedStoredResources), count($resourceStorage->getPaths()));
+        $paths = $sourceStorage->getPaths();
+
+        $this->assertInstanceOf(SourceMap::class, $paths);
+        $this->assertEquals(count($expectedStoredResources), count($paths));
 
         foreach ($expectedStoredResources as $url => $expectedContent) {
-            $path = $resourceStorage->getPath($url);
+            $path = $paths[$url];
 
             $this->assertIsString($path);
             $this->assertEquals($expectedContent, file_get_contents($path));
         }
 
-        $resourceStorage->deleteAll();
+        $sourceStorage->deleteAll();
     }
 
     public function storeSuccessDataProvider()

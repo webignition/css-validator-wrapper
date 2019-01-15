@@ -7,11 +7,18 @@ use webignition\WebResourceInterfaces\WebPageInterface;
 
 class SourceStorage
 {
+    private $paths;
     private $resourceStorage;
 
     public function __construct()
     {
-        $this->resourceStorage = new ResourceStorage();
+        $this->paths = new SourceMap();
+        $this->resourceStorage = new ResourceStorage($this->paths);
+    }
+
+    public function getPaths(): SourceMap
+    {
+        return $this->paths;
     }
 
     /**
@@ -19,11 +26,9 @@ class SourceStorage
      * @param SourceMap $sourceMap
      * @param array $stylesheetUrls
      *
-     * @return ResourceStorage
-     *
      * @throws UnknownSourceException
      */
-    public function store(WebPageInterface $webPage, SourceMap $sourceMap, array $stylesheetUrls): ResourceStorage
+    public function store(WebPageInterface $webPage, SourceMap $sourceMap, array $stylesheetUrls)
     {
         $this->resourceStorage->store((string) $webPage->getUri(), $webPage->getContent(), 'html');
 
@@ -41,7 +46,10 @@ class SourceStorage
             $localPath = $sourceMap->getLocalPath($stylesheetUrl);
             $cssResourceTemporaryPaths[] = $this->resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
         }
+    }
 
-        return $this->resourceStorage;
+    public function deleteAll()
+    {
+        $this->resourceStorage->deleteAll();
     }
 }
