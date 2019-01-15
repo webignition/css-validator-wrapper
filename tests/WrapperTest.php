@@ -5,6 +5,7 @@
 
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
+use Mockery\MockInterface;
 use phpmock\mockery\PHPMockery;
 use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
@@ -28,7 +29,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     public function testValidateUnknownSourceExceptionForWebPage()
     {
         $webPage = $this->createWebPage('http://example.com/', 'content');
-        $wrapper = $this->createWrapper();
+        $wrapper = $this->createWrapper(new SourceStorage());
 
         $sourceHandler = new SourceHandler($webPage, new SourceMap());
 
@@ -45,7 +46,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             'http://example.com/',
             FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
         );
-        $wrapper = $this->createWrapper();
+        $wrapper = $this->createWrapper(new SourceStorage());
 
         $sourceHandler = new SourceHandler($webPage, new SourceMap([
             'http://example.com/' => 'non-empty string',
@@ -62,6 +63,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
      * @dataProvider validateSuccessDataProvider
      */
     public function testValidateSuccess(
+        SourceStorage $sourceStorage,
         SourceMap $sourceMap,
         string $sourceFixture,
         string $sourceUrl,
@@ -73,7 +75,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         array $expectedErrorCountByUrl = []
     ) {
         $webPage = $this->createWebPage($sourceUrl, $sourceFixture);
-        $wrapper = $this->createWrapper();
+        $wrapper = $this->createWrapper($sourceStorage);
 
         $sourceHandler = new SourceHandler($webPage, $sourceMap);
 
@@ -102,13 +104,31 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
     public function validateSuccessDataProvider(): array
     {
+        $noStylesheetsHtml = FixtureLoader::load('Html/minimal-html5.html');
+        $singleStylesheetHtml = FixtureLoader::load('Html/minimal-html5-single-stylesheet.html');
+        $cssNoMessagesPath = FixtureLoader::getPath('Css/valid-no-messages.css');
+
+        $noStylesheetsSourceMap = new SourceMap([
+            'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
+        ]);
+
+        $singleStylesheetValidNoMessagesSourceMap = new SourceMap([
+            'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html'),
+            'http://example.com/style.css' => $cssNoMessagesPath,
+        ]);
+
         return [
-            'html5 with single linked CSS resource, no messages' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html'),
-                    'http://example.com/style.css' => FixtureLoader::getPath('Css/valid-no-messages.css'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+            'html5 no css no linked resources' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        'http://example.com/' => '/tmp/web-page-hash.html',
+                    ]),
+                    $noStylesheetsHtml,
+                    $noStylesheetsSourceMap,
+                    []
+                ),
+                'sourceMap' => $noStylesheetsSourceMap,
+                'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
@@ -116,81 +136,35 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'ignore false image data url messages' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
-                'sourceUrl' => 'http://example.com/',
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
-                    'incorrect-data-url-background-image-errors'
+            'html5 with single linked CSS resource, no messages' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        'http://example.com/' => '/tmp/web-page-hash.html',
+                        'http://example.com/style.css' => '/tmp/valid-ss-no-messages-hash.css',
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssNoMessagesPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
                 ),
-                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_FALSE_DATA_URL_MESSAGES => true,
-                ]),
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'ignore warnings' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('single-warning'),
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                ]),
+                'outputParserConfiguration' => new OutputParserConfiguration(),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'vendor extension issues:warn and ignore warnings' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
-                'sourceUrl' => 'http://example.com/',
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
-                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                    OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
-                ]),
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'ignore vendor extension warnings' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
-                'sourceUrl' => 'http://example.com/',
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                ]),
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'ignore vendor extension errors' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
-                'sourceUrl' => 'http://example.com/',
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
-                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_IGNORE,
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_VENDOR_EXTENSION_ISSUES => true,
-                ]),
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-
-
 
 //            'domains to ignore: ignore none' => [
 //                'httpFixtures' => [
@@ -293,26 +267,105 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 //                'expectedWarningCount' => 0,
 //                'expectedErrorCount' => 0,
 //            ],
+        ];
+    }
 
+    /**
+     * @dataProvider validateSuccessOutputParserConfigurationDataProvider
+     */
+    public function testValidateSuccessOutputParserConfiguration(
+        string $cssValidatorRawOutput,
+        string $vendorExtensionSeverityLevel,
+        OutputParserConfiguration $outputParserConfiguration,
+        int $expectedWarningCount,
+        int $expectedErrorCount,
+        array $expectedErrorCountByUrl = []
+    ) {
+        $sourceUrl = 'http://example.com/';
+        $htmlFixtureName = 'Html/minimal-html5.html';
 
-            'html5 no css no linked resources' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
-                'sourceUrl' => 'http://example.com/',
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
+        $webPage = $this->createWebPage($sourceUrl, FixtureLoader::load($htmlFixtureName));
+        $wrapper = $this->createWrapper(new SourceStorage());
+
+        $sourceHandler = new SourceHandler($webPage, new SourceMap([
+            $sourceUrl => FixtureLoader::getPath($htmlFixtureName),
+        ]));
+
+        $this->setCssValidatorRawOutput($cssValidatorRawOutput);
+
+        /* @var ValidationOutput $output */
+        $output = $wrapper->validate(
+            $sourceHandler,
+            $vendorExtensionSeverityLevel,
+            $outputParserConfiguration
+        );
+
+        $this->assertInstanceOf(ValidationOutput::class, $output);
+
+        $messageList = $output->getMessages();
+        $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
+        $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
+
+        foreach ($expectedErrorCountByUrl as $url => $expectedErrorCountForUrl) {
+            /* @var array $errorsByUrl */
+            $errorsByUrl = $messageList->getErrorsByRef($url);
+
+            $this->assertCount($expectedErrorCountForUrl, $errorsByUrl);
+        }
+    }
+
+    public function validateSuccessOutputParserConfigurationDataProvider(): array
+    {
+        return [
+            'ignore false image data url messages' => [
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'incorrect-data-url-background-image-errors'
+                ),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_FALSE_DATA_URL_MESSAGES => true,
+                ]),
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'ignore warnings' => [
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('single-warning'),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+                ]),
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'vendor extension issues:warn and ignore warnings' => [
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+                    OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
+                ]),
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'ignore vendor extension warnings' => [
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+                ]),
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'ignore vendor extension errors' => [
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_IGNORE,
+                'outputParserConfiguration' => new OutputParserConfiguration([
+                    OutputParserConfiguration::KEY_IGNORE_VENDOR_EXTENSION_ISSUES => true,
+                ]),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: default' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
-                'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration(),
@@ -320,11 +373,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: warn' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
-                'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration(),
@@ -332,11 +380,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: error' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
-                'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_ERROR,
                 'outputParserConfiguration' => new OutputParserConfiguration([]),
@@ -344,11 +387,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 3,
             ],
             'vendor extension warnings: warn, with at-rule errors that should be warnings' => [
-                'sourceMap' => new SourceMap([
-                    'http://example.com/' => FixtureLoader::getPath('Html/minimal-html5.html'),
-                ]),
-                'sourceFixture' => FixtureLoader::load('Html/minimal-html5.html'),
-                'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration([
@@ -375,10 +413,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         return file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
     }
 
-    private function createWrapper(): Wrapper
+    private function createWrapper(SourceStorage $sourceStorage): Wrapper
     {
         return new Wrapper(
-            new SourceStorage(),
+            $sourceStorage,
             new CommandFactory(),
             new OutputParser(),
             self::JAVA_EXECUTABLE_PATH,
@@ -398,6 +436,81 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $webPage = $webPage->setUri($uri);
 
         return $webPage;
+    }
+
+    /**
+     * @return MockInterface|SourceStorage
+     */
+    private function createSourceStorage()
+    {
+        $sourceStorage = \Mockery::mock(SourceStorage::class);
+
+        return $sourceStorage;
+    }
+
+    private function createSourceStorageWithValidateExpectations(
+        SourceMap $getPathsSourceMap,
+        string $expectedStoreWebPageContent,
+        SourceMap $expectedStoreSourceMap,
+        array $expectedStoreStylesheetUrls
+    ) {
+        $sourceStorage = $this->createSourceStorage();
+
+        $this->createSourceStorageStoreExpectation(
+            $sourceStorage,
+            $expectedStoreWebPageContent,
+            $expectedStoreSourceMap,
+            $expectedStoreStylesheetUrls
+        );
+
+        $this->createSourceStorageGetPathsExpectation($sourceStorage, $getPathsSourceMap);
+        $this->createSourceStorageDeleteAllExpectation($sourceStorage);
+
+        return $sourceStorage;
+    }
+
+    private function createSourceStorageStoreExpectation(
+        MockInterface $sourceStorageMock,
+        string $expectedWebPageContent,
+        SourceMap $expectedSourceMap,
+        array $expectedStylesheetUrls
+    ) {
+        $sourceStorageMock
+            ->shouldReceive('store')
+            ->withArgs(function (
+                WebPage $webPage,
+                SourceMap $sourceMap,
+                array $stylesheetUrls
+            ) use (
+                $expectedWebPageContent,
+                $expectedSourceMap,
+                $expectedStylesheetUrls
+            ) {
+                $this->assertEquals($expectedWebPageContent, $webPage->getContent());
+                $this->assertSame($expectedSourceMap, $sourceMap);
+                $this->assertEquals($expectedStylesheetUrls, $stylesheetUrls);
+
+                return true;
+            });
+
+        return $sourceStorageMock;
+    }
+
+    private function createSourceStorageGetPathsExpectation(MockInterface $sourceStorageMock, SourceMap $paths)
+    {
+        $sourceStorageMock
+            ->shouldReceive('getPaths')
+            ->andReturn($paths);
+
+        return $sourceStorageMock;
+    }
+
+    private function createSourceStorageDeleteAllExpectation(MockInterface $sourceStorageMock)
+    {
+        $sourceStorageMock
+            ->shouldReceive('deleteAll');
+
+        return $sourceStorageMock;
     }
 
     protected function tearDown()

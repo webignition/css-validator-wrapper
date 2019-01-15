@@ -74,7 +74,6 @@ class Wrapper
         $this->sourceStorage->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
 
         $resourcePaths = $this->sourceStorage->getPaths();
-
         $webPageLocalTempPath = $resourcePaths[$webPageUri];
 
         $webPageLocalUri = 'file:' . $webPageLocalTempPath;
