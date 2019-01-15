@@ -5,6 +5,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorWrapper\ResourceStorage;
+use webignition\CssValidatorWrapper\SourceMap;
 
 class ResourceStorageTest extends \PHPUnit\Framework\TestCase
 {
@@ -24,12 +25,13 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $this->mockMicrotime(self::MICROTIME);
         $this->mockMd5($content . self::MICROTIME, $filenameHash);
 
-        $resourceStorage = new ResourceStorage();
+        $paths = new SourceMap();
+        $resourceStorage = new ResourceStorage($paths);
 
         $path = $resourceStorage->store($url, $content, $type);
 
         $this->assertStoredFile($expectedPath, $path, $content);
-        $this->assertEquals($path, $resourceStorage->getPath($url));
+        $this->assertEquals($path, $paths[$url]);
 
         $resourceStorage->deleteAll();
 
@@ -73,12 +75,13 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $this->mockMicrotime(self::MICROTIME);
         $this->mockMd5($localPath . self::MICROTIME, $filenameHash);
 
-        $resourceStorage = new ResourceStorage();
+        $paths = new SourceMap();
+        $resourceStorage = new ResourceStorage($paths);
 
         $path = $resourceStorage->duplicate($url, $localPath, $type);
 
         $this->assertStoredFile($expectedPath, $path, $content);
-        $this->assertEquals($path, $resourceStorage->getPath($url));
+        $this->assertEquals($path, $paths[$url]);
 
         $resourceStorage->deleteAll();
 

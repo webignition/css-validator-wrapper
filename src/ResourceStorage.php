@@ -6,9 +6,9 @@ class ResourceStorage
 {
     private $paths;
 
-    public function __construct()
+    public function __construct(SourceMap $paths)
     {
-        $this->paths = new SourceMap();
+        $this->paths = $paths;
     }
 
     public function store(string $url, string $content, string $type): string
@@ -23,11 +23,6 @@ class ResourceStorage
         return $this->persist($url, $localPath, $type, function (string $path, string $localPath) {
             copy($localPath, $path);
         });
-    }
-
-    public function getPath(string $url): ?string
-    {
-        return $this->paths[$url] ?? null;
     }
 
     private function persist(string $url, string $hashInput, string $type, callable $persister): string
