@@ -40,11 +40,9 @@ class SourceStorage
             }
         }
 
-        $cssResourceTemporaryPaths = [];
-
         foreach ($stylesheetUrls as $stylesheetUrl) {
             $localPath = $sourceMap->getLocalPath($stylesheetUrl);
-            $cssResourceTemporaryPaths[] = $this->resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
+            $this->resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
         }
     }
 
