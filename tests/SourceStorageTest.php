@@ -9,34 +9,33 @@ use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\ResourceStorage;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
-use webignition\CssValidatorWrapper\SourcePreparer;
+use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\WebResource\WebPage\WebPage;
 use webignition\WebResourceInterfaces\WebPageInterface;
 
-class SourcePreparerTest extends \PHPUnit\Framework\TestCase
+class SourceStorageTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @dataProvider storeLinkedCssResourcesUnknownSourceExceptionDataProvider
+     * @dataProvider storeUnknownSourceExceptionDataProvider
      */
-    public function testStoreLinkedCssResourcesUnknownSourceException(
+    public function testStoreUnknownSourceException(
         WebPage $webPage,
         SourceMap $sourceMap,
         string $expectedExceptionMessage
     ) {
         $sourceInspector = new SourceInspector($webPage);
-        $preparer = new SourcePreparer();
+        $sourceStorage = new SourceStorage();
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
-        $resourceStorage = new ResourceStorage();
 
         $this->expectException(UnknownSourceException::class);
         $this->expectExceptionCode(UnknownSourceException::CODE);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $preparer->storeLinkedCssResources($sourceMap, $resourceStorage, $stylesheetUrls);
+        $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
     }
 
-    public function storeLinkedCssResourcesUnknownSourceExceptionDataProvider()
+    public function storeUnknownSourceExceptionDataProvider()
     {
         return [
             'single linked stylesheet' => [
@@ -80,9 +79,9 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @dataProvider storeLinkedCssResourcesSuccessDataProvider
+     * @dataProvider storeSuccessDataProvider
      */
-    public function testStoreLinkedCssResourcesSuccess(
+    public function testStoreSuccess(
         array $sources,
         WebPage $webPage,
         SourceMap $sourceMap,
@@ -93,10 +92,10 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
         }
 
         $sourceInspector = new SourceInspector($webPage);
-        $preparer = new SourcePreparer();
+        $sourceStorage = new SourceStorage();
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
-        $resourceStorage = new ResourceStorage();
-        $preparer->storeLinkedCssResources($sourceMap, $resourceStorage, $stylesheetUrls);
+
+        $resourceStorage = $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
 
         $this->assertInstanceOf(ResourceStorage::class, $resourceStorage);
         $this->assertEquals(count($expectedStoredResources), count($resourceStorage->getPaths()));
@@ -111,7 +110,7 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
         $resourceStorage->deleteAll();
     }
 
-    public function storeLinkedCssResourcesSuccessDataProvider()
+    public function storeSuccessDataProvider()
     {
         return [
             'no linked resources' => [
@@ -121,7 +120,9 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
                     $this->createUri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap(),
-                'expectedStoredResources' => [],
+                'expectedStoredResources' => [
+                    'http://example.com/' => FixtureLoader::load('Html/minimal-html5.html'),
+                ],
             ],
             'single linked stylesheet' => [
                 'sources' => [
@@ -135,6 +136,7 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
                     'http://example.com/style.css' => '/tmp/style.css',
                 ]),
                 'expectedStoredResources' => [
+                    'http://example.com/' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
                     'http://example.com/style.css' => 'html {}',
                 ],
             ],
@@ -154,6 +156,7 @@ class SourcePreparerTest extends \PHPUnit\Framework\TestCase
                     'http://example.com/three.css?foo=bar&foobar=foobar' => '/tmp/three.css',
                 ]),
                 'expectedStoredResources' => [
+                    'http://example.com/' => FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
                     'http://example.com/one.css' => 'one {}',
                     'http://example.com/two.css' => 'two {}',
                     'http://example.com/three.css?foo=bar&foobar=foobar' => 'three {}',
