@@ -15,7 +15,7 @@ use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceMap;
-use webignition\CssValidatorWrapper\SourcePreparer;
+use webignition\CssValidatorWrapper\SourcePersister;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Wrapper;
 use webignition\WebResource\WebPage\WebPage;
@@ -378,7 +378,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     private function createWrapper(): Wrapper
     {
         return new Wrapper(
-            new SourcePreparer(),
+            new SourcePersister(),
             new CommandFactory(),
             new OutputParser(),
             self::JAVA_EXECUTABLE_PATH,

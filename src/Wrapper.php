@@ -18,7 +18,7 @@ class Wrapper
     private $cssValidatorJarPath;
 
     public function __construct(
-        SourcePreparer $sourcePreparer,
+        SourcePersister $sourcePreparer,
         CommandFactory $commandFactory,
         OutputParser $outputParser,
         string $javaExecutablePath,

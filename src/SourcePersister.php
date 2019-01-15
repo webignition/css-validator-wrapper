@@ -5,7 +5,7 @@ namespace webignition\CssValidatorWrapper;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\WebResourceInterfaces\WebPageInterface;
 
-class SourcePreparer
+class SourcePersister
 {
     private $resourceStorage;
 
