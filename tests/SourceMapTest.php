@@ -105,4 +105,23 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($sourceMap['a']);
         $this->assertEquals('second', $sourceMap['b']);
     }
+
+    public function testIterator()
+    {
+        $mappings = [
+            'a' => 'first',
+            'b' => 'second',
+            'c' => 'third',
+        ];
+        $sourceMap = new SourceMap($mappings);
+
+        $this->assertEquals('first', $sourceMap->current());
+        $sourceMap->next();
+        $this->assertEquals('second', $sourceMap->current());
+        $sourceMap->next();
+        $this->assertEquals('third', $sourceMap->current());
+
+        $sourceMap->rewind();
+        $this->assertEquals('first', $sourceMap->current());
+    }
 }

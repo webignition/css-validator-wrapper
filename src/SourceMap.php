@@ -2,7 +2,7 @@
 
 namespace webignition\CssValidatorWrapper;
 
-class SourceMap implements \ArrayAccess
+class SourceMap implements \ArrayAccess, \Iterator
 {
     private $mappings = [];
 
@@ -52,5 +52,30 @@ class SourceMap implements \ArrayAccess
     public function offsetUnset($offset)
     {
         unset($this->mappings[$offset]);
+    }
+
+    public function current(): string
+    {
+        return current($this->mappings);
+    }
+
+    public function next()
+    {
+        next($this->mappings);
+    }
+
+    public function key(): ?string
+    {
+        return key($this->mappings);
+    }
+
+    public function valid(): bool
+    {
+        return isset($this->mappings[$this->key()]);
+    }
+
+    public function rewind()
+    {
+        reset($this->mappings);
     }
 }
