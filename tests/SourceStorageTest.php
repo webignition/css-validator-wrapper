@@ -9,12 +9,12 @@ use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\ResourceStorage;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
-use webignition\CssValidatorWrapper\SourcePersister;
+use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\WebResource\WebPage\WebPage;
 use webignition\WebResourceInterfaces\WebPageInterface;
 
-class SourcePersisterTest extends \PHPUnit\Framework\TestCase
+class SourceStorageTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @dataProvider storeUnknownSourceExceptionDataProvider
@@ -25,14 +25,14 @@ class SourcePersisterTest extends \PHPUnit\Framework\TestCase
         string $expectedExceptionMessage
     ) {
         $sourceInspector = new SourceInspector($webPage);
-        $sourcePersister = new SourcePersister();
+        $sourceStorage = new SourceStorage();
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
 
         $this->expectException(UnknownSourceException::class);
         $this->expectExceptionCode(UnknownSourceException::CODE);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $sourcePersister->store($webPage, $sourceMap, $stylesheetUrls);
+        $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
     }
 
     public function storeUnknownSourceExceptionDataProvider()
@@ -92,10 +92,10 @@ class SourcePersisterTest extends \PHPUnit\Framework\TestCase
         }
 
         $sourceInspector = new SourceInspector($webPage);
-        $sourcePersister = new SourcePersister();
+        $sourceStorage = new SourceStorage();
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
 
-        $resourceStorage = $sourcePersister->store($webPage, $sourceMap, $stylesheetUrls);
+        $resourceStorage = $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
 
         $this->assertInstanceOf(ResourceStorage::class, $resourceStorage);
         $this->assertEquals(count($expectedStoredResources), count($resourceStorage->getPaths()));
