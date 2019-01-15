@@ -1,6 +1,6 @@
 {vextwarning=false, output=ucn, lang=en, warning=2, medium=all, profile=css3}
 <?xml version='1.0' encoding="utf-8"?>
-<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="file:/tmp/9be0f2d981ccf4ea77e4f9dad3020ff6.html" date="2013-01-04T04:15:25Z" xml:lang="en">
+<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="{{ webPageUri }}" date="2013-01-04T04:15:25Z" xml:lang="en">
 
 <status value="passed"/>
 

@@ -274,7 +274,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
      * @dataProvider validateSuccessOutputParserConfigurationDataProvider
      */
     public function testValidateSuccessOutputParserConfiguration(
-        string $cssValidatorRawOutput,
+        string $cssValidatorFixture,
         string $vendorExtensionSeverityLevel,
         OutputParserConfiguration $outputParserConfiguration,
         int $expectedWarningCount,
@@ -282,16 +282,35 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         array $expectedErrorCountByUrl = []
     ) {
         $sourceUrl = 'http://example.com/';
+
         $htmlFixtureName = 'Html/minimal-html5.html';
+        $noStylesheetsHtml = FixtureLoader::load($htmlFixtureName);
 
-        $webPage = $this->createWebPage($sourceUrl, FixtureLoader::load($htmlFixtureName));
-        $wrapper = $this->createWrapper(new SourceStorage());
+        $noStylesheetsSourceMap = new SourceMap([
+            'http://example.com/' => FixtureLoader::getPath($htmlFixtureName),
+        ]);
 
-        $sourceHandler = new SourceHandler($webPage, new SourceMap([
-            $sourceUrl => FixtureLoader::getPath($htmlFixtureName),
-        ]));
+        $sourceStorage = $this->createSourceStorageWithValidateExpectations(
+            new SourceMap([
+                'http://example.com/' => '/tmp/web-page-hash.html',
+            ]),
+            $noStylesheetsHtml,
+            $noStylesheetsSourceMap,
+            []
+        );
 
-        $this->setCssValidatorRawOutput($cssValidatorRawOutput);
+        $webPage = $this->createWebPage($sourceUrl, $noStylesheetsHtml);
+        $wrapper = $this->createWrapper($sourceStorage);
+
+        $sourceHandler = new SourceHandler($webPage, $noStylesheetsSourceMap);
+
+        $this->setCssValidatorRawOutput($this->loadCssValidatorRawOutputFixture(
+            $cssValidatorFixture,
+            [
+                '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                '{{ cssSourceUri }}' => 'file:/tmp/css-hash.css',
+            ]
+        ));
 
         /* @var ValidationOutput $output */
         $output = $wrapper->validate(
@@ -318,9 +337,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     {
         return [
             'ignore false image data url messages' => [
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
-                    'incorrect-data-url-background-image-errors'
-                ),
+                'cssValidatorFixture' => 'incorrect-data-url-background-image-errors',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration([
                     OutputParserConfiguration::KEY_IGNORE_FALSE_DATA_URL_MESSAGES => true,
@@ -329,7 +346,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'ignore warnings' => [
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('single-warning'),
+                'cssValidatorFixture' => 'single-warning',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration([
                     OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
@@ -338,7 +355,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'vendor extension issues:warn and ignore warnings' => [
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
+                'cssValidatorFixture' => 'vendor-specific-at-rules',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration([
                     OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
@@ -348,7 +365,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension warnings' => [
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
+                'cssValidatorFixture' => 'three-vendor-extension-warnings',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration([
                     OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
@@ -357,7 +374,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension errors' => [
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
+                'cssValidatorFixture' => 'three-vendor-extension-errors',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_IGNORE,
                 'outputParserConfiguration' => new OutputParserConfiguration([
                     OutputParserConfiguration::KEY_IGNORE_VENDOR_EXTENSION_ISSUES => true,
@@ -366,28 +383,28 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: default' => [
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
+                'cssValidatorFixture' => 'three-vendor-extension-warnings',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration(),
                 'expectedWarningCount' => 3,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: warn' => [
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
+                'cssValidatorFixture' => 'three-vendor-extension-warnings',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration(),
                 'expectedWarningCount' => 3,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: error' => [
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
+                'cssValidatorFixture' => 'three-vendor-extension-errors',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_ERROR,
                 'outputParserConfiguration' => new OutputParserConfiguration([]),
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 3,
             ],
             'vendor extension warnings: warn, with at-rule errors that should be warnings' => [
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
+                'cssValidatorFixture' => 'vendor-specific-at-rules',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration([
                     OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
@@ -408,9 +425,15 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    private function loadCssValidatorRawOutputFixture(string $name): string
+    private function loadCssValidatorRawOutputFixture(string $name, array $replacements = []): string
     {
-        return file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
+        $fixtureContent = file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
+
+        foreach ($replacements as $search => $replace) {
+            $fixtureContent = str_replace($search, $replace, $fixtureContent);
+        }
+
+        return $fixtureContent;
     }
 
     private function createWrapper(SourceStorage $sourceStorage): Wrapper
@@ -487,7 +510,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 $expectedStylesheetUrls
             ) {
                 $this->assertEquals($expectedWebPageContent, $webPage->getContent());
-                $this->assertSame($expectedSourceMap, $sourceMap);
+                $this->assertEquals($expectedSourceMap, $sourceMap);
                 $this->assertEquals($expectedStylesheetUrls, $stylesheetUrls);
 
                 return true;

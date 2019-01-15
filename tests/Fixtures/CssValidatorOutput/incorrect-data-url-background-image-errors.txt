@@ -1,8 +1,8 @@
 {vextwarning=false, output=ucn, lang=en, warning=2, medium=all, profile=css3}
 <?xml version='1.0' encoding="utf-8"?>
-<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="file:/tmp/9be0f2d981ccf4ea77e4f9dad3020ff6.html" date="2013-03-26T07:46:31Z" xml:lang="en">
+<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="{{ webPageUri }}" date="2013-03-26T07:46:31Z" xml:lang="en">
 
-<message type="error" ref="file:/tmp/7e104bcdddbafaf368960c71df2f5c17.css">
+<message type="error" ref="{{ cssSourceUri }}">
 	<context line="618">#logo span</context>
 	<title>
 		Value Error :  background-image (nullcolors.html#propdef-background-image)
