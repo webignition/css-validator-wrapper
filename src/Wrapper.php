@@ -11,20 +11,20 @@ use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 
 class Wrapper
 {
-    private $sourcePreparer;
+    private $sourcePersister;
     private $commandFactory;
     private $outputParser;
     private $javaExecutablePath;
     private $cssValidatorJarPath;
 
     public function __construct(
-        SourcePersister $sourcePreparer,
+        SourcePersister $sourcePersister,
         CommandFactory $commandFactory,
         OutputParser $outputParser,
         string $javaExecutablePath,
         string $cssValidatorJarPath
     ) {
-        $this->sourcePreparer = $sourcePreparer;
+        $this->sourcePersister = $sourcePersister;
         $this->commandFactory = $commandFactory;
         $this->outputParser = $outputParser;
         $this->javaExecutablePath = $javaExecutablePath;
@@ -71,7 +71,7 @@ class Wrapper
         $stylesheetReferences = $sourceInspector->findStylesheetReferences();
         $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($stylesheetReferences);
 
-        $resourceStorage = $this->sourcePreparer->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
+        $resourceStorage = $this->sourcePersister->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
 
         $webPageLocalTempPath = $resourceStorage->getPath($webPageUri);
 
