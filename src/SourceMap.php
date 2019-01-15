@@ -2,7 +2,7 @@
 
 namespace webignition\CssValidatorWrapper;
 
-class SourceMap implements \ArrayAccess, \Iterator
+class SourceMap implements \ArrayAccess, \Iterator, \Countable
 {
     private $mappings = [];
 
@@ -77,5 +77,10 @@ class SourceMap implements \ArrayAccess, \Iterator
     public function rewind()
     {
         reset($this->mappings);
+    }
+
+    public function count(): int
+    {
+        return count($this->mappings);
     }
 }

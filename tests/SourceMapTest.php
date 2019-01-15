@@ -124,4 +124,25 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
         $sourceMap->rewind();
         $this->assertEquals('first', $sourceMap->current());
     }
+
+    public function testCount()
+    {
+        $mappings = [
+            'a' => 'first',
+            'b' => 'second',
+            'c' => 'third',
+        ];
+        $sourceMap = new SourceMap($mappings);
+
+        $this->assertEquals(3, count($sourceMap));
+
+        unset($sourceMap['a']);
+        $this->assertEquals(2, count($sourceMap));
+
+        unset($sourceMap['b']);
+        $this->assertEquals(1, count($sourceMap));
+
+        unset($sourceMap['c']);
+        $this->assertEquals(0, count($sourceMap));
+    }
 }
