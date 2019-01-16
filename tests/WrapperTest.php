@@ -16,7 +16,7 @@ use webignition\CssValidatorWrapper\CommandFactory;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\OutputMutator;
-use webignition\CssValidatorWrapper\Source\AvailableSource;
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceMutator;
@@ -53,7 +53,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $wrapper = $this->createWrapper(new SourceStorage());
 
         $sourceHandler = new SourceHandler($webPage, new SourceMap([
-            new AvailableSource('http://example.com/', 'non-empty string'),
+            new Source('http://example.com/', 'non-empty string'),
         ]));
 
         $this->expectException(UnknownSourceException::class);
@@ -119,22 +119,22 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $cssNoMessagesPath = FixtureLoader::getPath('Css/valid-no-messages.css');
 
         $noStylesheetsSourceMap = new SourceMap([
-            new AvailableSource('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
+            new Source('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
         ]);
 
         $singleStylesheetValidNoMessagesSourceMap = new SourceMap([
-            new AvailableSource(
+            new Source(
                 'http://example.com/',
                 'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
             ),
-            new AvailableSource('http://example.com/style.css', 'file:' . $cssNoMessagesPath),
+            new Source('http://example.com/style.css', 'file:' . $cssNoMessagesPath),
         ]);
 
         return [
             'html5 no css no linked resources' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
-                        new AvailableSource('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                     ]),
                     $noStylesheetsHtml,
                     $noStylesheetsSourceMap,
@@ -158,8 +158,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             'html5 with single linked CSS resource, no messages' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
-                        new AvailableSource('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                        new AvailableSource('http://example.com/style.css', 'file:/tmp/valid-ss-no-messages-hash.css'),
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-ss-no-messages-hash.css'),
                     ]),
                     str_replace(
                         [
@@ -193,7 +193,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             'html5 with single empty linked CSS resource, file not found error is removed' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
-                        new AvailableSource('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                     ]),
                     str_replace(
                         [
@@ -225,7 +225,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             'html5 with inline style, single error' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
-                        new AvailableSource('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                     ]),
                     $noStylesheetsHtml,
                     $noStylesheetsSourceMap,
@@ -251,8 +251,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             'html5 with inline style, single error in linked stylesheet' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
-                        new AvailableSource('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                        new AvailableSource('http://example.com/style.css', 'file:/tmp/style-hash.css'),
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/style-hash.css'),
                     ]),
                     str_replace(
                         [
@@ -407,12 +407,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $noStylesheetsHtml = FixtureLoader::load($htmlFixtureName);
 
         $noStylesheetsSourceMap = new SourceMap([
-            new AvailableSource('http://example.com/', 'file:' . FixtureLoader::getPath($htmlFixtureName)),
+            new Source('http://example.com/', 'file:' . FixtureLoader::getPath($htmlFixtureName)),
         ]);
 
         $sourceStorage = $this->createSourceStorageWithValidateExpectations(
             new SourceMap([
-                new AvailableSource('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
             ]),
             $noStylesheetsHtml,
             $noStylesheetsSourceMap,

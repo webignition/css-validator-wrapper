@@ -8,7 +8,6 @@ use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfigura
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
-use webignition\CssValidatorWrapper\Source\AvailableSource;
 
 class Wrapper
 {
@@ -77,10 +76,8 @@ class Wrapper
 
         $this->sourceStorage->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
 
-        $resourcePaths = $this->sourceStorage->getSources();
-
-        /* @var AvailableSource $webPageLocalSource */
-        $webPageLocalSource = $resourcePaths[$webPageUri];
+        $localSources = $this->sourceStorage->getSources();
+        $webPageLocalSource = $localSources[$webPageUri];
 
         $webPageLocalUri = 'file:' . $webPageLocalSource->getLocalUri();
 
@@ -102,7 +99,7 @@ class Wrapper
         if ($output->isValidationOutput()) {
             $output = $this->outputMutator->removeMessagesWithRef($output, SourceMutator::EMPTY_STYLESHEET_HREF_URL);
             $output = $this->outputMutator->setObservationResponseRef($output, $webPageUri);
-            $output = $this->outputMutator->setMessagesRef($output, $resourcePaths);
+            $output = $this->outputMutator->setMessagesRef($output, $localSources);
         }
 
         $this->sourceStorage->deleteAll();
