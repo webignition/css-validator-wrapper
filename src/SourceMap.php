@@ -2,34 +2,31 @@
 
 namespace webignition\CssValidatorWrapper;
 
-use webignition\CssValidatorWrapper\Source\AvailableSource;
-use webignition\CssValidatorWrapper\Source\SourceInterface;
-
 class SourceMap implements \ArrayAccess, \Iterator, \Countable
 {
     private $sources = [];
 
     /**
-     * @param SourceInterface[] $sources
+     * @param Source[] $sources
      */
     public function __construct(array $sources = [])
     {
         foreach ($sources as $source) {
-            if ($source instanceof SourceInterface) {
+            if ($source instanceof Source) {
                 $this[$source->getUri()] = $source;
             }
         }
     }
 
-    public function getByUri(string $uri): ?SourceInterface
+    public function getByUri(string $uri): ?Source
     {
         return $this->offsetGet($uri);
     }
 
-    public function getByLocalUri(string $localUri): ?SourceInterface
+    public function getByLocalUri(string $localUri): ?Source
     {
         foreach ($this as $source) {
-            if ($source->isAvailable() && $source instanceof AvailableSource && $localUri === $source->getLocalUri()) {
+            if ($source->isAvailable() && $localUri === $source->getLocalUri()) {
                 return $source;
             }
         }
@@ -46,7 +43,7 @@ class SourceMap implements \ArrayAccess, \Iterator, \Countable
         return isset($this->sources[$offset]);
     }
 
-    public function offsetGet($offset): ?SourceInterface
+    public function offsetGet($offset): ?Source
     {
         return $this->sources[$offset] ?? null;
     }
@@ -61,8 +58,8 @@ class SourceMap implements \ArrayAccess, \Iterator, \Countable
             throw new \InvalidArgumentException('array key must be a string');
         }
 
-        if (!$value instanceof SourceInterface) {
-            throw new \InvalidArgumentException('array value must be a SourceInterface instance');
+        if (!$value instanceof Source) {
+            throw new \InvalidArgumentException('array value must be a Source instance');
         }
 
         $this->sources[$offset] = $value;
@@ -73,7 +70,7 @@ class SourceMap implements \ArrayAccess, \Iterator, \Countable
         unset($this->sources[$offset]);
     }
 
-    public function current(): SourceInterface
+    public function current(): Source
     {
         return current($this->sources);
     }

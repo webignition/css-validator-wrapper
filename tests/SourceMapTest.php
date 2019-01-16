@@ -3,9 +3,7 @@
 
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
-use webignition\CssValidatorWrapper\Source\AvailableSource;
-use webignition\CssValidatorWrapper\Source\SourceInterface;
-use webignition\CssValidatorWrapper\Source\UnavailableSource;
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceMap;
 
 class SourceMapTest extends \PHPUnit\Framework\TestCase
@@ -13,7 +11,7 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider getByUriDataProvider
      */
-    public function testGetByUri(array $sources, string $uri, ?SourceInterface $expectedSource)
+    public function testGetByUri(array $sources, string $uri, ?Source $expectedSource)
     {
         $sourceMap = new SourceMap($sources);
 
@@ -22,8 +20,8 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
 
     public function getByUriDataProvider(): array
     {
-        $availableSource = new AvailableSource('http://example.com/foo.css', 'file:///foo.css');
-        $unavailableSource = new UnavailableSource('http://example.com/404');
+        $availableSource = new Source('http://example.com/foo.css', 'file:///foo.css');
+        $unavailableSource = new Source('http://example.com/404');
 
         return [
             'no mappings' => [
@@ -60,7 +58,7 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider getByLocalUriDataProvider
      */
-    public function testGetSourcePath(array $sources, string $localUri, ?SourceInterface $expectedSource)
+    public function testGetSourcePath(array $sources, string $localUri, ?Source $expectedSource)
     {
         $sourceMap = new SourceMap($sources);
 
@@ -69,8 +67,8 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
 
     public function getByLocalUriDataProvider(): array
     {
-        $availableSource = new AvailableSource('http://example.com/foo.css', 'file:///foo.css');
-        $unavailableSource = new UnavailableSource('http://example.com/404');
+        $availableSource = new Source('http://example.com/foo.css', 'file:///foo.css');
+        $unavailableSource = new Source('http://example.com/404');
 
         return [
             'no sources' => [
@@ -112,15 +110,15 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
         $sourceMap = new SourceMap();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('array value must be a SourceInterface instance');
+        $this->expectExceptionMessage('array value must be a Source instance');
 
         $sourceMap['foo'] = true;
     }
 
     public function testOffsetGet()
     {
-        $htmlSource = new AvailableSource('http://example.com/', 'file:/tmp/example.html');
-        $cssSource = new AvailableSource('http://example.com/style.css', 'file:/tmp/style.css');
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
         $sourceMap = new SourceMap([
             $htmlSource,
@@ -134,8 +132,8 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
 
     public function testOffsetExists()
     {
-        $htmlSource = new AvailableSource('http://example.com/', 'file:/tmp/example.html');
-        $cssSource = new AvailableSource('http://example.com/style.css', 'file:/tmp/style.css');
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
         $sourceMap = new SourceMap([
             $htmlSource,
@@ -150,8 +148,8 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
 
     public function testOffsetUnset()
     {
-        $htmlSource = new AvailableSource('http://example.com/', 'file:/tmp/example.html');
-        $cssSource = new AvailableSource('http://example.com/style.css', 'file:/tmp/style.css');
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
         $sourceMap = new SourceMap([
             $htmlSource,
@@ -169,8 +167,8 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
 
     public function testIterator()
     {
-        $htmlSource = new AvailableSource('http://example.com/', 'file:/tmp/example.html');
-        $cssSource = new AvailableSource('http://example.com/style.css', 'file:/tmp/style.css');
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
         $sourceMap = new SourceMap([
             $htmlSource,
@@ -187,8 +185,8 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
 
     public function testCount()
     {
-        $htmlSource = new AvailableSource('http://example.com/', 'file:/tmp/example.html');
-        $cssSource = new AvailableSource('http://example.com/style.css', 'file:/tmp/style.css');
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
         $sourceMap = new SourceMap([
             $htmlSource,
