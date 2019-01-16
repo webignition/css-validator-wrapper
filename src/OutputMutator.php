@@ -40,4 +40,25 @@ class OutputMutator
 
         return $output;
     }
+
+    public function removeMessagesWithRef(ValidationOutput $output, string $ref)
+    {
+        $observationResponse = $output->getObservationResponse();
+
+        $messages = $observationResponse->getMessages();
+
+        $messageFilter = function (AbstractMessage $message) use ($ref) {
+            if (!$message instanceof AbstractIssueMessage) {
+                return true;
+            }
+
+            return $ref !== $message->getRef();
+        };
+
+        $observationResponse = $observationResponse->withMessages($messages->filter($messageFilter));
+
+        $output = $output->withObservationResponse($observationResponse);
+
+        return $output;
+    }
 }
