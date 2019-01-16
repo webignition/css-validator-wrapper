@@ -43,7 +43,10 @@ class SourceMutator
             if ($hrefUrl) {
                 $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
                 $source = $this->sourceMap->getByUri($referenceAbsoluteUrl);
-                $localUri = $source->getLocalUri();
+
+                $localUri = $source->isAvailable()
+                    ? $source->getLocalUri()
+                    : self::EMPTY_STYLESHEET_HREF_URL;
 
                 $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
                 $referenceReplacement = $referenceWithoutHrefValue . $localUri;

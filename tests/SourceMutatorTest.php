@@ -72,7 +72,24 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         $cssThreePath = FixtureLoader::getPath('Css/three.css');
 
         return [
-            'single linked CSS resources' => [
+            'single linked stylesheet, is unavailable' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/style.css'),
+                ]),
+                'stylesheetReferences' => [
+                    '<link href="/style.css',
+                ],
+                'expectedWebPageContent' => str_replace(
+                    '<link href="/style.css" rel="stylesheet">',
+                    '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                ),
+            ],
+            'single linked stylesheet, is available' => [
                 'webPage' => $this->createWebPage(
                     'http://example.com/',
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
