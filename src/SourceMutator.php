@@ -3,6 +3,7 @@
 namespace webignition\CssValidatorWrapper;
 
 use webignition\AbsoluteUrlDeriver\AbsoluteUrlDeriver;
+use webignition\CssValidatorWrapper\Source\AvailableSource;
 use webignition\Uri\Uri;
 use webignition\WebResource\WebPage\WebPage;
 
@@ -42,10 +43,12 @@ class SourceMutator
 
             if ($hrefUrl) {
                 $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
-                $localPath = $this->sourceMap->getLocalPath($referenceAbsoluteUrl);
-                $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
+                /* @var AvailableSource $source */
+                $source = $this->sourceMap->getByUri($referenceAbsoluteUrl);
+                $localUri = $source->getLocalUri();
 
-                $referenceReplacement = $referenceWithoutHrefValue . 'file:' . $localPath;
+                $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
+                $referenceReplacement = $referenceWithoutHrefValue . $localUri;
 
                 $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
             } else {
