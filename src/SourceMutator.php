@@ -55,35 +55,11 @@ class SourceMutator
                     if ($reference !== $referenceReplacement) {
                         $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
                     } else {
-                        $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
-
-                        foreach ($referenceFragments as $referenceFragment) {
-                            $quoteCharacter = $this->findLeadingRelStylesheetQuote($referenceFragment);
-                            $quotedReferenceFragment = $referenceFragment . $quoteCharacter;
-                            $fragmentReplacement = $this->removeRelStylesheetFromReference($quotedReferenceFragment);
-
-                            $webPageContent = str_replace(
-                                $quotedReferenceFragment,
-                                $fragmentReplacement,
-                                $webPageContent
-                            );
-                        }
+                        $webPageContent = $this->replaceReferenceByFragment($webPageContent, $reference);
                     }
                 }
             } else {
-                $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
-
-                foreach ($referenceFragments as $referenceFragment) {
-                    $quoteCharacter = $this->findLeadingRelStylesheetQuote($referenceFragment);
-                    $quotedReferenceFragment = $referenceFragment . $quoteCharacter;
-                    $fragmentReplacement = $this->removeRelStylesheetFromReference($quotedReferenceFragment);
-
-                    $webPageContent = str_replace(
-                        $quotedReferenceFragment,
-                        $fragmentReplacement,
-                        $webPageContent
-                    );
-                }
+                $webPageContent = $this->replaceReferenceByFragment($webPageContent, $reference);
             }
         }
 
@@ -94,7 +70,31 @@ class SourceMutator
         return $mutatedWebPage;
     }
 
-    private function stripHrefValueFromReference(string $reference, string $hrefUrl)
+    private function replaceReferenceByFragment(string $webPageContent, string $reference): string
+    {
+        $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
+
+        foreach ($referenceFragments as $referenceFragment) {
+            $webPageContent = $this->replaceReferenceFragment($webPageContent, $referenceFragment);
+        }
+
+        return $webPageContent;
+    }
+
+    private function replaceReferenceFragment(string $webPageContent, string $referenceFragment): string
+    {
+        $quoteCharacter = $this->findLeadingRelStylesheetQuote($referenceFragment);
+        $quotedReferenceFragment = $referenceFragment . $quoteCharacter;
+        $fragmentReplacement = $this->removeRelStylesheetFromReference($quotedReferenceFragment);
+
+        return str_replace(
+            $quotedReferenceFragment,
+            $fragmentReplacement,
+            $webPageContent
+        );
+    }
+
+    private function stripHrefValueFromReference(string $reference, string $hrefUrl): string
     {
         return preg_replace('/(' . preg_quote($hrefUrl, '/') . ')$/', '', $reference);
     }
