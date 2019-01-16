@@ -18,6 +18,7 @@ use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\OutputMutator;
 use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceMap;
+use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Wrapper;
@@ -64,7 +65,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider validateSuccessDataProvider
      */
-    public function testValidateSuccess(
+    public function testValidateSuccessFoo(
         SourceStorage $sourceStorage,
         SourceMap $sourceMap,
         string $sourceFixture,
@@ -113,6 +114,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     {
         $noStylesheetsHtml = FixtureLoader::load('Html/minimal-html5.html');
         $singleStylesheetHtml = FixtureLoader::load('Html/minimal-html5-single-stylesheet.html');
+        $singleEmptyHrefStylesheetHtml = FixtureLoader::load('Html/minimal-html5-unavailable-stylesheet.html');
         $cssNoMessagesPath = FixtureLoader::getPath('Css/valid-no-messages.css');
 
         $noStylesheetsSourceMap = new SourceMap([
@@ -174,6 +176,38 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
                     'no-messages',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'html5 with single empty linked CSS resource, file not found error is removed' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        'http://example.com/' => '/tmp/web-page-hash.html',
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
+                        ],
+                        $singleEmptyHrefStylesheetHtml
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    []
+                ),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleEmptyHrefStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'unavailable-resource',
                     [
                         '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
                     ]

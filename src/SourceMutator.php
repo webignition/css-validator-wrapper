@@ -8,6 +8,9 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceMutator
 {
+    const EMPTY_STYLESHEET_HREF_URL = 'file:/null';
+
+
     private $webPage;
     private $sourceMap;
     private $sourceInspector;
@@ -51,7 +54,7 @@ class SourceMutator
                 foreach ($referenceFragments as $fragment) {
                     $fragmentReplacement = preg_replace(
                         '/href\s*=\s*("|\')\s*("|\')/',
-                        'href="file:/"',
+                        'href="' . self::EMPTY_STYLESHEET_HREF_URL . '"',
                         $fragment
                     );
 
