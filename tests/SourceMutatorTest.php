@@ -72,24 +72,7 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         $cssThreePath = FixtureLoader::getPath('Css/three.css');
 
         return [
-            'single linked stylesheet, is unavailable' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
-                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
-                ),
-                'sourceMap' => new SourceMap([
-                    new Source('http://example.com/style.css'),
-                ]),
-                'stylesheetReferences' => [
-                    '<link href="/style.css',
-                ],
-                'expectedWebPageContent' => str_replace(
-                    '<link href="/style.css" rel="stylesheet">',
-                    '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
-                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
-                ),
-            ],
-            'single linked stylesheet, is available' => [
+            'single linked stylesheet' => [
                 'webPage' => $this->createWebPage(
                     'http://example.com/',
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
@@ -140,11 +123,11 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                         '<link href="/three.css?foo=bar&amp;foobar=foobar" rel="stylesheet">',
                     ],
                     [
-                        '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" accesskey="1" rel="stylesheet">',
-                        '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" accesskey="2" rel="stylesheet">',
-                        '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
-                        '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
-                        '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
+                        '<link href="" accesskey="1">',
+                        '<link href="" accesskey="2">',
+                        '<link href=" ">',
+                        '<link href=\'\'>',
+                        '<link href=\' \'>',
                         '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
                         '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
                         '<link href="file:' . $cssThreePath . '" rel="stylesheet">',
@@ -168,6 +151,79 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     '<link href="file:' . $cssValidNoMessagePath . '" rel="stylesheet"',
                     FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html')
                 ),
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider replaceStylesheetUrlsMutatesWebPageUnavailableStylesheetDataProvider
+     */
+    public function testReplaceStylesheetUrlsMutateWebPageUnavailableStylesheet(
+        string $stylesheetLinkElement,
+        string $expectedStylesheetLinkElement
+    ) {
+        $webPage = $this->createWebPage(
+            'http://example.com/',
+            str_replace(
+                '<link href="/style.css" rel="stylesheet">',
+                $stylesheetLinkElement,
+                FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+            )
+        );
+
+        $sourceMap = new SourceMap([
+            new Source('http://example.com/style.css'),
+        ]);
+
+        $expectedWebPageContent = str_replace(
+            '<link href="/style.css" rel="stylesheet">',
+            $expectedStylesheetLinkElement,
+            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+        );
+
+        $sourceInspector = new SourceInspector($webPage);
+        $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
+        $mutatedWebPage = $mutator->replaceStylesheetUrls($sourceInspector->findStylesheetReferences());
+
+        $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
+        $this->assertNotSame($webPage, $mutatedWebPage);
+        $this->assertEquals($expectedWebPageContent, $mutatedWebPage->getContent());
+    }
+
+    public function replaceStylesheetUrlsMutatesWebPageUnavailableStylesheetDataProvider(): array
+    {
+        return [
+            'trailing rel="stylesheet"' => [
+                'stylesheetLinkElement' => '<link href="/style.css" rel="stylesheet">',
+                'expectedStylesheetLinkElement' => '<link href="/style.css">',
+            ],
+            'trailing rel = "stylesheet"' => [
+                'stylesheetLinkElement' => '<link href="/style.css" rel = "stylesheet">',
+                'expectedStylesheetLinkElement' => '<link href="/style.css">',
+            ],
+            'trailing rel=\'stylesheet\'"' => [
+                'stylesheetLinkElement' => '<link href="/style.css" rel=\'stylesheet\'>',
+                'expectedStylesheetLinkElement' => '<link href="/style.css">',
+            ],
+            'trailing rel = \'stylesheet\'"' => [
+                'stylesheetLinkElement' => '<link href="/style.css" rel = \'stylesheet\'>',
+                'expectedStylesheetLinkElement' => '<link href="/style.css">',
+            ],
+            'leading rel="stylesheet"' => [
+                'stylesheetLinkElement' => '<link rel="stylesheet" href="/style.css">',
+                'expectedStylesheetLinkElement' => '<link href="/style.css">',
+            ],
+            'leading rel = "stylesheet"' => [
+                'stylesheetLinkElement' => '<link rel = "stylesheet" href="/style.css">',
+                'expectedStylesheetLinkElement' => '<link href="/style.css">',
+            ],
+            'leading rel=\'stylesheet\'' => [
+                'stylesheetLinkElement' => '<link rel=\'stylesheet\' href="/style.css">',
+                'expectedStylesheetLinkElement' => '<link href="/style.css">',
+            ],
+            'leading rel = \'stylesheet\'' => [
+                'stylesheetLinkElement' => '<link rel = \'stylesheet\' href="/style.css">',
+                'expectedStylesheetLinkElement' => '<link href="/style.css">',
             ],
         ];
     }

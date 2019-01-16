@@ -8,9 +8,6 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceMutator
 {
-    const EMPTY_STYLESHEET_HREF_URL = 'file:/null';
-
-
     private $webPage;
     private $sourceMap;
     private $sourceInspector;
@@ -44,26 +41,22 @@ class SourceMutator
                 $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
                 $source = $this->sourceMap->getByUri($referenceAbsoluteUrl);
 
-                $localUri = $source->isAvailable()
-                    ? $source->getLocalUri()
-                    : self::EMPTY_STYLESHEET_HREF_URL;
+                if ($source->isAvailable()) {
+                    $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
+                    $referenceReplacement = $referenceWithoutHrefValue . $source->getLocalUri();
 
-                $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
-                $referenceReplacement = $referenceWithoutHrefValue . $localUri;
+                    $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
+                } else {
+                    $referenceReplacement = $this->removeRelStylesheetFromReference($reference);
 
-                $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
-            } else {
-                $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
-
-                foreach ($referenceFragments as $fragment) {
-                    $fragmentReplacement = preg_replace(
-                        '/href\s*=\s*("|\')\s*("|\')/',
-                        'href="' . self::EMPTY_STYLESHEET_HREF_URL . '"',
-                        $fragment
-                    );
-
-                    $webPageContent = str_replace($fragment, $fragmentReplacement, $webPageContent);
+                    if ($reference !== $referenceReplacement) {
+                        $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
+                    } else {
+                        $webPageContent = $this->replaceReferenceByFragment($webPageContent, $reference);
+                    }
                 }
+            } else {
+                $webPageContent = $this->replaceReferenceByFragment($webPageContent, $reference);
             }
         }
 
@@ -74,7 +67,31 @@ class SourceMutator
         return $mutatedWebPage;
     }
 
-    private function stripHrefValueFromReference(string $reference, string $hrefUrl)
+    private function replaceReferenceByFragment(string $webPageContent, string $reference): string
+    {
+        $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
+
+        foreach ($referenceFragments as $referenceFragment) {
+            $webPageContent = $this->replaceReferenceFragment($webPageContent, $referenceFragment);
+        }
+
+        return $webPageContent;
+    }
+
+    private function replaceReferenceFragment(string $webPageContent, string $referenceFragment): string
+    {
+        $quoteCharacter = $this->findLeadingRelStylesheetQuote($referenceFragment);
+        $quotedReferenceFragment = $referenceFragment . $quoteCharacter;
+        $fragmentReplacement = $this->removeRelStylesheetFromReference($quotedReferenceFragment);
+
+        return str_replace(
+            $quotedReferenceFragment,
+            $fragmentReplacement,
+            $webPageContent
+        );
+    }
+
+    private function stripHrefValueFromReference(string $reference, string $hrefUrl): string
     {
         return preg_replace('/(' . preg_quote($hrefUrl, '/') . ')$/', '', $reference);
     }
@@ -87,5 +104,25 @@ class SourceMutator
             preg_replace('/^href/', '', $hrefAndValue),
             ' "\'='
         );
+    }
+
+    private function removeRelStylesheetFromReference(string $reference): string
+    {
+        $pattern = '/\s+rel\s*=\s*("|\')stylesheet("|\')/';
+
+        return preg_replace($pattern, '', $reference);
+    }
+
+    private function findLeadingRelStylesheetQuote(string $fragment): string
+    {
+        $stylesheetWithLeadingQuoteMatches = [];
+        preg_match('/rel\s*=\s*("|\')stylesheet/', $fragment, $stylesheetWithLeadingQuoteMatches);
+
+        $stylesheetWithLeadingQuote = $stylesheetWithLeadingQuoteMatches[0];
+
+        $leadingQuote = preg_replace('/^rel\s*=/', '', $stylesheetWithLeadingQuote);
+        $leadingQuote = preg_replace('/stylesheet$/', '', $leadingQuote);
+
+        return trim($leadingQuote);
     }
 }

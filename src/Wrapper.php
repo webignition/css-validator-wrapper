@@ -97,7 +97,6 @@ class Wrapper
         );
 
         if ($output->isValidationOutput()) {
-            $output = $this->outputMutator->removeMessagesWithRef($output, SourceMutator::EMPTY_STYLESHEET_HREF_URL);
             $output = $this->outputMutator->setObservationResponseRef($output, $webPageUri);
             $output = $this->outputMutator->setMessagesRef($output, $localSources);
         }
