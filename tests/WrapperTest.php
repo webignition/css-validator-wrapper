@@ -8,12 +8,14 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 use Mockery\MockInterface;
 use phpmock\mockery\PHPMockery;
 use Psr\Http\Message\UriInterface;
+use webignition\CssValidatorOutput\Model\ErrorMessage;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandFactory;
 use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\CssValidatorWrapper\OutputMutator;
 use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceStorage;
@@ -70,6 +72,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         string $cssValidatorRawOutput,
         string $vendorExtensionSeverityLevel,
         OutputParserConfiguration $outputParserConfiguration,
+        array $expectedMessages,
         int $expectedWarningCount,
         int $expectedErrorCount,
         array $expectedErrorCountByUrl = []
@@ -90,9 +93,13 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(ValidationOutput::class, $output);
 
+        $observationResponse = $output->getObservationResponse();
+        $this->assertEquals($sourceUrl, $observationResponse->getRef());
+
         $messageList = $output->getMessages();
         $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
         $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
+        $this->assertEquals($expectedMessages, $messageList->getMessages());
 
         foreach ($expectedErrorCountByUrl as $url => $expectedErrorCountForUrl) {
             /* @var array $errorsByUrl */
@@ -130,9 +137,15 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceMap' => $noStylesheetsSourceMap,
                 'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'no-messages',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
@@ -159,13 +172,82 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'no-messages',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-
+            'html5 with inline style, single error' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        'http://example.com/' => '/tmp/web-page-hash.html',
+                    ]),
+                    $noStylesheetsHtml,
+                    $noStylesheetsSourceMap,
+                    []
+                ),
+                'sourceMap' => $noStylesheetsSourceMap,
+                'sourceFixture' => $noStylesheetsHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'single-error-within-markup',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [
+                    new ErrorMessage('title content', 3, '.bar', ''),
+                ],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 1,
+            ],
+            'html5 with inline style, single error in linked stylesheet' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        'http://example.com/' => '/tmp/web-page-hash.html',
+                        'http://example.com/style.css' => '/tmp/style-hash.css',
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssNoMessagesPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
+                ),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'single-error-within-linked-stylesheet',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                        '{{ cssSourceUri }}' => '/tmp/style-hash.css',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [
+                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/style.css'),
+                ],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 1,
+            ],
 //            'domains to ignore: ignore none' => [
 //                'httpFixtures' => [
 //                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
@@ -440,6 +522,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     {
         return new Wrapper(
             $sourceStorage,
+            new OutputMutator(),
             new CommandFactory(),
             new OutputParser(),
             self::JAVA_EXECUTABLE_PATH,

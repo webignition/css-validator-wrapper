@@ -1,0 +1,15 @@
+{vextwarning=true, output=ucn, lang=en, warning=2, medium=all, profile=css3}
+<?xml version='1.0' encoding="utf-8"?>
+<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="{{ webPageUri }}" date="2019-01-15T05:35:23Z" xml:lang="en">
+
+
+
+
+<message type="error" >
+	<context line="3">.bar</context>
+	<title>title content
+	</title>
+</message>
+
+
+</observationresponse>
