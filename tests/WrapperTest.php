@@ -66,7 +66,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider validateSuccessDataProvider
      */
-    public function testValidateSuccess(
+    public function testValidateSuccessFoo(
         SourceStorage $sourceStorage,
         SourceMap $sourceMap,
         string $sourceFixture,
@@ -128,6 +128,14 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
             ),
             new Source('http://example.com/style.css', 'file:' . $cssNoMessagesPath),
+        ]);
+
+        $singleStylesheetUnavailableSourceMap = new SourceMap([
+            new Source(
+                'http://example.com/',
+                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
+            ),
+            new Source('http://example.com/style.css'),
         ]);
 
         return [
@@ -209,6 +217,40 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 ),
                 'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
                 'sourceFixture' => $singleEmptyHrefStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'unavailable-resource',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'html5 with unavailable CSS resource, file not found error is removed' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetUnavailableSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
+                ),
+                'sourceMap' => $singleStylesheetUnavailableSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
                     'unavailable-resource',
