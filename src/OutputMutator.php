@@ -9,7 +9,7 @@ use webignition\CssValidatorOutput\Model\ValidationOutput;
 
 class OutputMutator
 {
-    public function setObservationResponseRef(ValidationOutput $output, string $webPageUri)
+    public function setObservationResponseRef(ValidationOutput $output, string $webPageUri): ValidationOutput
     {
         $observationResponse = $output->getObservationResponse();
         $observationResponse = $observationResponse->withRef($webPageUri);
@@ -19,7 +19,7 @@ class OutputMutator
         return $output;
     }
 
-    public function setMessagesRef(ValidationOutput $output, SourceMap $linkedResourcesMap)
+    public function setMessagesRef(ValidationOutput $output, SourceMap $linkedResourcesMap): ValidationOutput
     {
         $mutator = function (AbstractMessage $message) use ($linkedResourcesMap) {
             if ($message instanceof AbstractIssueMessage) {
@@ -39,7 +39,7 @@ class OutputMutator
         );
     }
 
-    public function removeMessagesWithRef(ValidationOutput $output, string $ref)
+    public function removeMessagesWithRef(ValidationOutput $output, string $ref): ValidationOutput
     {
         $filter = function (AbstractMessage $message) use ($ref) {
             if (!$message instanceof AbstractIssueMessage) {
