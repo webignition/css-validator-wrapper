@@ -19,13 +19,15 @@ class OutputMutator
         return $output;
     }
 
-    public function setMessagesRef(ValidationOutput $output, SourceMap $linkedResourcesMap): ValidationOutput
+    public function setMessagesRef(ValidationOutput $output, SourceMap $localLinkedSources): ValidationOutput
     {
-        $mutator = function (AbstractMessage $message) use ($linkedResourcesMap) {
+        $mutator = function (AbstractMessage $message) use ($localLinkedSources) {
             if ($message instanceof AbstractIssueMessage) {
-                $message = $message->withRef(
-                    $linkedResourcesMap->getSourcePath($message->getRef())
-                );
+                $source = $localLinkedSources->getByLocalUri($message->getRef());
+
+                if ($source) {
+                    $message = $message->withRef($source->getUri());
+                }
             }
 
             return $message;
