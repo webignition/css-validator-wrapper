@@ -12,7 +12,7 @@ use webignition\CssValidatorOutput\Model\Options;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Model\WarningMessage;
 use webignition\CssValidatorWrapper\OutputMutator;
-use webignition\CssValidatorWrapper\Source\AvailableSource;
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceMap;
 
 class OutputMutatorTest extends \PHPUnit\Framework\TestCase
@@ -112,8 +112,8 @@ class OutputMutatorTest extends \PHPUnit\Framework\TestCase
                     ]))
                 ),
                 'sourceMap' => new SourceMap([
-                    new AvailableSource('http://example.com/warning.css', '/tmp/warning.html'),
-                    new AvailableSource('http://example.com/error.css', '/tmp/error.html'),
+                    new Source('http://example.com/warning.css', '/tmp/warning.html'),
+                    new Source('http://example.com/error.css', '/tmp/error.html'),
                 ]),
                 'expectedMessages' => [
                     new WarningMessage('warning title', 0, 'warning context', 'http://example.com/warning.css', 0),
