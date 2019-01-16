@@ -2,36 +2,40 @@
 
 namespace webignition\CssValidatorWrapper;
 
+use webignition\CssValidatorWrapper\Source\AvailableSource;
+
 class ResourceStorage
 {
-    private $paths;
+    private $localSources;
 
-    public function __construct(SourceMap $paths)
+    public function __construct(SourceMap $localSources)
     {
-        $this->paths = $paths;
+        $this->localSources = $localSources;
     }
 
-    public function store(string $url, string $content, string $type): string
+    public function store(string $uri, string $content, string $type): string
     {
-        return $this->persist($url, $content, $type, function (string $path, string $content) {
+        return $this->persist($uri, $content, $type, function (string $path, string $content) {
             file_put_contents($path, $content);
         });
     }
 
-    public function duplicate(string $url, string $localPath, string $type): string
+    public function duplicate(string $uri, string $localUri, string $type): string
     {
-        return $this->persist($url, $localPath, $type, function (string $path, string $localPath) {
+        return $this->persist($uri, $localUri, $type, function (string $path, string $localPath) {
             copy($localPath, $path);
         });
     }
 
-    private function persist(string $url, string $hashInput, string $type, callable $persister): string
+    private function persist(string $uri, string $hashInput, string $type, callable $persister): string
     {
         $path = $this->createPath($hashInput, $type);
+        $localUri = 'file:' . $path;
+        $source = new AvailableSource($uri, $localUri);
 
         $persister($path, $hashInput);
 
-        $this->paths[$url] = $path;
+        $this->localSources[$uri] = $source;
 
         return $path;
     }
@@ -48,7 +52,10 @@ class ResourceStorage
 
     public function deleteAll()
     {
-        foreach ($this->paths as $path) {
+        foreach ($this->localSources as $source) {
+            /* @var AvailableSource $source */
+            $path = preg_replace('/^file:/', '', $source->getLocalUri());
+
             @unlink($path);
         }
     }
