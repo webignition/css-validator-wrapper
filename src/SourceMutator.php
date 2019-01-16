@@ -3,7 +3,6 @@
 namespace webignition\CssValidatorWrapper;
 
 use webignition\AbsoluteUrlDeriver\AbsoluteUrlDeriver;
-use webignition\CssValidatorWrapper\Source\AvailableSource;
 use webignition\Uri\Uri;
 use webignition\WebResource\WebPage\WebPage;
 
@@ -43,7 +42,6 @@ class SourceMutator
 
             if ($hrefUrl) {
                 $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
-                /* @var AvailableSource $source */
                 $source = $this->sourceMap->getByUri($referenceAbsoluteUrl);
                 $localUri = $source->getLocalUri();
 

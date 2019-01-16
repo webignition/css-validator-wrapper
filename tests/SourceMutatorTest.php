@@ -6,7 +6,7 @@
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use Psr\Http\Message\UriInterface;
-use webignition\CssValidatorWrapper\Source\AvailableSource;
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceMutator;
@@ -78,7 +78,7 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
                 ),
                 'sourceMap' => new SourceMap([
-                    new AvailableSource('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
+                    new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
                 ]),
                 'stylesheetReferences' => [
                     '<link href="/style.css',
@@ -95,9 +95,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
                 ),
                 'sourceMap' => new SourceMap([
-                    new AvailableSource('http://example.com/one.css', 'file:' . $cssOnePath),
-                    new AvailableSource('http://example.com/two.css', 'file:' . $cssTwoPath),
-                    new AvailableSource(
+                    new Source('http://example.com/one.css', 'file:' . $cssOnePath),
+                    new Source('http://example.com/two.css', 'file:' . $cssTwoPath),
+                    new Source(
                         'http://example.com/three.css?foo=bar&amp;foobar=foobar',
                         'file:' . $cssThreePath
                     ),
@@ -141,7 +141,7 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html')
                 ),
                 'sourceMap' => new SourceMap([
-                    new AvailableSource('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
+                    new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
                 ]),
                 'stylesheetReferences' => [
                     '<link href="/style.css',
