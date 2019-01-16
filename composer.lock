@@ -481,16 +481,16 @@
         },
         {
             "name": "webignition/css-validator-output-models",
-            "version": "0.11",
+            "version": "0.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/css-validator-output-models.git",
-                "reference": "d22dc4dbb0bfe5e67996f2f571885a73e28b54ea"
+                "reference": "07dd49b317937146cc94fd9d223b232384f11dea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/css-validator-output-models/zipball/d22dc4dbb0bfe5e67996f2f571885a73e28b54ea",
-                "reference": "d22dc4dbb0bfe5e67996f2f571885a73e28b54ea",
+                "url": "https://api.github.com/repos/webignition/css-validator-output-models/zipball/07dd49b317937146cc94fd9d223b232384f11dea",
+                "reference": "07dd49b317937146cc94fd9d223b232384f11dea",
                 "shasum": ""
             },
             "require": {
@@ -524,7 +524,7 @@
                 "model",
                 "validator"
             ],
-            "time": "2019-01-03T16:02:51+00:00"
+            "time": "2019-01-15T18:44:57+00:00"
         },
         {
             "name": "webignition/css-validator-output-parser",

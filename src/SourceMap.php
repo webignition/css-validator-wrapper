@@ -18,6 +18,11 @@ class SourceMap implements \ArrayAccess, \Iterator, \Countable
         return $this->mappings[$sourcePath] ?? null;
     }
 
+    public function getSourcePath(string $localPath): ?string
+    {
+        return array_search($localPath, $this->mappings);
+    }
+
     public function offsetExists($offset): bool
     {
         if (!is_string($offset)) {
