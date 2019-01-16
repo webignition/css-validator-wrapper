@@ -19,7 +19,6 @@ use webignition\CssValidatorWrapper\OutputMutator;
 use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceMap;
-use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Wrapper;
@@ -66,7 +65,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider validateSuccessDataProvider
      */
-    public function testValidateSuccessFoo(
+    public function testValidateSuccess(
         SourceStorage $sourceStorage,
         SourceMap $sourceMap,
         string $sourceFixture,
@@ -198,7 +197,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'html5 with single empty linked CSS resource, file not found error is removed' => [
+            'html5 with single empty linked CSS resource, no CSS to validate' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -208,7 +207,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             '<link href="" rel="stylesheet">',
                         ],
                         [
-                            '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
+                            '<link href="">',
                         ],
                         $singleEmptyHrefStylesheetHtml
                     ),
@@ -219,7 +218,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleEmptyHrefStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
-                    'unavailable-resource',
+                    'no-messages',
                     [
                         '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
                     ]
@@ -240,7 +239,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             '<link href="/style.css" rel="stylesheet">',
                         ],
                         [
-                            '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
+                            '<link href="/style.css">',
                         ],
                         $singleStylesheetHtml
                     ),
@@ -253,7 +252,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
-                    'unavailable-resource',
+                    'no-messages',
                     [
                         '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
                     ]
