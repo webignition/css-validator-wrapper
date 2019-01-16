@@ -2,8 +2,6 @@
 
 namespace webignition\CssValidatorWrapper;
 
-use webignition\CssValidatorWrapper\Source\AvailableSource;
-
 class ResourceStorage
 {
     private $localSources;
@@ -31,7 +29,7 @@ class ResourceStorage
     {
         $path = $this->createPath($hashInput, $type);
         $localUri = 'file:' . $path;
-        $source = new AvailableSource($uri, $localUri);
+        $source = new Source($uri, $localUri);
 
         $persister($path, $hashInput);
 
@@ -53,7 +51,6 @@ class ResourceStorage
     public function deleteAll()
     {
         foreach ($this->localSources as $source) {
-            /* @var AvailableSource $source */
             $path = preg_replace('/^file:/', '', $source->getLocalUri());
 
             @unlink($path);

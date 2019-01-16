@@ -5,7 +5,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorWrapper\ResourceStorage;
-use webignition\CssValidatorWrapper\Source\AvailableSource;
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceMap;
 
 class ResourceStorageTest extends \PHPUnit\Framework\TestCase
@@ -30,7 +30,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $resourceStorage = new ResourceStorage($paths);
 
         $path = $resourceStorage->store($uri, $content, $type);
-        $expectedSource = new AvailableSource($uri, 'file:' . $path);
+        $expectedSource = new Source($uri, 'file:' . $path);
 
         $this->assertStoredFile($expectedPath, $path, $content);
         $this->assertEquals($expectedSource, $paths[$uri]);
@@ -81,7 +81,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $resourceStorage = new ResourceStorage($paths);
 
         $path = $resourceStorage->duplicate($uri, $localPath, $type);
-        $expectedSource = new AvailableSource($uri, 'file:' . $path);
+        $expectedSource = new Source($uri, 'file:' . $path);
 
         $this->assertStoredFile($expectedPath, $path, $content);
         $this->assertEquals($expectedSource, $paths[$uri]);
