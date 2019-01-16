@@ -5,6 +5,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorWrapper\ResourceStorage;
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceMap;
 
 class ResourceStorageTest extends \PHPUnit\Framework\TestCase
@@ -14,7 +15,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider storeDataProvider
      */
-    public function testStore(string $url, string $content, string $type, string $filenameHash, string $expectedPath)
+    public function testStore(string $uri, string $content, string $type, string $filenameHash, string $expectedPath)
     {
         if (file_exists($expectedPath)) {
             unlink($expectedPath);
@@ -28,10 +29,11 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $paths = new SourceMap();
         $resourceStorage = new ResourceStorage($paths);
 
-        $path = $resourceStorage->store($url, $content, $type);
+        $path = $resourceStorage->store($uri, $content, $type);
+        $expectedSource = new Source($uri, 'file:' . $path);
 
         $this->assertStoredFile($expectedPath, $path, $content);
-        $this->assertEquals($path, $paths[$url]);
+        $this->assertEquals($expectedSource, $paths[$uri]);
 
         $resourceStorage->deleteAll();
 
@@ -42,14 +44,14 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
     {
         return [
             'html file' => [
-                'url' => 'http://example.com/index.html',
+                'uri' => 'http://example.com/index.html',
                 'content' => '<!doctype html><html></html>',
                 'type' => 'html',
                 'filenameHash' => 'file-hash-1',
                 'expectedPath' => '/tmp/file-hash-1.html',
             ],
             'css file' => [
-                'url' => 'http://example.com/style.css',
+                'uri' => 'http://example.com/style.css',
                 'content' => 'html {}',
                 'type' => 'css',
                 'filenameHash' => 'file-hash-2',
@@ -60,7 +62,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
 
     public function testDuplicate()
     {
-        $url = 'http://example.com/index.html';
+        $uri = 'http://example.com/index.html';
         $content = '<!doctype html><html></html>';
         $type = 'html';
         $filenameHash = 'file-hash';
@@ -78,14 +80,16 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $paths = new SourceMap();
         $resourceStorage = new ResourceStorage($paths);
 
-        $path = $resourceStorage->duplicate($url, $localPath, $type);
+        $path = $resourceStorage->duplicate($uri, $localPath, $type);
+        $expectedSource = new Source($uri, 'file:' . $path);
 
         $this->assertStoredFile($expectedPath, $path, $content);
-        $this->assertEquals($path, $paths[$url]);
+        $this->assertEquals($expectedSource, $paths[$uri]);
 
         $resourceStorage->deleteAll();
 
         $this->assertFalse(file_exists($expectedPath));
+        @unlink($localPath);
     }
 
     private function assertStoredFile(string $expectedPath, string $path, string $expectedContent)

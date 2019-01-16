@@ -6,6 +6,7 @@
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use Psr\Http\Message\UriInterface;
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceMutator;
@@ -71,13 +72,30 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         $cssThreePath = FixtureLoader::getPath('Css/three.css');
 
         return [
-            'single linked CSS resources' => [
+            'single linked stylesheet, is unavailable' => [
                 'webPage' => $this->createWebPage(
                     'http://example.com/',
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/style.css' => $cssValidNoMessagePath,
+                    new Source('http://example.com/style.css'),
+                ]),
+                'stylesheetReferences' => [
+                    '<link href="/style.css',
+                ],
+                'expectedWebPageContent' => str_replace(
+                    '<link href="/style.css" rel="stylesheet">',
+                    '<link href="' . SourceMutator::EMPTY_STYLESHEET_HREF_URL . '" rel="stylesheet">',
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                ),
+            ],
+            'single linked stylesheet, is available' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
                 ]),
                 'stylesheetReferences' => [
                     '<link href="/style.css',
@@ -94,9 +112,12 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/one.css' => $cssOnePath,
-                    'http://example.com/two.css' => $cssTwoPath,
-                    'http://example.com/three.css?foo=bar&amp;foobar=foobar' => $cssThreePath,
+                    new Source('http://example.com/one.css', 'file:' . $cssOnePath),
+                    new Source('http://example.com/two.css', 'file:' . $cssTwoPath),
+                    new Source(
+                        'http://example.com/three.css?foo=bar&amp;foobar=foobar',
+                        'file:' . $cssThreePath
+                    ),
                 ]),
                 'stylesheetReferences' => [
                     '<link href=""',
@@ -137,7 +158,7 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html')
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/style.css' => $cssValidNoMessagePath,
+                    new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
                 ]),
                 'stylesheetReferences' => [
                     '<link href="/style.css',

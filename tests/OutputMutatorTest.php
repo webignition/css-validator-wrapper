@@ -12,6 +12,7 @@ use webignition\CssValidatorOutput\Model\Options;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Model\WarningMessage;
 use webignition\CssValidatorWrapper\OutputMutator;
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceMap;
 
 class OutputMutatorTest extends \PHPUnit\Framework\TestCase
@@ -98,8 +99,8 @@ class OutputMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
                 'sourceMap' => new SourceMap(),
                 'expectedMessages' => [
-                    new WarningMessage('warning title', 0, 'warning context', '', 0),
-                    new ErrorMessage('error title', 0, 'error context', ''),
+                    new WarningMessage('warning title', 0, 'warning context', '/tmp/warning.html', 0),
+                    new ErrorMessage('error title', 0, 'error context', '/tmp/error.html'),
                 ],
             ],
             'error and warning, has matching resource urls' => [
@@ -111,8 +112,8 @@ class OutputMutatorTest extends \PHPUnit\Framework\TestCase
                     ]))
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/warning.css' => '/tmp/warning.html',
-                    'http://example.com/error.css' => '/tmp/error.html',
+                    new Source('http://example.com/warning.css', '/tmp/warning.html'),
+                    new Source('http://example.com/error.css', '/tmp/error.html'),
                 ]),
                 'expectedMessages' => [
                     new WarningMessage('warning title', 0, 'warning context', 'http://example.com/warning.css', 0),

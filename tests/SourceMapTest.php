@@ -3,76 +3,94 @@
 
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceMap;
 
 class SourceMapTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @dataProvider getLocalPathDataProvider
+     * @dataProvider getByUriDataProvider
      */
-    public function testGetLocalPath(array $mappings, string $sourcePath, ?string $expectedLocalPath)
+    public function testGetByUri(array $sources, string $uri, ?Source $expectedSource)
     {
-        $sourceMap = new SourceMap($mappings);
+        $sourceMap = new SourceMap($sources);
 
-        $this->assertEquals($expectedLocalPath, $sourceMap->getLocalPath($sourcePath));
+        $this->assertEquals($expectedSource, $sourceMap->getByUri($uri));
     }
 
-    public function getLocalPathDataProvider(): array
+    public function getByUriDataProvider(): array
     {
+        $availableSource = new Source('http://example.com/foo.css', 'file:///foo.css');
+        $unavailableSource = new Source('http://example.com/404');
+
         return [
             'no mappings' => [
-                'mappings' => [],
+                'sources' => [],
                 'sourcePath' => 'http://example.com/style.css',
-                'expectedLocalPath' => null,
+                'expectedSource' => null,
             ],
-            'no matching mapping' => [
-                'mappings' => [
-                    'http://example.com/foo.css' => 'file:///foo.css',
+            'no matching source by uri' => [
+                'sources' => [
+                    $availableSource,
+                    $unavailableSource,
                 ],
                 'sourcePath' => 'http://example.com/bar.css',
-                'expectedLocalPath' => null,
+                'expectedSource' => null,
             ],
-            'has matching mapping' => [
-                'mappings' => [
-                    'http://example.com/foo.css' => 'file:///foo.css',
+            'no matching source by type' => [
+                'sources' => [
+                    $unavailableSource,
+                ],
+                'sourcePath' => 'http://example.com/bar.css',
+                'expectedSource' => null,
+            ],
+            'has matching source' => [
+                'sources' => [
+                    $availableSource,
+                    $unavailableSource,
                 ],
                 'sourcePath' => 'http://example.com/foo.css',
-                'expectedLocalPath' => 'file:///foo.css',
+                'expectedSource' => $availableSource,
             ],
         ];
     }
 
     /**
-     * @dataProvider getSourcePathDataProvider
+     * @dataProvider getByLocalUriDataProvider
      */
-    public function testGetSourcePath(array $mappings, string $localPath, ?string $expectedSourcePath)
+    public function testGetSourcePath(array $sources, string $localUri, ?Source $expectedSource)
     {
-        $sourceMap = new SourceMap($mappings);
+        $sourceMap = new SourceMap($sources);
 
-        $this->assertEquals($expectedSourcePath, $sourceMap->getSourcePath($localPath));
+        $this->assertEquals($expectedSource, $sourceMap->getByLocalUri($localUri));
     }
 
-    public function getSourcePathDataProvider(): array
+    public function getByLocalUriDataProvider(): array
     {
+        $availableSource = new Source('http://example.com/foo.css', 'file:///foo.css');
+        $unavailableSource = new Source('http://example.com/404');
+
         return [
-            'no mappings' => [
-                'mappings' => [],
-                'localPath' => 'file:///foo.css',
-                'expectedSourcePath' => null,
+            'no sources' => [
+                'sources' => [],
+                'localUri' => 'file:///foo.css',
+                'expectedSource' => null,
             ],
-            'no matching mapping' => [
-                'mappings' => [
-                    'http://example.com/foo.css' => 'file:///foo.css',
+            'no matching source' => [
+                'sources' => [
+                    $availableSource,
+                    $unavailableSource,
                 ],
-                'localPath' => 'file:///bar.css',
-                'expectedSourcePath' => null,
+                'localUri' => 'file:///bar.css',
+                'expectedSource' => null,
             ],
-            'has matching mapping' => [
-                'mappings' => [
-                    'http://example.com/foo.css' => 'file:///foo.css',
+            'has matching source' => [
+                'sources' => [
+                    $availableSource,
+                    $unavailableSource,
                 ],
-                'localPath' => 'file:///foo.css',
-                'expectedSourcePath' => 'http://example.com/foo.css',
+                'localUri' => 'file:///foo.css',
+                'expectedSource' => $availableSource,
             ],
         ];
     }
@@ -92,92 +110,95 @@ class SourceMapTest extends \PHPUnit\Framework\TestCase
         $sourceMap = new SourceMap();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('array value must be a string');
+        $this->expectExceptionMessage('array value must be a Source instance');
 
         $sourceMap['foo'] = true;
     }
 
     public function testOffsetGet()
     {
-        $mappings = [
-            'a' => 'first',
-            'b' => 'second',
-        ];
-        $sourceMap = new SourceMap($mappings);
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
-        $this->assertEquals('first', $sourceMap['a']);
-        $this->assertEquals('second', $sourceMap['b']);
+        $sourceMap = new SourceMap([
+            $htmlSource,
+            $cssSource,
+        ]);
+
+        $this->assertEquals($htmlSource, $sourceMap['http://example.com/']);
+        $this->assertEquals($cssSource, $sourceMap['http://example.com/style.css']);
         $this->assertNull($sourceMap[1]);
     }
 
     public function testOffsetExists()
     {
-        $mappings = [
-            'a' => 'first',
-            'b' => 'second',
-        ];
-        $sourceMap = new SourceMap($mappings);
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
-        $this->assertTrue(isset($sourceMap['a']));
-        $this->assertTrue(isset($sourceMap['b']));
+        $sourceMap = new SourceMap([
+            $htmlSource,
+            $cssSource,
+        ]);
+
+        $this->assertTrue(isset($sourceMap['http://example.com/']));
+        $this->assertTrue(isset($sourceMap['http://example.com/style.css']));
         $this->assertFalse(isset($sourceMap['c']));
         $this->assertFalse(isset($sourceMap[1]));
     }
 
     public function testOffsetUnset()
     {
-        $mappings = [
-            'a' => 'first',
-            'b' => 'second',
-        ];
-        $sourceMap = new SourceMap($mappings);
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
-        $this->assertEquals('first', $sourceMap['a']);
-        $this->assertEquals('second', $sourceMap['b']);
+        $sourceMap = new SourceMap([
+            $htmlSource,
+            $cssSource,
+        ]);
 
-        unset($sourceMap['a']);
+        $this->assertEquals($htmlSource, $sourceMap['http://example.com/']);
+        $this->assertEquals($cssSource, $sourceMap['http://example.com/style.css']);
 
-        $this->assertNull($sourceMap['a']);
-        $this->assertEquals('second', $sourceMap['b']);
+        unset($sourceMap['http://example.com/']);
+
+        $this->assertNull($sourceMap['http://example.com/']);
+        $this->assertEquals($cssSource, $sourceMap['http://example.com/style.css']);
     }
 
     public function testIterator()
     {
-        $mappings = [
-            'a' => 'first',
-            'b' => 'second',
-            'c' => 'third',
-        ];
-        $sourceMap = new SourceMap($mappings);
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
-        $this->assertEquals('first', $sourceMap->current());
+        $sourceMap = new SourceMap([
+            $htmlSource,
+            $cssSource,
+        ]);
+
+        $this->assertEquals($htmlSource, $sourceMap->current());
         $sourceMap->next();
-        $this->assertEquals('second', $sourceMap->current());
-        $sourceMap->next();
-        $this->assertEquals('third', $sourceMap->current());
+        $this->assertEquals($cssSource, $sourceMap->current());
 
         $sourceMap->rewind();
-        $this->assertEquals('first', $sourceMap->current());
+        $this->assertEquals($htmlSource, $sourceMap->current());
     }
 
     public function testCount()
     {
-        $mappings = [
-            'a' => 'first',
-            'b' => 'second',
-            'c' => 'third',
-        ];
-        $sourceMap = new SourceMap($mappings);
+        $htmlSource = new Source('http://example.com/', 'file:/tmp/example.html');
+        $cssSource = new Source('http://example.com/style.css', 'file:/tmp/style.css');
 
-        $this->assertEquals(3, count($sourceMap));
+        $sourceMap = new SourceMap([
+            $htmlSource,
+            $cssSource,
+        ]);
 
-        unset($sourceMap['a']);
         $this->assertEquals(2, count($sourceMap));
 
-        unset($sourceMap['b']);
+        unset($sourceMap['http://example.com/']);
         $this->assertEquals(1, count($sourceMap));
 
-        unset($sourceMap['c']);
+        unset($sourceMap['http://example.com/style.css']);
         $this->assertEquals(0, count($sourceMap));
     }
 }

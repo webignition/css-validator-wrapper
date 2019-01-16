@@ -54,16 +54,16 @@ class Wrapper
         $sourceInspector = $sourceHandler->getInspector();
 
         $webPageUri = (string) $webPage->getUri();
-        $webPageLocalPath = $sourceMap->getLocalPath($webPageUri);
+        $webPageSource = $sourceMap->getByUri($webPageUri);
 
-        if (empty($webPageLocalPath)) {
+        if (empty($webPageSource)) {
             throw new UnknownSourceException($webPageUri);
         }
 
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
         if (count($stylesheetUrls)) {
             foreach ($stylesheetUrls as $stylesheetUrl) {
-                if (!$sourceMap->getLocalPath($stylesheetUrl)) {
+                if (!$sourceMap->getByUri($stylesheetUrl)) {
                     throw new UnknownSourceException($stylesheetUrl);
                 }
             }
@@ -76,10 +76,10 @@ class Wrapper
 
         $this->sourceStorage->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
 
-        $resourcePaths = $this->sourceStorage->getPaths();
-        $webPageLocalTempPath = $resourcePaths[$webPageUri];
+        $localSources = $this->sourceStorage->getSources();
+        $webPageLocalSource = $localSources[$webPageUri];
 
-        $webPageLocalUri = 'file:' . $webPageLocalTempPath;
+        $webPageLocalUri = 'file:' . $webPageLocalSource->getLocalUri();
 
         $command = $this->commandFactory->create(
             $webPageLocalUri,
@@ -99,7 +99,7 @@ class Wrapper
         if ($output->isValidationOutput()) {
             $output = $this->outputMutator->removeMessagesWithRef($output, SourceMutator::EMPTY_STYLESHEET_HREF_URL);
             $output = $this->outputMutator->setObservationResponseRef($output, $webPageUri);
-            $output = $this->outputMutator->setMessagesRef($output, $resourcePaths);
+            $output = $this->outputMutator->setMessagesRef($output, $localSources);
         }
 
         $this->sourceStorage->deleteAll();

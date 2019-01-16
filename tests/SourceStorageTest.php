@@ -6,6 +6,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceStorage;
@@ -59,7 +60,7 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                     $this->createUri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/one.css' => 'file:/tmp/one.css',
+                    new Source('http://example.com/one.css', 'file:/tmp/one.css'),
                 ]),
                 'expectedExceptionMessage' => 'Unknown source "http://example.com/two.css"',
             ],
@@ -69,8 +70,8 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                     $this->createUri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/one.css' => 'file:/tmp/one.css',
-                    'http://example.com/two.css' => 'file:/tmp/two.css',
+                    new Source('http://example.com/one.css', 'file:/tmp/one.css'),
+                    new Source('http://example.com/two.css', 'file:/tmp/two.css'),
                 ]),
                 'expectedExceptionMessage' => 'Unknown source "http://example.com/three.css?foo=bar&foobar=foobar"',
             ],
@@ -96,16 +97,18 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
 
         $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
 
-        $paths = $sourceStorage->getPaths();
+        $sources = $sourceStorage->getSources();
 
-        $this->assertInstanceOf(SourceMap::class, $paths);
-        $this->assertEquals(count($expectedStoredResources), count($paths));
+        $this->assertInstanceOf(SourceMap::class, $sources);
+        $this->assertEquals(count($expectedStoredResources), count($sources));
 
         foreach ($expectedStoredResources as $url => $expectedContent) {
-            $path = $paths[$url];
+            $source = $sources[$url];
 
-            $this->assertIsString($path);
-            $this->assertEquals($expectedContent, file_get_contents($path));
+            $this->assertEquals(
+                $expectedContent,
+                file_get_contents(preg_replace('/^file:/', '', $source->getLocalUri()))
+            );
         }
 
         $sourceStorage->deleteAll();
@@ -125,7 +128,20 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                     'http://example.com/' => FixtureLoader::load('Html/minimal-html5.html'),
                 ],
             ],
-            'single linked stylesheet' => [
+            'single linked stylesheet, unavailable' => [
+                'sources' => [],
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/style.css'),
+                ]),
+                'expectedStoredResources' => [
+                    'http://example.com/' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                ],
+            ],
+            'single linked stylesheet, available' => [
                 'sources' => [
                     '/tmp/style.css' => 'html {}',
                 ],
@@ -134,7 +150,7 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                     $this->createUri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/style.css' => '/tmp/style.css',
+                    new Source('http://example.com/style.css', '/tmp/style.css'),
                 ]),
                 'expectedStoredResources' => [
                     'http://example.com/' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
@@ -152,9 +168,9 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                     $this->createUri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
-                    'http://example.com/one.css' => '/tmp/one.css',
-                    'http://example.com/two.css' => '/tmp/two.css',
-                    'http://example.com/three.css?foo=bar&foobar=foobar' => '/tmp/three.css',
+                    new Source('http://example.com/one.css', '/tmp/one.css'),
+                    new Source('http://example.com/two.css', '/tmp/two.css'),
+                    new Source('http://example.com/three.css?foo=bar&foobar=foobar', '/tmp/three.css'),
                 ]),
                 'expectedStoredResources' => [
                     'http://example.com/' => FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),

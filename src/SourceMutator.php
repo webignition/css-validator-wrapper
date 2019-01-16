@@ -42,10 +42,14 @@ class SourceMutator
 
             if ($hrefUrl) {
                 $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
-                $localPath = $this->sourceMap->getLocalPath($referenceAbsoluteUrl);
-                $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
+                $source = $this->sourceMap->getByUri($referenceAbsoluteUrl);
 
-                $referenceReplacement = $referenceWithoutHrefValue . 'file:' . $localPath;
+                $localUri = $source->isAvailable()
+                    ? $source->getLocalUri()
+                    : self::EMPTY_STYLESHEET_HREF_URL;
+
+                $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
+                $referenceReplacement = $referenceWithoutHrefValue . $localUri;
 
                 $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
             } else {

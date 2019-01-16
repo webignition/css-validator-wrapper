@@ -4,23 +4,34 @@ namespace webignition\CssValidatorWrapper;
 
 class SourceMap implements \ArrayAccess, \Iterator, \Countable
 {
-    private $mappings = [];
+    private $sources = [];
 
-    public function __construct(array $mappings = [])
+    /**
+     * @param Source[] $sources
+     */
+    public function __construct(array $sources = [])
     {
-        foreach ($mappings as $sourcePath => $localPath) {
-            $this[$sourcePath] = $localPath;
+        foreach ($sources as $source) {
+            if ($source instanceof Source) {
+                $this[$source->getUri()] = $source;
+            }
         }
     }
 
-    public function getLocalPath(string $sourcePath): ?string
+    public function getByUri(string $uri): ?Source
     {
-        return $this->mappings[$sourcePath] ?? null;
+        return $this->offsetGet($uri);
     }
 
-    public function getSourcePath(string $localPath): ?string
+    public function getByLocalUri(string $localUri): ?Source
     {
-        return array_search($localPath, $this->mappings);
+        foreach ($this as $source) {
+            if ($source->isAvailable() && $localUri === $source->getLocalUri()) {
+                return $source;
+            }
+        }
+
+        return null;
     }
 
     public function offsetExists($offset): bool
@@ -29,12 +40,12 @@ class SourceMap implements \ArrayAccess, \Iterator, \Countable
             return false;
         }
 
-        return isset($this->mappings[$offset]);
+        return isset($this->sources[$offset]);
     }
 
-    public function offsetGet($offset): ?string
+    public function offsetGet($offset): ?Source
     {
-        return $this->mappings[$offset] ?? null;
+        return $this->sources[$offset] ?? null;
     }
 
     /**
@@ -47,45 +58,45 @@ class SourceMap implements \ArrayAccess, \Iterator, \Countable
             throw new \InvalidArgumentException('array key must be a string');
         }
 
-        if (!is_string($value)) {
-            throw new \InvalidArgumentException('array value must be a string');
+        if (!$value instanceof Source) {
+            throw new \InvalidArgumentException('array value must be a Source instance');
         }
 
-        $this->mappings[$offset] = $value;
+        $this->sources[$offset] = $value;
     }
 
     public function offsetUnset($offset)
     {
-        unset($this->mappings[$offset]);
+        unset($this->sources[$offset]);
     }
 
-    public function current(): string
+    public function current(): Source
     {
-        return current($this->mappings);
+        return current($this->sources);
     }
 
     public function next()
     {
-        next($this->mappings);
+        next($this->sources);
     }
 
     public function key(): ?string
     {
-        return key($this->mappings);
+        return key($this->sources);
     }
 
     public function valid(): bool
     {
-        return isset($this->mappings[$this->key()]);
+        return isset($this->sources[$this->key()]);
     }
 
     public function rewind()
     {
-        reset($this->mappings);
+        reset($this->sources);
     }
 
     public function count(): int
     {
-        return count($this->mappings);
+        return count($this->sources);
     }
 }

@@ -16,7 +16,7 @@ class SourceStorage
         $this->resourceStorage = new ResourceStorage($this->paths);
     }
 
-    public function getPaths(): SourceMap
+    public function getSources(): SourceMap
     {
         return $this->paths;
     }
@@ -34,15 +34,20 @@ class SourceStorage
 
         if (count($stylesheetUrls)) {
             foreach ($stylesheetUrls as $stylesheetUrl) {
-                if (!$sourceMap->getLocalPath($stylesheetUrl)) {
+                if (!$sourceMap->getByUri($stylesheetUrl)) {
                     throw new UnknownSourceException($stylesheetUrl);
                 }
             }
         }
 
         foreach ($stylesheetUrls as $stylesheetUrl) {
-            $localPath = $sourceMap->getLocalPath($stylesheetUrl);
-            $this->resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
+            $source = $sourceMap->getByUri($stylesheetUrl);
+
+            if ($source->isAvailable()) {
+                $localPath = preg_replace('/^file:/', '', $source->getLocalUri());
+
+                $this->resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
+            }
         }
     }
 
