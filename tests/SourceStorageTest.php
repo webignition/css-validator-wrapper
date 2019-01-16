@@ -128,7 +128,20 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                     'http://example.com/' => FixtureLoader::load('Html/minimal-html5.html'),
                 ],
             ],
-            'single linked stylesheet' => [
+            'single linked stylesheet, unavailable' => [
+                'sources' => [],
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/style.css'),
+                ]),
+                'expectedStoredResources' => [
+                    'http://example.com/' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                ],
+            ],
+            'single linked stylesheet, available' => [
                 'sources' => [
                     '/tmp/style.css' => 'html {}',
                 ],

@@ -42,9 +42,12 @@ class SourceStorage
 
         foreach ($stylesheetUrls as $stylesheetUrl) {
             $source = $sourceMap->getByUri($stylesheetUrl);
-            $localPath = $path = preg_replace('/^file:/', '', $source->getLocalUri());
 
-            $this->resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
+            if ($source->isAvailable()) {
+                $localPath = preg_replace('/^file:/', '', $source->getLocalUri());
+
+                $this->resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
+            }
         }
     }
 
