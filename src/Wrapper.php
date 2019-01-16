@@ -8,6 +8,7 @@ use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfigura
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\CssValidatorWrapper\Source\AvailableSource;
 
 class Wrapper
 {
@@ -54,16 +55,16 @@ class Wrapper
         $sourceInspector = $sourceHandler->getInspector();
 
         $webPageUri = (string) $webPage->getUri();
-        $webPageLocalPath = $sourceMap->getLocalPath($webPageUri);
+        $webPageSource = $sourceMap->getByUri($webPageUri);
 
-        if (empty($webPageLocalPath)) {
+        if (empty($webPageSource)) {
             throw new UnknownSourceException($webPageUri);
         }
 
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
         if (count($stylesheetUrls)) {
             foreach ($stylesheetUrls as $stylesheetUrl) {
-                if (!$sourceMap->getLocalPath($stylesheetUrl)) {
+                if (!$sourceMap->getByUri($stylesheetUrl)) {
                     throw new UnknownSourceException($stylesheetUrl);
                 }
             }
@@ -76,10 +77,12 @@ class Wrapper
 
         $this->sourceStorage->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
 
-        $resourcePaths = $this->sourceStorage->getPaths();
-        $webPageLocalTempPath = $resourcePaths[$webPageUri];
+        $resourcePaths = $this->sourceStorage->getSources();
 
-        $webPageLocalUri = 'file:' . $webPageLocalTempPath;
+        /* @var AvailableSource $webPageLocalSource */
+        $webPageLocalSource = $resourcePaths[$webPageUri];
+
+        $webPageLocalUri = 'file:' . $webPageLocalSource->getLocalUri();
 
         $command = $this->commandFactory->create(
             $webPageLocalUri,
