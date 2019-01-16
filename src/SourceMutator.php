@@ -8,9 +8,6 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceMutator
 {
-    const EMPTY_STYLESHEET_HREF_URL = 'file:/null';
-
-
     private $webPage;
     private $sourceMap;
     private $sourceInspector;
