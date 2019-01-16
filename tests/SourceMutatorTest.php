@@ -20,12 +20,11 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
      */
     public function testReplaceStylesheetUrlsNoChangesMade(
         WebPage $webPage,
-        SourceMap $sourceMap,
-        array $stylesheetReferences
+        SourceMap $sourceMap
     ) {
         $sourceInspector = new SourceInspector($webPage);
         $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
-        $returnedWebPage = $mutator->replaceStylesheetUrls($stylesheetReferences);
+        $returnedWebPage = $mutator->replaceStylesheetUrls($sourceInspector->findStylesheetReferences());
 
         $this->assertInstanceOf(WebPage::class, $returnedWebPage);
         $this->assertSame($webPage, $returnedWebPage);
@@ -41,7 +40,6 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     FixtureLoader::load('Html/minimal-html5.html')
                 ),
                 'sourceMap' => new SourceMap(),
-                'stylesheetReferences' => []
             ],
         ];
     }
@@ -52,12 +50,11 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
     public function testReplaceStylesheetUrlsMutateWebPage(
         WebPage $webPage,
         SourceMap $sourceMap,
-        array $stylesheetReferences,
         string $expectedWebPageContent
     ) {
         $sourceInspector = new SourceInspector($webPage);
         $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
-        $mutatedWebPage = $mutator->replaceStylesheetUrls($stylesheetReferences);
+        $mutatedWebPage = $mutator->replaceStylesheetUrls($sourceInspector->findStylesheetReferences());
 
         $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
         $this->assertNotSame($webPage, $mutatedWebPage);
@@ -80,9 +77,6 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
                 ]),
-                'stylesheetReferences' => [
-                    '<link href="/style.css',
-                ],
                 'expectedWebPageContent' => str_replace(
                     '<link href="/style.css" rel="stylesheet">',
                     '<link href="file:' . $cssValidNoMessagePath . '" rel="stylesheet">',
@@ -102,15 +96,6 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                         'file:' . $cssThreePath
                     ),
                 ]),
-                'stylesheetReferences' => [
-                    '<link href=""',
-                    "<link href=''",
-                    '<link href=" "',
-                    "<link href=' '",
-                    '<link href="/one.css',
-                    '<link href="/two.css',
-                    '<link href="/three.css?foo=bar&amp;foobar=foobar',
-                ],
                 'expectedWebPageContent' => str_replace(
                     [
                         '<link href="" accesskey="1" rel="stylesheet">',
@@ -143,9 +128,6 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
                 ]),
-                'stylesheetReferences' => [
-                    '<link href="/style.css',
-                ],
                 'expectedWebPageContent' => str_replace(
                     '<link href="/style.css" rel="stylesheet"',
                     '<link href="file:' . $cssValidNoMessagePath . '" rel="stylesheet"',
