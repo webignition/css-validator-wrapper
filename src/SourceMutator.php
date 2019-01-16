@@ -57,7 +57,6 @@ class SourceMutator
                     } else {
                         $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
 
-
                         foreach ($referenceFragments as $referenceFragment) {
                             $quoteCharacter = $this->findLeadingRelStylesheetQuote($referenceFragment);
                             $quotedReferenceFragment = $referenceFragment . $quoteCharacter;
@@ -74,14 +73,16 @@ class SourceMutator
             } else {
                 $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
 
-                foreach ($referenceFragments as $fragment) {
-                    $fragmentReplacement = preg_replace(
-                        '/href\s*=\s*("|\')\s*("|\')/',
-                        'href="' . self::EMPTY_STYLESHEET_HREF_URL . '"',
-                        $fragment
-                    );
+                foreach ($referenceFragments as $referenceFragment) {
+                    $quoteCharacter = $this->findLeadingRelStylesheetQuote($referenceFragment);
+                    $quotedReferenceFragment = $referenceFragment . $quoteCharacter;
+                    $fragmentReplacement = $this->removeRelStylesheetFromReference($quotedReferenceFragment);
 
-                    $webPageContent = str_replace($fragment, $fragmentReplacement, $webPageContent);
+                    $webPageContent = str_replace(
+                        $quotedReferenceFragment,
+                        $fragmentReplacement,
+                        $webPageContent
+                    );
                 }
             }
         }
