@@ -4,6 +4,7 @@ namespace webignition\CssValidatorWrapper;
 
 use webignition\CssValidatorOutput\Model\AbstractIssueMessage;
 use webignition\CssValidatorOutput\Model\AbstractMessage;
+use webignition\CssValidatorOutput\Model\MessageList;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 
 class OutputMutator
@@ -20,42 +21,40 @@ class OutputMutator
 
     public function setMessagesRef(ValidationOutput $output, SourceMap $linkedResourcesMap)
     {
-        $observationResponse = $output->getObservationResponse();
+        $modifier = function (MessageList $messageList) use ($linkedResourcesMap): MessageList {
+            return $messageList->mutate(function (AbstractMessage $message) use ($linkedResourcesMap) {
+                if ($message instanceof AbstractIssueMessage) {
+                    $message = $message->withRef(
+                        $linkedResourcesMap->getSourcePath($message->getRef())
+                    );
+                }
 
-        $messages = $observationResponse->getMessages();
-
-        $messageMutator = function (AbstractMessage $message) use ($linkedResourcesMap) {
-            if ($message instanceof AbstractIssueMessage) {
-                $message = $message->withRef(
-                    $linkedResourcesMap->getSourcePath($message->getRef())
-                );
-            }
-
-            return $message;
+                return $message;
+            });
         };
 
-        $observationResponse = $observationResponse->withMessages($messages->mutate($messageMutator));
-
-        $output = $output->withObservationResponse($observationResponse);
-
-        return $output;
+        return $this->modifyMessages($output, $modifier);
     }
 
     public function removeMessagesWithRef(ValidationOutput $output, string $ref)
     {
-        $observationResponse = $output->getObservationResponse();
+        $modifier = function (MessageList $messageList) use ($ref): MessageList {
+            return $messageList->filter(function (AbstractMessage $message) use ($ref) {
+                if (!$message instanceof AbstractIssueMessage) {
+                    return true;
+                }
 
-        $messages = $observationResponse->getMessages();
-
-        $messageFilter = function (AbstractMessage $message) use ($ref) {
-            if (!$message instanceof AbstractIssueMessage) {
-                return true;
-            }
-
-            return $ref !== $message->getRef();
+                return $ref !== $message->getRef();
+            });
         };
 
-        $observationResponse = $observationResponse->withMessages($messages->filter($messageFilter));
+        return $this->modifyMessages($output, $modifier);
+    }
+
+    private function modifyMessages(ValidationOutput $output, callable $modifier)
+    {
+        $observationResponse = $output->getObservationResponse();
+        $observationResponse = $observationResponse->withMessages($modifier($observationResponse->getMessages()));
 
         $output = $output->withObservationResponse($observationResponse);
 
