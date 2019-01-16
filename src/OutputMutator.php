@@ -21,34 +21,40 @@ class OutputMutator
 
     public function setMessagesRef(ValidationOutput $output, SourceMap $linkedResourcesMap)
     {
-        $modifier = function (MessageList $messageList) use ($linkedResourcesMap): MessageList {
-            return $messageList->mutate(function (AbstractMessage $message) use ($linkedResourcesMap) {
-                if ($message instanceof AbstractIssueMessage) {
-                    $message = $message->withRef(
-                        $linkedResourcesMap->getSourcePath($message->getRef())
-                    );
-                }
+        $mutator = function (AbstractMessage $message) use ($linkedResourcesMap) {
+            if ($message instanceof AbstractIssueMessage) {
+                $message = $message->withRef(
+                    $linkedResourcesMap->getSourcePath($message->getRef())
+                );
+            }
 
-                return $message;
-            });
+            return $message;
         };
 
-        return $this->modifyMessages($output, $modifier);
+        return $this->modifyMessages(
+            $output,
+            function (MessageList $messageList) use ($mutator): MessageList {
+                return $messageList->mutate($mutator);
+            }
+        );
     }
 
     public function removeMessagesWithRef(ValidationOutput $output, string $ref)
     {
-        $modifier = function (MessageList $messageList) use ($ref): MessageList {
-            return $messageList->filter(function (AbstractMessage $message) use ($ref) {
-                if (!$message instanceof AbstractIssueMessage) {
-                    return true;
-                }
+        $filter = function (AbstractMessage $message) use ($ref) {
+            if (!$message instanceof AbstractIssueMessage) {
+                return true;
+            }
 
-                return $ref !== $message->getRef();
-            });
+            return $ref !== $message->getRef();
         };
 
-        return $this->modifyMessages($output, $modifier);
+        return $this->modifyMessages(
+            $output,
+            function (MessageList $messageList) use ($filter): MessageList {
+                return $messageList->filter($filter);
+            }
+        );
     }
 
     private function modifyMessages(ValidationOutput $output, callable $modifier)
