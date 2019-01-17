@@ -99,6 +99,19 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     'http://example.com/style.css',
                 ],
             ],
+            'single linked stylesheet, single-quoted attributes' => [
+                'webPage' => $this->createWebPage(
+                    str_replace(
+                        '<link href="/style.css" rel="stylesheet">',
+                        "<link href='/style.css' rel='stylesheet'>",
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/style.css',
+                ],
+            ],
             'three linked stylesheets' => [
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
@@ -261,6 +274,19 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     '<link' . "\n            " . 'href="/style.css',
                 ],
             ],
+            'single linked stylesheet, single-quoted attributes' => [
+                'webPage' => $this->createWebPage(
+                    str_replace(
+                        '<link href="/style.css" rel="stylesheet">',
+                        "<link href='/style.css' rel='stylesheet'>",
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    "<link href='/style.css",
+                ],
+            ],
             'three linked stylesheets' => [
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
@@ -404,6 +430,20 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                 'reference' => '<link' . "\n            " . 'href="/style.css',
                 'expectedStylesheetReferenceFragments' => [
                     '<link' . "\n            " . 'href="/style.css"' . "\n            " . 'rel="stylesheet',
+                ],
+            ],
+            'single linked stylesheet, single-quoted attributes' => [
+                'webPage' => $this->createWebPage(
+                    str_replace(
+                        '<link href="/style.css" rel="stylesheet">',
+                        "<link href='/style.css' rel='stylesheet'>",
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => "<link href='/style.css",
+                'expectedStylesheetReferenceFragments' => [
+                    "<link href='/style.css' rel='stylesheet",
                 ],
             ],
             'three linked stylesheets (1)' => [
