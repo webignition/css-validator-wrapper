@@ -48,20 +48,14 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider replaceStylesheetUrlsMutatesWebPageDataProvider
      */
-    public function testReplaceStylesheetUrlsMutateWebPageFoo(
+    public function testReplaceStylesheetUrlsMutateWebPage(
         WebPage $webPage,
         SourceMap $sourceMap,
         string $expectedWebPageContent
     ) {
-//        echo $webPage->getContent() . "\n\n";
-
         $sourceInspector = new SourceInspector($webPage);
         $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
         $mutatedWebPage = $mutator->replaceStylesheetUrls($sourceInspector->findStylesheetReferences());
-
-//        echo $expectedWebPageContent . "\n\n";
-//        echo $mutatedWebPage->getContent() . "\n\n";
-//        exit();
 
         $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
         $this->assertNotSame($webPage, $mutatedWebPage);
@@ -87,6 +81,24 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 'expectedWebPageContent' => str_replace(
                     '<link href="/style.css" rel="stylesheet">',
                     '<link href="file:' . $cssValidNoMessagePath . '" rel="stylesheet">',
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                ),
+            ],
+            'single linked stylesheet, invalid additional href attribute' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    str_replace(
+                        '<link href="/style.css" rel="stylesheet">',
+                        '<link '.'href="/style.css" rel="stylesheet" href="/foo.css">',
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                    )
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
+                ]),
+                'expectedWebPageContent' => str_replace(
+                    '<link href="/style.css" rel="stylesheet">',
+                    '<link href="file:' . $cssValidNoMessagePath . '" rel="stylesheet" href="/foo.css">',
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
                 ),
             ],
