@@ -124,6 +124,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             ]
         );
 
+        $singleStylesheetHtmlWithLinkElementTriplicated = WebPageFixtureModifier::repeatContent(
+            $singleStylesheetHtml,
+            '<link href="/style.css" rel="stylesheet">',
+            3
+        );
+
         $noStylesheetsSourceMap = new SourceMap([
             new Source('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
         ]);
@@ -191,6 +197,41 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 ),
                 'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'no-messages',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'html5 with single linked CSS resource, link element is triplicated, no messages' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssNoMessagesPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtmlWithLinkElementTriplicated
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
+                ),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleStylesheetHtmlWithLinkElementTriplicated,
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
                     'no-messages',
