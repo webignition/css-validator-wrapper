@@ -314,6 +314,22 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     '<link href="/style.css" rel="stylesheet',
                 ],
             ],
+            'single linked stylesheet, link element triplicated' => [
+                'webPage' => $this->createWebPage(
+                    WebPageFixtureModifier::repeatContent(
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                        '<link href="/style.css" rel="stylesheet">',
+                        3
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => '<link href="/style.css',
+                'expectedStylesheetReferenceFragments' => [
+                    '<link href="/style.css" rel="stylesheet',
+                    '">' . "\n" . '<link href="/style.css" rel="stylesheet',
+                    '">' . "\n" . '<link href="/style.css" rel="stylesheet',
+                ],
+            ],
             'single linked stylesheet, new lines in link element' => [
                 'webPage' => $this->createWebPage(
                     WebPageFixtureModifier::addLineReturnsToLinkElements(
@@ -376,6 +392,32 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                 'reference' => "<link href=' '",
                 'expectedStylesheetUrlReferences' => [
                     '<link href=\' \' rel="stylesheet',
+                ],
+            ],
+            'three linked stylesheets (4)' => [
+                'webPage' => $this->createWebPage(
+                    FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => '<link href="/two.css"',
+                'expectedStylesheetUrlReferences' => [
+                    '<link href="/two.css" rel="stylesheet',
+                ],
+            ],
+            'three linked stylesheets (4), link element is triplicated' => [
+                'webPage' => $this->createWebPage(
+                    WebPageFixtureModifier::repeatContent(
+                        FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                        '<link href="/two.css" rel="stylesheet">',
+                        3
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => '<link href="/two.css"',
+                'expectedStylesheetUrlReferences' => [
+                    '<link href="/two.css" rel="stylesheet',
+                    '">' . "\n" . '<link href="/two.css" rel="stylesheet',
+                    '">' . "\n" . '<link href="/two.css" rel="stylesheet',
                 ],
             ],
         ];

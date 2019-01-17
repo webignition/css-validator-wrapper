@@ -15,11 +15,11 @@ class WebPageFixtureModifier
         return str_replace($linkElements, $replacements, $webPageContent);
     }
 
-    public static function repeatContent(string $webPageContent, string $contentToDuplicate, int $times = 2): string
+    public static function repeatContent(string $webPageContent, string $contentToRepeat, int $times = 2): string
     {
-        $replacement = rtrim(str_repeat($contentToDuplicate . "\n", $times), "\n");
+        $replacement = rtrim(str_repeat($contentToRepeat . "\n", $times), "\n");
 
-        return str_replace($contentToDuplicate, $replacement, $webPageContent);
+        return str_replace($contentToRepeat, $replacement, $webPageContent);
     }
 
     private static function addLineReturnsToLinkElement(string $linkElement): string
