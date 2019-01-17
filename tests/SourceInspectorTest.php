@@ -90,6 +90,20 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     'http://example.com/style.css',
                 ],
             ],
+            'single linked stylesheet, malformed markup, new lines in link element' => [
+                'webPage' => $this->createWebPage(
+                    $this->addLineReturnsToLinkElements(
+                        FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
+                        [
+                            '<link href="/style.css" rel="stylesheet"',
+                        ]
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/style.css',
+                ],
+            ],
         ];
     }
 
