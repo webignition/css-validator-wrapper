@@ -4,7 +4,7 @@ namespace webignition\CssValidatorWrapper\Tests\Factory;
 
 class WebPageFixtureModifier
 {
-    public static function addLineReturnsToLinkElements(string $webPageContent, array $linkElements)
+    public static function addLineReturnsToLinkElements(string $webPageContent, array $linkElements): string
     {
         $replacements = [];
 
@@ -13,6 +13,13 @@ class WebPageFixtureModifier
         }
 
         return str_replace($linkElements, $replacements, $webPageContent);
+    }
+
+    public static function repeatContent(string $webPageContent, string $contentToDuplicate, int $times = 2): string
+    {
+        $replacement = rtrim(str_repeat($contentToDuplicate . "\n", $times), "\n");
+
+        return str_replace($contentToDuplicate, $replacement, $webPageContent);
     }
 
     private static function addLineReturnsToLinkElement(string $linkElement): string

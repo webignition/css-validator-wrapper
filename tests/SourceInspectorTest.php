@@ -41,7 +41,47 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     'http://example.com/style.css',
                 ],
             ],
+            'single linked stylesheet, link element triplicated' => [
+                'webPage' => $this->createWebPage(
+                    WebPageFixtureModifier::repeatContent(
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                        '<link href="/style.css" rel="stylesheet">',
+                        3
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/style.css',
+                ],
+            ],
             'single linked stylesheet, new lines in link element' => [
+                'webPage' => $this->createWebPage(
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ]
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/style.css',
+                ],
+            ],
+            'single linked stylesheet, new lines in link element, link element triplicated' => [
+                'webPage' => $this->createWebPage(
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
+                        WebPageFixtureModifier::repeatContent(
+                            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                            '<link href="/style.css" rel="stylesheet">',
+                            3
+                        ),
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ]
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
                 'webPage' => $this->createWebPage(
                     WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
