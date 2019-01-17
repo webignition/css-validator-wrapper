@@ -250,6 +250,21 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     '<link href="/style.css" rel="stylesheet',
                 ],
             ],
+            'single linked stylesheet, new lines in link element' => [
+                'webPage' => $this->createWebPage(
+                    $this->addLineReturnsToLinkElements(
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ]
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => '<link' . "\n            " . 'href="/style.css',
+                'expectedStylesheetReferenceFragments' => [
+                    '<link' . "\n            " . 'href="/style.css"' . "\n            " . 'rel="stylesheet',
+                ],
+            ],
             'three linked stylesheets (1)' => [
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
@@ -259,6 +274,24 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                 'expectedStylesheetUrlReferences' => [
                     '<link href="" accesskey="1" rel="stylesheet',
                     '">'."\n".'        <link href="" accesskey="2" rel="stylesheet',
+                ],
+            ],
+            'three linked stylesheets (1), new lines in link element' => [
+                'webPage' => $this->createWebPage(
+                    $this->addLineReturnsToLinkElements(
+                        FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                        [
+                            '<link href="" accesskey="1" rel="stylesheet">',
+                        ]
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'reference' => '<link' . "\n            " . 'href=""',
+                'expectedStylesheetUrlReferences' => [
+                    '<link' . "\n            " .
+                    'href=""' . "\n            " .
+                    'accesskey="1"' . "\n            " .
+                    'rel="stylesheet',
                 ],
             ],
             'three linked stylesheets (2)' => [
