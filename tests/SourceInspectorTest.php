@@ -41,6 +41,19 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     'http://example.com/style.css',
                 ],
             ],
+            'single linked stylesheet, invalid additional href attributes are ignored' => [
+                'webPage' => $this->createWebPage(
+                    str_replace(
+                        '<link href="/style.css" rel="stylesheet">',
+                        '<link '.'href="/style.css" rel="stylesheet" href="/foo.css">',
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/style.css',
+                ],
+            ],
             'single linked stylesheet, link element triplicated' => [
                 'webPage' => $this->createWebPage(
                     WebPageFixtureModifier::repeatContent(
@@ -89,6 +102,27 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             'three linked stylesheets' => [
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/one.css',
+                    'http://example.com/two.css',
+                    'http://example.com/three.css?foo=bar&foobar=foobar',
+                ],
+            ],
+            'three linked stylesheets, invalid additional href attributes are ignored' => [
+                'webPage' => $this->createWebPage(
+                    str_replace(
+                        [
+                            '<link href="/one.css" rel="stylesheet">',
+                            '<link href="/two.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link '.'href="/one.css" href="/foo.css" rel="stylesheet">',
+                            '<link '.'href="/two.css" rel="stylesheet" href="/bar.css">',
+                        ],
+                        FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
+                    ),
                     $this->createUri('http://example.com/')
                 ),
                 'expectedStylesheetUrls' => [
