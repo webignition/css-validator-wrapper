@@ -66,7 +66,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider validateSuccessDataProvider
      */
-    public function testValidateSuccessFoo(
+    public function testValidateSuccess(
         SourceStorage $sourceStorage,
         SourceMap $sourceMap,
         string $sourceFixture,
