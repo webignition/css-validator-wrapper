@@ -122,6 +122,20 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     '<link href="/style.css',
                 ],
             ],
+            'single linked stylesheet, new lines in link element' => [
+                'webPage' => $this->createWebPage(
+                    $this->addLineReturnsToLinkElements(
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ]
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link' . "\n            " . 'href="/style.css',
+                ],
+            ],
             'three linked stylesheets' => [
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
@@ -137,6 +151,28 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     '<link href="/three.css?foo=bar&amp;foobar=foobar'
                 ],
             ],
+            'three linked stylesheets, new lines in link element' => [
+                'webPage' => $this->createWebPage(
+                    $this->addLineReturnsToLinkElements(
+                        FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                        [
+                            '<link href="" accesskey="2" rel="stylesheet">',
+                            '<link href="/one.css" rel="stylesheet">',
+                        ]
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link href=""',
+                    '<link' . "\n            " . 'href=""',
+                    "<link href=''",
+                    '<link href=" "',
+                    "<link href=' '",
+                    '<link' . "\n            " . 'href="/one.css',
+                    '<link href="/two.css',
+                    '<link href="/three.css?foo=bar&amp;foobar=foobar'
+                ],
+            ],
             'single linked stylesheet, malformed markup' => [
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
@@ -144,6 +180,20 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                 ),
                 'expectedStylesheetUrlReferences' => [
                     '<link href="/style.css',
+                ],
+            ],
+            'single linked stylesheet, malformed markup, new lines in link element' => [
+                'webPage' => $this->createWebPage(
+                    $this->addLineReturnsToLinkElements(
+                        FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
+                        [
+                            '<link href="/style.css" rel="stylesheet"',
+                        ]
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link' . "\n            " . 'href="/style.css',
                 ],
             ],
         ];
