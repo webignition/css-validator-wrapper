@@ -84,6 +84,24 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
                 ),
             ],
+            'single linked stylesheet, link element triplicated' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    WebPageFixtureModifier::repeatContent(
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                        '<link href="/style.css" rel="stylesheet">',
+                        3
+                    )
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
+                ]),
+                'expectedWebPageContent' => str_replace(
+                    '<link href="/style.css" rel="stylesheet">',
+                    '<link href="file:' . $cssValidNoMessagePath . '" rel="stylesheet">',
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                ),
+            ],
             'single linked stylesheet, new lines in link element' => [
                 'webPage' => $this->createWebPage(
                     'http://example.com/',
@@ -103,6 +121,141 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     'href="file:' . $cssValidNoMessagePath . '"' . "\n            " .
                     'rel="stylesheet">',
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                ),
+            ],
+            'two linked stylesheets' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    FixtureLoader::load('Html/minimal-html5-two-stylesheets.html')
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/one.css', 'file:' . $cssOnePath),
+                    new Source('http://example.com/two.css', 'file:' . $cssTwoPath),
+                ]),
+                'expectedWebPageContent' => str_replace(
+                    [
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/two.css" rel="stylesheet">',
+                    ],
+                    [
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
+                    ],
+                    FixtureLoader::load('Html/minimal-html5-two-stylesheets.html')
+                ),
+            ],
+            'two linked stylesheets, first repeated after second' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html')
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/one.css', 'file:' . $cssOnePath),
+                    new Source('http://example.com/two.css', 'file:' . $cssTwoPath),
+                ]),
+                'expectedWebPageContent' => str_replace(
+                    [
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/two.css" rel="stylesheet">',
+                        '<link href="/one.css" rel="stylesheet">',
+                    ],
+                    [
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                    ],
+                    FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html')
+                ),
+            ],
+            'two linked stylesheets, first repeated after second, first is triplicated' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    WebPageFixtureModifier::repeatContent(
+                        FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html'),
+                        '<link href="/one.css" rel="stylesheet">',
+                        3
+                    )
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/one.css', 'file:' . $cssOnePath),
+                    new Source('http://example.com/two.css', 'file:' . $cssTwoPath),
+                ]),
+                'expectedWebPageContent' => str_replace(
+                    [
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/two.css" rel="stylesheet">',
+                        '<link href="/one.css" rel="stylesheet">',
+                    ],
+                    [
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                    ],
+                    FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html')
+                ),
+            ],
+            'two linked stylesheets, first repeated after second, second is triplicated' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    WebPageFixtureModifier::repeatContent(
+                        FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html'),
+                        '<link href="/two.css" rel="stylesheet">',
+                        3
+                    )
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/one.css', 'file:' . $cssOnePath),
+                    new Source('http://example.com/two.css', 'file:' . $cssTwoPath),
+                ]),
+                'expectedWebPageContent' => str_replace(
+                    [
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/two.css" rel="stylesheet">',
+                        '<link href="/two.css" rel="stylesheet">',
+                        '<link href="/two.css" rel="stylesheet">',
+                        '<link href="/one.css" rel="stylesheet">',
+                    ],
+                    [
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                    ],
+                    FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html')
+                ),
+            ],
+            'two linked stylesheets, first link element is triplicated' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    WebPageFixtureModifier::repeatContent(
+                        FixtureLoader::load('Html/minimal-html5-two-stylesheets.html'),
+                        '<link href="/one.css" rel="stylesheet">',
+                        3
+                    )
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/one.css', 'file:' . $cssOnePath),
+                    new Source('http://example.com/two.css', 'file:' . $cssTwoPath),
+                ]),
+                'expectedWebPageContent' => str_replace(
+                    [
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/two.css" rel="stylesheet">',
+                    ],
+                    [
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
+                    ],
+                    FixtureLoader::load('Html/minimal-html5-two-stylesheets.html')
                 ),
             ],
             'three linked stylesheets' => [
