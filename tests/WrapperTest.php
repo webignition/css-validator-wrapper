@@ -130,9 +130,15 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             3
         );
 
-        $singleStylesheetHtmlWithInvalidAdditionalHref= str_replace(
+        $singleStylesheetHtmlWithInvalidAdditionalHref = str_replace(
             '<link href="/style.css" rel="stylesheet">',
             '<link '.'href="/style.css" rel="stylesheet" href="/foo">',
+            $singleStylesheetHtml
+        );
+
+        $singleStylesheetHtmlWithSingleQuotedAttributes = str_replace(
+            '<link href="/style.css" rel="stylesheet">',
+            "<link href='/style.css' rel='stylesheet'>",
             $singleStylesheetHtml
         );
 
@@ -376,6 +382,41 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 ),
                 'sourceMap' => $singleStylesheetUnavailableSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'no-messages',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'html5 with single linked CSS resource, no messages, single-quoted attributes' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            "<link href='/style.css' rel='stylesheet'>",
+                        ],
+                        [
+                            "<link href='file:" . $cssNoMessagesPath . "' rel='stylesheet'>",
+                        ],
+                        $singleStylesheetHtmlWithSingleQuotedAttributes
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
+                ),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleStylesheetHtmlWithSingleQuotedAttributes,
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
                     'no-messages',

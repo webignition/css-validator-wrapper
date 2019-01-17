@@ -143,6 +143,24 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
                 ),
             ],
+            'single linked stylesheet, single-quoted attributes' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    str_replace(
+                        '<link href="/style.css" rel="stylesheet">',
+                        "<link href='/style.css' rel='stylesheet'>",
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                    )
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
+                ]),
+                'expectedWebPageContent' => str_replace(
+                    '<link href="/style.css" rel="stylesheet">',
+                    "<link href='file:" . $cssValidNoMessagePath . "' rel='stylesheet'>",
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                ),
+            ],
             'two linked stylesheets' => [
                 'webPage' => $this->createWebPage(
                     'http://example.com/',
@@ -345,6 +363,53 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                         'href="file:' . $cssOnePath . '"' . "\n            " .
                         'rel="stylesheet">',
                         '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
+                        '<link href="file:' . $cssThreePath . '" rel="stylesheet">',
+                    ],
+                    FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
+                ),
+            ],
+            'three linked stylesheets, single-quoted attributes' => [
+                'webPage' => $this->createWebPage(
+                    'http://example.com/',
+                    str_replace(
+                        [
+                            '<link href="" accesskey="1" rel="stylesheet">',
+                            '<link href="/two.css" rel="stylesheet">',
+                        ],
+                        [
+                            "<link href='' accesskey='1' rel='stylesheet'>",
+                            "<link href='/two.css' rel='stylesheet'>",
+                        ],
+                        FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
+                    )
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/one.css', 'file:' . $cssOnePath),
+                    new Source('http://example.com/two.css', 'file:' . $cssTwoPath),
+                    new Source(
+                        'http://example.com/three.css?foo=bar&amp;foobar=foobar',
+                        'file:' . $cssThreePath
+                    ),
+                ]),
+                'expectedWebPageContent' => str_replace(
+                    [
+                        '<link href="" accesskey="1" rel="stylesheet">',
+                        '<link href="" accesskey="2" rel="stylesheet">',
+                        '<link href=" " rel="stylesheet">',
+                        '<link href=\'\' rel="stylesheet">',
+                        '<link href=\' \' rel="stylesheet">',
+                        '<link href="/one.css" rel="stylesheet">',
+                        '<link href="/two.css" rel="stylesheet">',
+                        '<link href="/three.css?foo=bar&amp;foobar=foobar" rel="stylesheet">',
+                    ],
+                    [
+                        "<link href='' accesskey='1'>",
+                        '<link href="" accesskey="2">',
+                        '<link href=" ">',
+                        '<link href=\'\'>',
+                        '<link href=\' \'>',
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
+                        "<link href='file:" . $cssTwoPath . "' rel='stylesheet'>",
                         '<link href="file:' . $cssThreePath . '" rel="stylesheet">',
                     ],
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
