@@ -40,9 +40,39 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     'http://example.com/style.css',
                 ],
             ],
+            'single linked stylesheet, new lines in link element' => [
+                'webPage' => $this->createWebPage(
+                    str_replace(
+                        '<link href="/style.css" rel="stylesheet">',
+                        $this->addLineReturnsToLinkElement('<link href="/style.css" rel="stylesheet">'),
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                    ),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/style.css',
+                ],
+            ],
             'three linked stylesheets' => [
                 'webPage' => $this->createWebPage(
                     FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                    $this->createUri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/one.css',
+                    'http://example.com/two.css',
+                    'http://example.com/three.css?foo=bar&foobar=foobar',
+                ],
+            ],
+            'three linked stylesheets, new lines in link elements' => [
+                'webPage' => $this->createWebPage(
+                    $this->addLineReturnsToLinkElements(
+                        FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                        [
+                            '<link href="" accesskey="2" rel="stylesheet">',
+                            '<link href="/one.css" rel="stylesheet">',
+                        ]
+                    ),
                     $this->createUri('http://example.com/')
                 ),
                 'expectedStylesheetUrls' => [
@@ -207,6 +237,35 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ->andReturn($url);
 
         return $uri;
+    }
+
+    private function addLineReturnsToLinkElements(string $webPageContent, array $linkElements)
+    {
+        $replacements = [];
+
+        foreach ($linkElements as $linkElement) {
+            $replacements[] = $this->addLineReturnsToLinkElement($linkElement);
+        }
+
+        return str_replace($linkElements, $replacements, $webPageContent);
+    }
+
+    private function addLineReturnsToLinkElement(string $linkElement): string
+    {
+        $parts = explode(' ', $linkElement);
+        $partCount = count($parts);
+
+        $updatedLinkElement = '';
+
+        foreach ($parts as $partIndex => $part) {
+            $updatedLinkElement .= $part;
+
+            if ($partIndex < $partCount - 1) {
+                $updatedLinkElement .= "\n            ";
+            }
+        }
+
+        return $updatedLinkElement;
     }
 
     protected function tearDown()
