@@ -21,6 +21,7 @@ use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
+use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureModifier;
 use webignition\CssValidatorWrapper\Wrapper;
 use webignition\WebResource\WebPage\WebPage;
 
@@ -116,6 +117,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $singleStylesheetHtml = FixtureLoader::load('Html/minimal-html5-single-stylesheet.html');
         $singleEmptyHrefStylesheetHtml = FixtureLoader::load('Html/minimal-html5-unavailable-stylesheet.html');
         $cssNoMessagesPath = FixtureLoader::getPath('Css/valid-no-messages.css');
+        $singleStylesheetHtmlWithNewLinesInLinkElement = WebPageFixtureModifier::addLineReturnsToLinkElements(
+            $singleStylesheetHtml,
+            [
+                '<link href="/style.css" rel="stylesheet">',
+            ]
+        );
 
         $noStylesheetsSourceMap = new SourceMap([
             new Source('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
@@ -166,7 +173,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                        new Source('http://example.com/style.css', 'file:/tmp/valid-ss-no-messages-hash.css'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     str_replace(
                         [
@@ -184,6 +191,43 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 ),
                 'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'no-messages',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'html5 with single linked CSS resource, new lines in link element, no messages' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link' . "\n            " . 'href="/style.css"' . "\n            " . 'rel="stylesheet">',
+                        ],
+                        [
+                            '<link' . "\n            " .
+                            'href="file:' . $cssNoMessagesPath . '"' . "\n            " .
+                            'rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtmlWithNewLinesInLinkElement
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
+                ),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleStylesheetHtmlWithNewLinesInLinkElement,
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
                     'no-messages',
