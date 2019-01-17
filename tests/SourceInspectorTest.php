@@ -7,6 +7,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
+use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureModifier;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourceInspectorTest extends \PHPUnit\Framework\TestCase
@@ -42,10 +43,11 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ],
             'single linked stylesheet, new lines in link element' => [
                 'webPage' => $this->createWebPage(
-                    str_replace(
-                        '<link href="/style.css" rel="stylesheet">',
-                        $this->addLineReturnsToLinkElement('<link href="/style.css" rel="stylesheet">'),
-                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
+                        FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ]
                     ),
                     $this->createUri('http://example.com/')
                 ),
@@ -66,7 +68,7 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ],
             'three linked stylesheets, new lines in link elements' => [
                 'webPage' => $this->createWebPage(
-                    $this->addLineReturnsToLinkElements(
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
                         [
                             '<link href="" accesskey="2" rel="stylesheet">',
@@ -92,7 +94,7 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ],
             'single linked stylesheet, malformed markup, new lines in link element' => [
                 'webPage' => $this->createWebPage(
-                    $this->addLineReturnsToLinkElements(
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
                         [
                             '<link href="/style.css" rel="stylesheet"',
@@ -138,7 +140,7 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ],
             'single linked stylesheet, new lines in link element' => [
                 'webPage' => $this->createWebPage(
-                    $this->addLineReturnsToLinkElements(
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
                         [
                             '<link href="/style.css" rel="stylesheet">',
@@ -167,7 +169,7 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ],
             'three linked stylesheets, new lines in link element' => [
                 'webPage' => $this->createWebPage(
-                    $this->addLineReturnsToLinkElements(
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
                         [
                             '<link href="" accesskey="2" rel="stylesheet">',
@@ -198,7 +200,7 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ],
             'single linked stylesheet, malformed markup, new lines in link element' => [
                 'webPage' => $this->createWebPage(
-                    $this->addLineReturnsToLinkElements(
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
                         [
                             '<link href="/style.css" rel="stylesheet"',
@@ -252,7 +254,7 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ],
             'single linked stylesheet, new lines in link element' => [
                 'webPage' => $this->createWebPage(
-                    $this->addLineReturnsToLinkElements(
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
                         [
                             '<link href="/style.css" rel="stylesheet">',
@@ -278,7 +280,7 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ],
             'three linked stylesheets (1), new lines in link element' => [
                 'webPage' => $this->createWebPage(
-                    $this->addLineReturnsToLinkElements(
+                    WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
                         [
                             '<link href="" accesskey="1" rel="stylesheet">',
@@ -334,35 +336,6 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
             ->andReturn($url);
 
         return $uri;
-    }
-
-    private function addLineReturnsToLinkElements(string $webPageContent, array $linkElements)
-    {
-        $replacements = [];
-
-        foreach ($linkElements as $linkElement) {
-            $replacements[] = $this->addLineReturnsToLinkElement($linkElement);
-        }
-
-        return str_replace($linkElements, $replacements, $webPageContent);
-    }
-
-    private function addLineReturnsToLinkElement(string $linkElement): string
-    {
-        $parts = explode(' ', $linkElement);
-        $partCount = count($parts);
-
-        $updatedLinkElement = '';
-
-        foreach ($parts as $partIndex => $part) {
-            $updatedLinkElement .= $part;
-
-            if ($partIndex < $partCount - 1) {
-                $updatedLinkElement .= "\n            ";
-            }
-        }
-
-        return $updatedLinkElement;
     }
 
     protected function tearDown()
