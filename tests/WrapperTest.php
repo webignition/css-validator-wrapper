@@ -149,6 +149,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $singleStylesheetHtml
         );
 
+        $singleMbStylesheetHtml = str_replace(
+            '"/style.css"',
+            '"/搜.css"',
+            $singleStylesheetHtml
+        );
+
         $noStylesheetsSourceMap = new SourceMap([
             new Source('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
         ]);
@@ -167,6 +173,14 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
             ),
             new Source('http://example.com/style.css'),
+        ]);
+
+        $singleMbStylesheetValidNoMessagesSourceMap = new SourceMap([
+            new Source(
+                'http://example.com/',
+                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
+            ),
+            new Source('http://example.com/%E6%90%9C.css', 'file:' . $cssNoMessagesPath),
         ]);
 
         return [
@@ -498,7 +512,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 1,
             ],
-            'html5 with inline style, single error in linked stylesheet' => [
+            'html5 with single linked stylesheet, single error in linked stylesheet' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -532,6 +546,44 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'outputParserConfiguration' => new OutputParserConfiguration(),
                 'expectedMessages' => [
                     new ErrorMessage('title content', 2, '.foo', 'http://example.com/style.css'),
+                ],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 1,
+            ],
+            'big5 document with no charset, charset supplied, single linked stylesheet, error stylesheet' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/%E6%90%9C.css', 'file:/tmp/style-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/搜.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssNoMessagesPath . '" rel="stylesheet">',
+                        ],
+                        $singleMbStylesheetHtml
+                    ),
+                    $singleMbStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/%E6%90%9C.css',
+                    ]
+                ),
+                'sourceMap' => $singleMbStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleMbStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'single-error-within-linked-stylesheet',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                        '{{ cssSourceUri }}' => 'file:/tmp/style-hash.css',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [
+                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/%E6%90%9C.css'),
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 1,
