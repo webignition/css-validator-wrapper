@@ -13,7 +13,7 @@ use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandFactory;
-use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
+use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\OutputMutator;
 use webignition\CssValidatorWrapper\Source;
