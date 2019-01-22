@@ -2,6 +2,7 @@
 
 namespace webignition\CssValidatorWrapper;
 
+use webignition\WebResource\WebPage\ContentEncodingValidator;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourceHandler
@@ -13,6 +14,11 @@ class SourceHandler
 
     public function __construct(WebPage $webPage, SourceMap $sourceMap)
     {
+        $contentEncodingValidator = new ContentEncodingValidator();
+        if (!$contentEncodingValidator->isValid($webPage)) {
+            $webPage = $contentEncodingValidator->convertToUtf8($webPage);
+        }
+
         $this->webPage = $webPage;
         $this->sourceMap = $sourceMap;
 
