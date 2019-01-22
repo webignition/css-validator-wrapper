@@ -5,12 +5,13 @@
 
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
-use Psr\Http\Message\UriInterface;
+use GuzzleHttp\Psr7\Uri;
 use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
+use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureModifier;
 use webignition\WebResource\WebPage\WebPage;
 
@@ -36,9 +37,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
     {
         return [
             'no linked CSS resources' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
-                    FixtureLoader::load('Html/minimal-html5.html')
+                'webPage' => WebPageFactory::create(
+                    FixtureLoader::load('Html/minimal-html5.html'),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap(),
             ],
@@ -71,9 +72,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
 
         return [
             'single linked stylesheet' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
-                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+                'webPage' => WebPageFactory::create(
+                    FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
@@ -85,13 +86,13 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'single linked stylesheet, invalid additional href attribute' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     str_replace(
                         '<link href="/style.css" rel="stylesheet">',
                         '<link '.'href="/style.css" rel="stylesheet" href="/foo.css">',
                         FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
@@ -103,13 +104,13 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'single linked stylesheet, link element triplicated' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     WebPageFixtureModifier::repeatContent(
                         FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
                         '<link href="/style.css" rel="stylesheet">',
                         3
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
@@ -123,14 +124,14 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'single linked stylesheet, new lines in link element' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
                         [
                             '<link href="/style.css" rel="stylesheet">',
                         ]
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
@@ -144,13 +145,13 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'single linked stylesheet, single-quoted attributes' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     str_replace(
                         '<link href="/style.css" rel="stylesheet">',
                         "<link href='/style.css' rel='stylesheet'>",
                         FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
@@ -162,9 +163,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'two linked stylesheets' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
-                    FixtureLoader::load('Html/minimal-html5-two-stylesheets.html')
+                'webPage' => WebPageFactory::create(
+                    FixtureLoader::load('Html/minimal-html5-two-stylesheets.html'),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/one.css', 'file:' . $cssOnePath),
@@ -183,9 +184,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'two linked stylesheets, first repeated after second' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
-                    FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html')
+                'webPage' => WebPageFactory::create(
+                    FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html'),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/one.css', 'file:' . $cssOnePath),
@@ -206,13 +207,13 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'two linked stylesheets, first repeated after second, first is triplicated' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     WebPageFixtureModifier::repeatContent(
                         FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html'),
                         '<link href="/one.css" rel="stylesheet">',
                         3
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/one.css', 'file:' . $cssOnePath),
@@ -233,13 +234,13 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'two linked stylesheets, first repeated after second, second is triplicated' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     WebPageFixtureModifier::repeatContent(
                         FixtureLoader::load('Html/minimal-html5-two-stylesheets-first-repeated.html'),
                         '<link href="/two.css" rel="stylesheet">',
                         3
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/one.css', 'file:' . $cssOnePath),
@@ -260,13 +261,13 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'two linked stylesheets, first link element is triplicated' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     WebPageFixtureModifier::repeatContent(
                         FixtureLoader::load('Html/minimal-html5-two-stylesheets.html'),
                         '<link href="/one.css" rel="stylesheet">',
                         3
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/one.css', 'file:' . $cssOnePath),
@@ -287,9 +288,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'three linked stylesheets' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
-                    FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
+                'webPage' => WebPageFactory::create(
+                    FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/one.css', 'file:' . $cssOnePath),
@@ -324,15 +325,15 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'three linked stylesheets, new lines in link elements' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
                         [
                             '<link href="" accesskey="2" rel="stylesheet">',
                             '<link href="/one.css" rel="stylesheet">',
                         ]
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/one.css', 'file:' . $cssOnePath),
@@ -369,8 +370,7 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'three linked stylesheets, single-quoted attributes' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     str_replace(
                         [
                             '<link href="" accesskey="1" rel="stylesheet">',
@@ -381,7 +381,8 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                             "<link href='/two.css' rel='stylesheet'>",
                         ],
                         FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/one.css', 'file:' . $cssOnePath),
@@ -416,9 +417,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'single malformed stylesheet' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
-                    FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html')
+                'webPage' => WebPageFactory::create(
+                    FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
@@ -430,13 +431,13 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'single malformed stylesheet, link element is triplicated' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     WebPageFixtureModifier::repeatContent(
                         FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
                         '<link href="/style.css" rel="stylesheet"',
                         3
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
@@ -450,14 +451,14 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 ),
             ],
             'single malformed stylesheet, new lines in link element' => [
-                'webPage' => $this->createWebPage(
-                    'http://example.com/',
+                'webPage' => WebPageFactory::create(
                     WebPageFixtureModifier::addLineReturnsToLinkElements(
                         FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html'),
                         [
                             '<link href="/style.css" rel="stylesheet"',
                         ]
-                    )
+                    ),
+                    new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
@@ -480,13 +481,13 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         string $stylesheetLinkElement,
         string $expectedStylesheetLinkElement
     ) {
-        $webPage = $this->createWebPage(
-            'http://example.com/',
+        $webPage = WebPageFactory::create(
             str_replace(
                 '<link href="/style.css" rel="stylesheet">',
                 $stylesheetLinkElement,
                 FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
-            )
+            ),
+            new Uri('http://example.com/')
         );
 
         $sourceMap = new SourceMap([
@@ -544,20 +545,6 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 'expectedStylesheetLinkElement' => '<link href="/style.css">',
             ],
         ];
-    }
-
-    private function createWebPage(string $url, string $content): WebPage
-    {
-        $uri = \Mockery::mock(UriInterface::class);
-        $uri
-            ->shouldReceive('__toString')
-            ->andReturn($url);
-
-        /* @var WebPage $webPage */
-        $webPage = WebPage::createFromContent($content);
-        $webPage = $webPage->setUri($uri);
-
-        return $webPage;
     }
 
     protected function tearDown()
