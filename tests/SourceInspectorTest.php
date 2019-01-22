@@ -7,6 +7,7 @@ use GuzzleHttp\Psr7\Uri;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
+use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureModifier;
 use webignition\WebResource\WebPage\WebPage;
 
@@ -31,6 +32,17 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     new Uri('http://example.com/')
                 ),
                 'expectedStylesheetUrls' => [],
+            ],
+            'single linked stylesheet, rel before href' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="/style.css">'
+                    ),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/style.css',
+                ],
             ],
             'single linked stylesheet' => [
                 'webPage' => WebPageFactory::create(
@@ -207,6 +219,17 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                 ),
                 'expectedStylesheetUrlReferences' => [],
             ],
+            'single linked stylesheet, rel before href' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="/style.css">'
+                    ),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link rel="stylesheet" href="/style.css',
+                ],
+            ],
             'single linked stylesheet' => [
                 'webPage' => WebPageFactory::create(
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
@@ -376,6 +399,18 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                 ),
                 'reference' => '<link href="/style.css',
                 'expectedStylesheetReferenceFragments' => [],
+            ],
+            'single linked stylesheet, rel before href' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="/style.css">'
+                    ),
+                    new Uri('http://example.com/')
+                ),
+                'reference' => '<link rel="stylesheet" href="/style.css',
+                'expectedStylesheetReferenceFragments' => [
+                    '<link rel="stylesheet" href="/style.css',
+                ],
             ],
             'single linked stylesheet' => [
                 'webPage' => WebPageFactory::create(

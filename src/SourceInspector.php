@@ -51,7 +51,7 @@ class SourceInspector
      */
     public function findStylesheetReferences(): array
     {
-        $encoding = $this->webPage->getCharacterSet();
+        $encoding = $this->webPage->getCharacterEncoding();
         $references = [];
         $hrefValues = $this->findStylesheetUrlHrefValues();
 
@@ -97,7 +97,13 @@ class SourceInspector
      */
     public function findStylesheetReferenceFragments(string $reference): array
     {
-        $encoding = $this->webPage->getCharacterSet();
+        if (preg_match('/rel\s*=\s*("|\')stylesheet/', $reference)) {
+            return [
+                $reference,
+            ];
+        }
+
+        $encoding = $this->webPage->getCharacterEncoding();
         $fragments = [];
 
         $content = $this->webPage->getContent();
