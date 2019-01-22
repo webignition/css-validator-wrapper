@@ -179,10 +179,6 @@ class SourceInspector
             return $hrefAttributes;
         }
 
-        if (empty($stylesheetLinkElements)) {
-            return $hrefAttributes;
-        }
-
         foreach ($stylesheetLinkElements as $stylesheetLinkElement) {
             $hrefAttributes[] = $stylesheetLinkElement->getAttribute('href');
         }
