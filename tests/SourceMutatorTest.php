@@ -10,6 +10,7 @@ use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
+use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureModifier;
 use webignition\WebResource\WebPage\WebPage;
 
@@ -67,6 +68,20 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         $cssThreePath = FixtureLoader::getPath('Css/three.css');
 
         return [
+            'single linked stylesheet, rel before href' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="/style.css">'
+                    ),
+                    new Uri('http://example.com/')
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/style.css', 'file:' . $cssValidNoMessagePath),
+                ]),
+                'expectedWebPageContent' => WebPageFixtureFactory::createMarkupContainingFragment(
+                    '<link rel="stylesheet" href="file:' . $cssValidNoMessagePath . '">'
+                ),
+            ],
             'single linked stylesheet' => [
                 'webPage' => WebPageFactory::create(
                     FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),

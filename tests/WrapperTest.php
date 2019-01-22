@@ -143,6 +143,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $singleStylesheetHtml
         );
 
+        $singleStylesheetHtmlRelBeforeHref = str_replace(
+            '<link href="/style.css" rel="stylesheet">',
+            '<link rel="stylesheet" href="/style.css">',
+            $singleStylesheetHtml
+        );
+
         $noStylesheetsSourceMap = new SourceMap([
             new Source('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
         ]);
@@ -188,7 +194,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'html5 with single linked CSS resource, no messages' => [
+            'html5 with single linked CSS resource, rel before href no messages' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -210,6 +216,41 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 ),
                 'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'no-messages',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'html5 with single linked CSS resource, no messages' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link rel="stylesheet" href="/style.css">',
+                        ],
+                        [
+                            '<link rel="stylesheet" href="file:' . $cssNoMessagesPath . '">',
+                        ],
+                        $singleStylesheetHtmlRelBeforeHref
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
+                ),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleStylesheetHtmlRelBeforeHref,
                 'sourceUrl' => 'http://example.com/',
                 'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
                     'no-messages',
