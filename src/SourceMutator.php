@@ -31,7 +31,7 @@ class SourceMutator
         }
 
         $webPageContent = $this->webPage->getContent();
-        $encoding = $this->webPage->getCharacterSet();
+        $encoding = $this->webPage->getCharacterEncoding();
         $baseUrl = $this->webPage->getBaseUrl();
 
         foreach ($stylesheetReferences as $reference) {
