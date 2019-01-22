@@ -8,6 +8,8 @@ use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureModifier;
+use webignition\InternetMediaTypeInterface\InternetMediaTypeInterface;
+use webignition\WebResource\WebPage\ContentEncodingValidator;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourceInspectorTest extends \PHPUnit\Framework\TestCase
@@ -524,11 +526,19 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    private function createWebPage(string $content, UriInterface $uri): WebPage
-    {
+    private function createWebPage(
+        string $content,
+        UriInterface $uri,
+        ?InternetMediaTypeInterface $contentType = null
+    ): WebPage {
         /* @var WebPage $webPage */
-        $webPage = WebPage::createFromContent($content);
+        $webPage = WebPage::createFromContent($content, $contentType);
         $webPage = $webPage->setUri($uri);
+
+        $contentEncodingValidator = new ContentEncodingValidator();
+        if (false === $contentEncodingValidator->isValid($webPage)) {
+            $webPage = $contentEncodingValidator->convertToUtf8($webPage);
+        }
 
         return $webPage;
     }
