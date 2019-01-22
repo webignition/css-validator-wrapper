@@ -41,24 +41,6 @@ class OutputMutator
         );
     }
 
-    public function removeMessagesWithRef(ValidationOutput $output, string $ref): ValidationOutput
-    {
-        $filter = function (AbstractMessage $message) use ($ref) {
-            if (!$message instanceof AbstractIssueMessage) {
-                return true;
-            }
-
-            return $ref !== $message->getRef();
-        };
-
-        return $this->modifyMessages(
-            $output,
-            function (MessageList $messageList) use ($filter): MessageList {
-                return $messageList->filter($filter);
-            }
-        );
-    }
-
     private function modifyMessages(ValidationOutput $output, callable $modifier)
     {
         $observationResponse = $output->getObservationResponse();
