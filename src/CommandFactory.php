@@ -2,8 +2,6 @@
 
 namespace webignition\CssValidatorWrapper;
 
-use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
-
 class CommandFactory
 {
     const JAVA_JAR_FLAG = '-jar';

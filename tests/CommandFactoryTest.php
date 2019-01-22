@@ -4,7 +4,7 @@
 namespace webignition\CssValidatorWrapper\Tests;
 
 use webignition\CssValidatorWrapper\CommandFactory;
-use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
+use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 
 class CommandFactoryTest extends \PHPUnit\Framework\TestCase
 {
