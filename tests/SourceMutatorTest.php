@@ -1,7 +1,5 @@
 <?php
 /** @noinspection PhpDocSignatureInspection */
-/** @noinspection PhpDocMissingThrowsInspection */
-/** @noinspection PhpUnhandledExceptionInspection */
 
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
@@ -20,10 +18,8 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider replaceStylesheetUrlsNoChangesMadeDataProvider
      */
-    public function testReplaceStylesheetUrlsNoChangesMade(
-        WebPage $webPage,
-        SourceMap $sourceMap
-    ) {
+    public function testReplaceStylesheetUrlsNoChangesMade(WebPage $webPage, SourceMap $sourceMap)
+    {
         $sourceInspector = new SourceInspector($webPage);
         $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
         $returnedWebPage = $mutator->replaceStylesheetUrls($sourceInspector->findStylesheetReferences());
@@ -89,7 +85,7 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 'webPage' => WebPageFactory::create(
                     str_replace(
                         '<link href="/style.css" rel="stylesheet">',
-                        '<link '.'href="/style.css" rel="stylesheet" href="/foo.css">',
+                        '<link ' . 'href="/style.css" rel="stylesheet" href="/foo.css">',
                         FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
                     ),
                     new Uri('http://example.com/')
@@ -279,8 +275,8 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                         '<link href="/two.css" rel="stylesheet">',
                     ],
                     [
-                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">' . "\n"  .
-                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">' . "\n"  .
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">' . "\n" .
+                        '<link href="file:' . $cssOnePath . '" rel="stylesheet">' . "\n" .
                         '<link href="file:' . $cssOnePath . '" rel="stylesheet">',
                         '<link href="file:' . $cssTwoPath . '" rel="stylesheet">',
                     ],
@@ -545,12 +541,5 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
                 'expectedStylesheetLinkElement' => '<link href="/style.css">',
             ],
         ];
-    }
-
-    protected function tearDown()
-    {
-        parent::tearDown();
-
-        \Mockery::close();
     }
 }
