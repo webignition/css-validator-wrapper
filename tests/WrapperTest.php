@@ -5,9 +5,9 @@
 
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
+use GuzzleHttp\Psr7\Uri;
 use Mockery\MockInterface;
 use phpmock\mockery\PHPMockery;
-use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorOutput\Model\ErrorMessage;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
@@ -21,6 +21,7 @@ use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
+use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureModifier;
 use webignition\CssValidatorWrapper\Wrapper;
 use webignition\WebResource\WebPage\WebPage;
@@ -32,7 +33,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
     public function testValidateUnknownSourceExceptionForWebPage()
     {
-        $webPage = $this->createWebPage('http://example.com/', 'content');
+        $webPage = WebPageFactory::create('content', new Uri('http://example.com/'));
         $wrapper = $this->createWrapper(new SourceStorage());
 
         $sourceHandler = new SourceHandler($webPage, new SourceMap());
@@ -46,9 +47,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
     public function testValidateUnknownSourceExceptionForLinkedCssResource()
     {
-        $webPage = $this->createWebPage(
-            'http://example.com/',
-            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
+        $webPage = WebPageFactory::create(
+            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+            new Uri('http://example.com/')
         );
         $wrapper = $this->createWrapper(new SourceStorage());
 
@@ -79,7 +80,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         int $expectedErrorCount,
         array $expectedErrorCountByUrl = []
     ) {
-        $webPage = $this->createWebPage($sourceUrl, $sourceFixture);
+        $webPage = WebPageFactory::create($sourceFixture, new Uri($sourceUrl));
         $wrapper = $this->createWrapper($sourceStorage);
 
         $sourceHandler = new SourceHandler($webPage, $sourceMap);
@@ -627,7 +628,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             []
         );
 
-        $webPage = $this->createWebPage($sourceUrl, $noStylesheetsHtml);
+        $webPage = WebPageFactory::create($noStylesheetsHtml, new Uri($sourceUrl));
         $wrapper = $this->createWrapper($sourceStorage);
 
         $sourceHandler = new SourceHandler($webPage, $noStylesheetsSourceMap);
@@ -774,20 +775,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             self::JAVA_EXECUTABLE_PATH,
             self::CSS_VALIDATOR_JAR_PATH
         );
-    }
-
-    private function createWebPage(string $url, string $content): WebPage
-    {
-        $uri = \Mockery::mock(UriInterface::class);
-        $uri
-            ->shouldReceive('__toString')
-            ->andReturn($url);
-
-        /* @var WebPage $webPage */
-        $webPage = WebPage::createFromContent($content);
-        $webPage = $webPage->setUri($uri);
-
-        return $webPage;
     }
 
     /**
