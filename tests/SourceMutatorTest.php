@@ -8,6 +8,7 @@ use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceMutator;
+use webignition\CssValidatorWrapper\Tests\Factory\ContentTypeFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureFactory;
@@ -68,6 +69,39 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         $cssThreePath = FixtureLoader::getPath('Css/three.css');
 
         return [
+            'big5 document with no charset, charset supplied' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="搜.css">',
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html; charset=big5')
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/%E6%90%9C.css', 'file:' . $cssValidNoMessagePath),
+                ]),
+                'expectedWebPageContent' => WebPageFixtureFactory::createMarkupContainingFragment(
+                    '<meta charset="big5"><link rel="stylesheet" href="file:' . $cssValidNoMessagePath . '">'
+                ),
+            ],
+            'big5 document with no charset, no charset supplied' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="搜.css">',
+                        null,
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html')
+                ),
+                'sourceMap' => new SourceMap([
+                    new Source('http://example.com/j.css', 'file:' . $cssValidNoMessagePath),
+                ]),
+                'expectedWebPageContent' => WebPageFixtureFactory::createMarkupContainingFragment(
+                    '<link rel="stylesheet" href="file:' . $cssValidNoMessagePath . '">'
+                ),
+            ],
             'single linked stylesheet, rel before href' => [
                 'webPage' => WebPageFactory::create(
                     WebPageFixtureFactory::createMarkupContainingFragment(

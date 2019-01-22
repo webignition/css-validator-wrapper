@@ -5,6 +5,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use GuzzleHttp\Psr7\Uri;
 use webignition\CssValidatorWrapper\SourceInspector;
+use webignition\CssValidatorWrapper\Tests\Factory\ContentTypeFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureFactory;
@@ -26,9 +27,47 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
     public function findStylesheetUrlsDataProvider()
     {
         return [
+            'big5 document with no charset, charset supplied' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="搜">',
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html; charset=big5')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/' . rawurlencode('搜'),
+                ],
+            ],
+            'big5 document with no charset, no charset supplied' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="搜">',
+                        null,
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html')
+                ),
+                'expectedStylesheetUrls' => [
+                    'http://example.com/j',
+                ],
+            ],
             'no linked resources' => [
                 'webPage' => WebPageFactory::create(
                     FixtureLoader::load('Html/minimal-html5.html'),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrls' => [],
+            ],
+            'no linked resources, no document-level charset (utf-8)' => [
+                'webPage' => WebPageFactory::create(
+                    str_replace(
+                        '<meta charset=utf-8>',
+                        '',
+                        FixtureLoader::load('Html/minimal-html5.html')
+                    ),
                     new Uri('http://example.com/')
                 ),
                 'expectedStylesheetUrls' => [],
@@ -212,6 +251,33 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
     public function findStylesheetUrlReferencesDataProvider()
     {
         return [
+            'big5 document with no charset, charset supplied' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="搜">',
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html; charset=big5')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link rel="stylesheet" href="搜'
+                ],
+            ],
+            'big5 document with no charset, no charset supplied' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="搜">',
+                        null,
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link rel="stylesheet" href="j',
+                ],
+            ],
             'no linked resources' => [
                 'webPage' => WebPageFactory::create(
                     FixtureLoader::load('Html/minimal-html5.html'),
@@ -229,6 +295,17 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                 'expectedStylesheetUrlReferences' => [
                     '<link rel="stylesheet" href="/style.css',
                 ],
+            ],
+            'no linked resources, no document-level charset' => [
+                'webPage' => WebPageFactory::create(
+                    str_replace(
+                        '<meta charset=utf-8>',
+                        '',
+                        FixtureLoader::load('Html/minimal-html5.html')
+                    ),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [],
             ],
             'single linked stylesheet' => [
                 'webPage' => WebPageFactory::create(
@@ -399,6 +476,49 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                 ),
                 'reference' => '<link href="/style.css',
                 'expectedStylesheetReferenceFragments' => [],
+            ],
+            'big5 document with no charset, charset supplied, href before rel' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link href="搜" rel="stylesheet">',
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html; charset=big5')
+                ),
+                'reference' => '<link href="搜',
+                'expectedStylesheetReferenceFragments' => [
+                    '<link href="搜" rel="stylesheet',
+                ],
+            ],
+            'big5 document with no charset, charset supplied, rel before href' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="搜">',
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html; charset=big5')
+                ),
+                'reference' => '<link rel="stylesheet" href="搜',
+                'expectedStylesheetReferenceFragments' => [
+                    '<link rel="stylesheet" href="搜',
+                ],
+            ],
+            'big5 document with no charset, no charset supplied' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<link rel="stylesheet" href="搜">',
+                        null,
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html')
+                ),
+                'reference' => '<link rel="stylesheet" href="j',
+                'expectedStylesheetReferenceFragments' => [
+                    '<link rel="stylesheet" href="j',
+                ],
             ],
             'single linked stylesheet, rel before href' => [
                 'webPage' => WebPageFactory::create(

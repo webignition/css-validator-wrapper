@@ -4,8 +4,11 @@ namespace webignition\CssValidatorWrapper\Tests\Factory;
 
 class WebPageFixtureFactory
 {
-    public static function createMarkupContainingFragment(string $fragment, ?string $charset = null)
-    {
+    public static function createMarkupContainingFragment(
+        string $fragment,
+        ?string $charset = null,
+        ?string $encoding = null
+    ): string {
         $charsetFragment = null === $charset
             ? ''
             : '<meta charset="' . $charset . '">';
@@ -16,8 +19,12 @@ class WebPageFixtureFactory
             $fragment
         );
 
-        if ($charset) {
-            $content = mb_convert_encoding($content, $charset, 'utf-8');
+        if (empty($encoding) && !empty($charset)) {
+            $encoding = $charset;
+        }
+
+        if ($encoding) {
+            $content = mb_convert_encoding($content, $encoding, 'utf-8');
         }
 
         return $content;
