@@ -27,7 +27,7 @@
         "php": ">=7.2.0",
         "webignition/css-validator-output-parser": ">=5.1,<6",
         "webignition/web-page-model":">=5.9,<6",
-        "webignition/web-page-inspector": ">=1.1,<2",
+        "webignition/web-page-inspector": ">=1.2,<2",
         "webignition/absolute-url-deriver": ">=3,<4"
     },
     "require-dev": {
