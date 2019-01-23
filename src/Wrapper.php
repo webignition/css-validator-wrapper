@@ -60,14 +60,20 @@ class Wrapper
             throw new UnknownSourceException($webPageUri);
         }
 
-        $stylesheetUrls = $sourceInspector->findStylesheetUrls();
-        if (count($stylesheetUrls)) {
-            foreach ($stylesheetUrls as $stylesheetUrl) {
-                if (!$sourceMap->getByUri($stylesheetUrl)) {
-                    throw new UnknownSourceException($stylesheetUrl);
-                }
+        $embeddedStylesheetUrls = $sourceInspector->findStylesheetUrls();
+        foreach ($embeddedStylesheetUrls as $stylesheetUrl) {
+            if (!$sourceMap->getByUri($stylesheetUrl)) {
+                throw new UnknownSourceException($stylesheetUrl);
             }
         }
+
+        $importedStylesheetUrls = [];
+        $importSources = $sourceMap->byType(SourceType::TYPE_IMPORT);
+        foreach ($importSources as $importSource) {
+            $importedStylesheetUrls[] = $importSource->getUri();
+        }
+
+        $stylesheetUrls = array_unique(array_merge($embeddedStylesheetUrls, $importedStylesheetUrls));
 
         $sourceMutator = $sourceHandler->getMutator();
 
