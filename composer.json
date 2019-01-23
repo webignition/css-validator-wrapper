@@ -28,7 +28,8 @@
         "webignition/css-validator-output-parser": ">=5.1,<6",
         "webignition/web-page-model":">=5.9,<6",
         "webignition/web-page-inspector": ">=1.2,<2",
-        "webignition/absolute-url-deriver": ">=3,<4"
+        "webignition/absolute-url-deriver": ">=3,<4",
+        "sabberworm/php-css-parser": "^8.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^7",
