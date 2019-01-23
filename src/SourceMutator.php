@@ -4,6 +4,7 @@ namespace webignition\CssValidatorWrapper;
 
 use webignition\AbsoluteUrlDeriver\AbsoluteUrlDeriver;
 use webignition\Uri\Uri;
+use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourceMutator
@@ -43,7 +44,7 @@ class SourceMutator
 
                 if ($source->isAvailable()) {
                     $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
-                    $referenceReplacement = $referenceWithoutHrefValue . $source->getLocalUri();
+                    $referenceReplacement = $referenceWithoutHrefValue . $source->getMappedUri();
 
                     $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
                 } else {

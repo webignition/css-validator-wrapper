@@ -12,8 +12,8 @@ use webignition\CssValidatorOutput\Model\Options;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Model\WarningMessage;
 use webignition\CssValidatorWrapper\OutputMutator;
-use webignition\CssValidatorWrapper\Source;
-use webignition\CssValidatorWrapper\SourceMap;
+use webignition\UrlSourceMap\Source;
+use webignition\UrlSourceMap\SourceMap;
 
 class OutputMutatorTest extends \PHPUnit\Framework\TestCase
 {

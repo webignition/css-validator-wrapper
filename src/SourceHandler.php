@@ -2,6 +2,7 @@
 
 namespace webignition\CssValidatorWrapper;
 
+use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\ContentEncodingValidator;
 use webignition\WebResource\WebPage\WebPage;
 

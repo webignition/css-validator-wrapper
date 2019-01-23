@@ -6,12 +6,12 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use GuzzleHttp\Psr7\Uri;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
-use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceInspector;
-use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
+use webignition\UrlSourceMap\Source;
+use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourceStorageTest extends \PHPUnit\Framework\TestCase
@@ -107,7 +107,7 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
 
             $this->assertEquals(
                 $expectedContent,
-                file_get_contents(preg_replace('/^file:/', '', $source->getLocalUri()))
+                file_get_contents(preg_replace('/^file:/', '', $source->getMappedUri()))
             );
         }
 

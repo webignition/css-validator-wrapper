@@ -6,10 +6,10 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceInspector;
-use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureFactory;
+use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourceHandlerTest extends \PHPUnit\Framework\TestCase

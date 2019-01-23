@@ -2,6 +2,9 @@
 
 namespace webignition\CssValidatorWrapper;
 
+use webignition\UrlSourceMap\Source;
+use webignition\UrlSourceMap\SourceMap;
+
 class ResourceStorage
 {
     private $localSources;
@@ -51,7 +54,7 @@ class ResourceStorage
     public function deleteAll()
     {
         foreach ($this->localSources as $source) {
-            $path = preg_replace('/^file:/', '', $source->getLocalUri());
+            $path = preg_replace('/^file:/', '', $source->getMappedUri());
 
             @unlink($path);
         }

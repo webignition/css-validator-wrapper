@@ -3,6 +3,7 @@
 namespace webignition\CssValidatorWrapper;
 
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResourceInterfaces\WebPageInterface;
 
 class SourceStorage
@@ -44,7 +45,7 @@ class SourceStorage
             $source = $sourceMap->getByUri($stylesheetUrl);
 
             if ($source->isAvailable()) {
-                $localPath = preg_replace('/^file:/', '', $source->getLocalUri());
+                $localPath = preg_replace('/^file:/', '', $source->getMappedUri());
 
                 $this->resourceStorage->duplicate($stylesheetUrl, $localPath, 'css');
             }
