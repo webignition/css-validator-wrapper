@@ -132,6 +132,26 @@ class SourceInspector
         return $fragments;
     }
 
+    public function findStyleBlocks(): array
+    {
+        $inspector = $this->webPage->getInspector();
+        $crawler = $inspector->getCrawler();
+
+        $filteredCrawler = $crawler->filter('style');
+
+        $elements = [];
+
+        foreach ($filteredCrawler as $styleElement) {
+            $content = trim($styleElement->textContent);
+
+            if ('' !== $content) {
+                $elements[] = $content;
+            }
+        }
+
+        return $elements;
+    }
+
     /**
      * @param string $content
      * @param string $hrefValue
