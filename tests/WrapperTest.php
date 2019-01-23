@@ -13,6 +13,7 @@ use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandFactory;
+use webignition\CssValidatorWrapper\SourceType;
 use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\OutputMutator;
@@ -118,6 +119,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $singleStylesheetHtml = FixtureLoader::load('Html/minimal-html5-single-stylesheet.html');
         $singleEmptyHrefStylesheetHtml = FixtureLoader::load('Html/minimal-html5-unavailable-stylesheet.html');
         $cssNoMessagesPath = FixtureLoader::getPath('Css/valid-no-messages.css');
+        $cssWithImportPath = FixtureLoader::getPath('Css/valid-with-import.css');
         $singleStylesheetHtmlWithNewLinesInLinkElement = WebPageFixtureModifier::addLineReturnsToLinkElements(
             $singleStylesheetHtml,
             [
@@ -165,6 +167,19 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
             ),
             new Source('http://example.com/style.css', 'file:' . $cssNoMessagesPath),
+        ]);
+
+        $singleStylesheetWithImportsSourceMap = new SourceMap([
+            new Source(
+                'http://example.com/',
+                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
+            ),
+            new Source('http://example.com/style.css', 'file:' . $cssWithImportPath),
+            new Source(
+                'http://example.com/one.css',
+                'file:' . FixtureLoader::getPath('Css/one.css'),
+                SourceType::TYPE_IMPORT
+            ),
         ]);
 
         $singleStylesheetUnavailableSourceMap = new SourceMap([
@@ -587,6 +602,43 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 1,
+            ],
+            'html5 with single linked CSS resource with import, no messages' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssWithImportPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetWithImportsSourceMap,
+                    [
+                        'http://example.com/style.css',
+                        'http://example.com/one.css',
+                    ]
+                ),
+                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
+                    'no-messages',
+                    [
+                        '{{ webPageUri }}' => 'file:/tmp/web-page-hash.html',
+                    ]
+                ),
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
             ],
 //            'domains to ignore: ignore none' => [
 //                'httpFixtures' => [
