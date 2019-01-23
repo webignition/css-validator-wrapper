@@ -79,7 +79,7 @@ class Wrapper
         $localSources = $this->sourceStorage->getSources();
         $webPageLocalSource = $localSources[$webPageUri];
 
-        $webPageLocalUri = 'file:' . $webPageLocalSource->getLocalUri();
+        $webPageLocalUri = 'file:' . $webPageLocalSource->getMappedUri();
 
         $command = $this->commandFactory->create(
             $webPageLocalUri,

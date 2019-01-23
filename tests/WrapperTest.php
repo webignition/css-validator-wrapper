@@ -16,14 +16,14 @@ use webignition\CssValidatorWrapper\CommandFactory;
 use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\OutputMutator;
-use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceHandler;
-use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureModifier;
 use webignition\CssValidatorWrapper\Wrapper;
+use webignition\UrlSourceMap\Source;
+use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\WebPage;
 
 class WrapperTest extends \PHPUnit\Framework\TestCase

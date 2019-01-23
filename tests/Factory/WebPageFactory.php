@@ -4,8 +4,8 @@ namespace webignition\CssValidatorWrapper\Tests\Factory;
 
 use Psr\Http\Message\UriInterface;
 use webignition\CssValidatorWrapper\SourceHandler;
-use webignition\CssValidatorWrapper\SourceMap;
 use webignition\InternetMediaTypeInterface\InternetMediaTypeInterface;
+use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\WebPage;
 
 class WebPageFactory

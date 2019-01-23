@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d61ea33b66c7f0719eecaf1f86342ab8",
+    "content-hash": "c1e8562af9d196aa9a28132f91956263",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -1152,6 +1152,47 @@
                 "url"
             ],
             "time": "2018-10-09T17:17:09+00:00"
+        },
+        {
+            "name": "webignition/url-source-map",
+            "version": "0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/url-source-map.git",
+                "reference": "a812d10ca37bdf757471e9613651ef8f22b1d2c8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webignition/url-source-map/zipball/a812d10ca37bdf757471e9613651ef8f22b1d2c8",
+                "reference": "a812d10ca37bdf757471e9613651ef8f22b1d2c8",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^0.11.1",
+                "phpunit/phpunit": "^7",
+                "squizlabs/php_codesniffer": "^3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "webignition\\UrlSourceMap\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Maps a collection of urls to another collection of urls",
+            "homepage": "https://github.com/webignition/url-source-map",
+            "keywords": [
+                "map",
+                "source",
+                "url"
+            ],
+            "time": "2019-01-23T13:35:54+00:00"
         },
         {
             "name": "webignition/web-page-inspector",

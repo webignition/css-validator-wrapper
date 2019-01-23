@@ -4,15 +4,15 @@
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use GuzzleHttp\Psr7\Uri;
-use webignition\CssValidatorWrapper\Source;
 use webignition\CssValidatorWrapper\SourceInspector;
-use webignition\CssValidatorWrapper\SourceMap;
 use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\Tests\Factory\ContentTypeFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureFactory;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureModifier;
+use webignition\UrlSourceMap\Source;
+use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourceMutatorTest extends \PHPUnit\Framework\TestCase

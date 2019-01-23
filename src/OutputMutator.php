@@ -6,6 +6,7 @@ use webignition\CssValidatorOutput\Model\AbstractIssueMessage;
 use webignition\CssValidatorOutput\Model\AbstractMessage;
 use webignition\CssValidatorOutput\Model\MessageList;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
+use webignition\UrlSourceMap\SourceMap;
 
 class OutputMutator
 {
@@ -23,7 +24,7 @@ class OutputMutator
     {
         $mutator = function (AbstractMessage $message) use ($localLinkedSources) {
             if ($message instanceof AbstractIssueMessage) {
-                $source = $localLinkedSources->getByLocalUri($message->getRef());
+                $source = $localLinkedSources->getByMappedUri($message->getRef());
 
                 if ($source) {
                     $message = $message->withRef($source->getUri());

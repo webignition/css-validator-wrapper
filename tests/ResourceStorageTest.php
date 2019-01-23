@@ -5,8 +5,8 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorWrapper\ResourceStorage;
-use webignition\CssValidatorWrapper\Source;
-use webignition\CssValidatorWrapper\SourceMap;
+use webignition\UrlSourceMap\Source;
+use webignition\UrlSourceMap\SourceMap;
 
 class ResourceStorageTest extends \PHPUnit\Framework\TestCase
 {
