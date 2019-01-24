@@ -679,55 +679,6 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    /**
-     * @dataProvider findStyleBlocksDataProvider
-     */
-    public function testFindStyleBlocks(
-        WebPage $webPage,
-        array $expectedStyleBlocks
-    ) {
-        $sourceInspector = new SourceInspector($webPage);
-
-        $this->assertEquals($expectedStyleBlocks, $sourceInspector->findStyleBlocks());
-    }
-
-    public function findStyleBlocksDataProvider()
-    {
-        return [
-            'no style elements' => [
-                'webPage' => WebPageFactory::create(
-                    '<!doctype html><html><head><meta charset=utf-8></head></html>',
-                    new Uri('http://example.com/')
-                ),
-                'expectedStyleBlocks' => [],
-            ],
-            'has style elements' => [
-                'webPage' => WebPageFactory::create(
-                    FixtureLoader::load('Html/minimal-html5-with-style-elements.html'),
-                    new Uri('http://example.com/')
-                ),
-                'expectedStyleBlocks' => [
-                    'html {}',
-                    'body {}',
-                ],
-            ],
-            'has style elements with preceding mb content' => [
-                'webPage' => WebPageFactory::create(
-                    str_replace(
-                        '<title>foo</title>',
-                        '<title>搜</title>',
-                        FixtureLoader::load('Html/minimal-html5-with-style-elements.html')
-                    ),
-                    new Uri('http://example.com/')
-                ),
-                'expectedStyleBlocks' => [
-                    'html {}',
-                    'body {}',
-                ],
-            ],
-        ];
-    }
-
     protected function tearDown()
     {
         parent::tearDown();
