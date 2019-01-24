@@ -78,10 +78,7 @@ class Wrapper
         $localSources = $this->sourceStorage->getSources();
         $webPageLocalSource = $localSources[$webPageUri];
 
-        $webPageLocalUri = 'file:' . $webPageLocalSource->getMappedUri();
-
-        $command = $this->commandFactory->create($webPageLocalUri, $vendorExtensionSeverityLevel);
-
+        $command = $this->commandFactory->create($webPageLocalSource->getMappedUri(), $vendorExtensionSeverityLevel);
         $output = $this->commandExecutor->execute($command, $outputParserConfiguration);
 
         if ($output instanceof ValidationOutput) {
