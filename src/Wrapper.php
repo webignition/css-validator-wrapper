@@ -6,7 +6,6 @@ use webignition\CssValidatorOutput\Model\OutputInterface;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
-use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 
 class Wrapper
@@ -14,18 +13,18 @@ class Wrapper
     private $sourceStorage;
     private $outputMutator;
     private $commandFactory;
-    private $outputParser;
+    private $commandExecutor;
 
     public function __construct(
         SourceStorage $sourceStorage,
         OutputMutator $outputMutator,
         CommandFactory $commandFactory,
-        OutputParser $outputParser
+        CommandExecutor $commandExecutor
     ) {
         $this->sourceStorage = $sourceStorage;
         $this->outputMutator = $outputMutator;
         $this->commandFactory = $commandFactory;
-        $this->outputParser = $outputParser;
+        $this->commandExecutor = $commandExecutor;
     }
 
     /**
@@ -79,19 +78,10 @@ class Wrapper
         $localSources = $this->sourceStorage->getSources();
         $webPageLocalSource = $localSources[$webPageUri];
 
-        $webPageLocalUri = 'file:' . $webPageLocalSource->getMappedUri();
+        $command = $this->commandFactory->create($webPageLocalSource->getMappedUri(), $vendorExtensionSeverityLevel);
+        $output = $this->commandExecutor->execute($command, $outputParserConfiguration);
 
-        $command = $this->commandFactory->create($webPageLocalUri, $vendorExtensionSeverityLevel);
-
-        $validatorOutput = shell_exec($command);
-
-        /* @var ValidationOutput $output */
-        $output = $this->outputParser->parse(
-            $validatorOutput,
-            $outputParserConfiguration ?? new OutputParserConfiguration()
-        );
-
-        if ($output->isValidationOutput()) {
+        if ($output instanceof ValidationOutput) {
             $output = $this->outputMutator->setObservationResponseRef($output, $webPageUri);
             $output = $this->outputMutator->setMessagesRef($output, $localSources);
         }
