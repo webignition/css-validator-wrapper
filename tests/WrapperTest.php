@@ -915,10 +915,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         return new Wrapper(
             $sourceStorage,
             new OutputMutator(),
-            new CommandFactory(),
-            new OutputParser(),
-            self::JAVA_EXECUTABLE_PATH,
-            self::CSS_VALIDATOR_JAR_PATH
+            new CommandFactory(self::JAVA_EXECUTABLE_PATH, self::CSS_VALIDATOR_JAR_PATH),
+            new OutputParser()
         );
     }
 

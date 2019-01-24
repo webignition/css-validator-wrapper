@@ -15,23 +15,17 @@ class Wrapper
     private $outputMutator;
     private $commandFactory;
     private $outputParser;
-    private $javaExecutablePath;
-    private $cssValidatorJarPath;
 
     public function __construct(
         SourceStorage $sourceStorage,
         OutputMutator $outputMutator,
         CommandFactory $commandFactory,
-        OutputParser $outputParser,
-        string $javaExecutablePath,
-        string $cssValidatorJarPath
+        OutputParser $outputParser
     ) {
         $this->sourceStorage = $sourceStorage;
         $this->outputMutator = $outputMutator;
         $this->commandFactory = $commandFactory;
         $this->outputParser = $outputParser;
-        $this->javaExecutablePath = $javaExecutablePath;
-        $this->cssValidatorJarPath = $cssValidatorJarPath;
     }
 
     /**
@@ -87,12 +81,7 @@ class Wrapper
 
         $webPageLocalUri = 'file:' . $webPageLocalSource->getMappedUri();
 
-        $command = $this->commandFactory->create(
-            $webPageLocalUri,
-            $this->javaExecutablePath,
-            $this->cssValidatorJarPath,
-            $vendorExtensionSeverityLevel
-        );
+        $command = $this->commandFactory->create($webPageLocalUri, $vendorExtensionSeverityLevel);
 
         $validatorOutput = shell_exec($command);
 
