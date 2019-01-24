@@ -11,7 +11,6 @@ use webignition\CssValidatorOutput\Model\ErrorMessage;
 use webignition\CssValidatorOutput\Model\MessageList;
 use webignition\CssValidatorOutput\Model\ObservationResponse;
 use webignition\CssValidatorOutput\Model\Options;
-use webignition\CssValidatorOutput\Model\OutputInterface;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
 use webignition\CssValidatorOutput\Parser\OutputParser;
@@ -34,7 +33,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 {
     const JAVA_EXECUTABLE_PATH = '/usr/bin/java';
     const CSS_VALIDATOR_JAR_PATH = 'css-validator.jar';
-    const CSS_VALIDATOR_COMMAND = '/java -jar css-validator.jar -output ucn -vextwarning true "file:/tmp/example" 2>&1';
+    const CSS_VALIDATOR_COMMAND = '/java -jar css-validator.jar -output ucn -vextwarning true "%s" 2>&1';
 
     public function testValidateUnknownSourceExceptionForWebPage()
     {
@@ -199,17 +198,22 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     $noStylesheetsSourceMap,
                     []
                 ),
-                'commandFactory' => $this->createCommandFactory(
-                    'file:/tmp/web-page-hash.html',
-                    VendorExtensionSeverityLevel::LEVEL_WARN
-                ),
-                'commandExecutor' => $this->createCommandExecutor(
-                    $this->createValidationOutput(
-                        'file:/tmp/web-page-hash.html',
-                        new MessageList()
-                    ),
-                    $outputParserConfiguration
-                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
                 'sourceMap' => $noStylesheetsSourceMap,
                 'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
@@ -239,17 +243,22 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'http://example.com/style.css',
                     ]
                 ),
-                'commandFactory' => $this->createCommandFactory(
-                    'file:/tmp/web-page-hash.html',
-                    VendorExtensionSeverityLevel::LEVEL_WARN
-                ),
-                'commandExecutor' => $this->createCommandExecutor(
-                    $this->createValidationOutput(
-                        'file:/tmp/web-page-hash.html',
-                        new MessageList()
-                    ),
-                    $outputParserConfiguration
-                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
                 'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
                 'sourceFixture' => $singleStylesheetHtmlRelBeforeHref,
                 'sourceUrl' => 'http://example.com/',
@@ -276,17 +285,22 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     $singleStylesheetValidNoMessagesSourceMap,
                     []
                 ),
-                'commandFactory' => $this->createCommandFactory(
-                    'file:/tmp/web-page-hash.html',
-                    VendorExtensionSeverityLevel::LEVEL_WARN
-                ),
-                'commandExecutor' => $this->createCommandExecutor(
-                    $this->createValidationOutput(
-                        'file:/tmp/web-page-hash.html',
-                        new MessageList()
-                    ),
-                    $outputParserConfiguration
-                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
                 'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
                 'sourceFixture' => $singleEmptyHrefStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
@@ -315,17 +329,22 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'http://example.com/style.css',
                     ]
                 ),
-                'commandFactory' => $this->createCommandFactory(
-                    'file:/tmp/web-page-hash.html',
-                    VendorExtensionSeverityLevel::LEVEL_WARN
-                ),
-                'commandExecutor' => $this->createCommandExecutor(
-                    $this->createValidationOutput(
-                        'file:/tmp/web-page-hash.html',
-                        new MessageList()
-                    ),
-                    $outputParserConfiguration
-                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
                 'sourceMap' => $singleStylesheetUnavailableSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
@@ -344,19 +363,24 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     $noStylesheetsSourceMap,
                     []
                 ),
-                'commandFactory' => $this->createCommandFactory(
-                    'file:/tmp/web-page-hash.html',
-                    VendorExtensionSeverityLevel::LEVEL_WARN
-                ),
-                'commandExecutor' => $this->createCommandExecutor(
-                    $this->createValidationOutput(
-                        'file:/tmp/web-page-hash.html',
-                        new MessageList([
-                            new ErrorMessage('title content', 3, '.bar', ''),
-                        ])
-                    ),
-                    $outputParserConfiguration
-                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList([
+                                new ErrorMessage('title content', 3, '.bar', ''),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
                 'sourceMap' => $noStylesheetsSourceMap,
                 'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
@@ -388,19 +412,24 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'http://example.com/style.css',
                     ]
                 ),
-                'commandFactory' => $this->createCommandFactory(
-                    'file:/tmp/web-page-hash.html',
-                    VendorExtensionSeverityLevel::LEVEL_WARN
-                ),
-                'commandExecutor' => $this->createCommandExecutor(
-                    $this->createValidationOutput(
-                        'file:/tmp/web-page-hash.html',
-                        new MessageList([
-                            new ErrorMessage('title content', 2, '.foo', 'file:/tmp/style-hash.css'),
-                        ])
-                    ),
-                    $outputParserConfiguration
-                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList([
+                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/style-hash.css'),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+                    ],
+                ]),
                 'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
@@ -432,19 +461,24 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'http://example.com/%E6%90%9C.css',
                     ]
                 ),
-                'commandFactory' => $this->createCommandFactory(
-                    'file:/tmp/web-page-hash.html',
-                    VendorExtensionSeverityLevel::LEVEL_WARN
-                ),
-                'commandExecutor' => $this->createCommandExecutor(
-                    $this->createValidationOutput(
-                        'file:/tmp/web-page-hash.html',
-                        new MessageList([
-                            new ErrorMessage('title content', 2, '.foo', 'file:/tmp/style-hash.css'),
-                        ])
-                    ),
-                    $outputParserConfiguration
-                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList([
+                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/style-hash.css'),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
                 'sourceMap' => $singleMbStylesheetValidNoMessagesSourceMap,
                 'sourceFixture' => $singleMbStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
@@ -478,17 +512,34 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'http://example.com/one.css',
                     ]
                 ),
-                'commandFactory' => $this->createCommandFactory(
-                    'file:/tmp/web-page-hash.html',
-                    VendorExtensionSeverityLevel::LEVEL_WARN
-                ),
-                'commandExecutor' => $this->createCommandExecutor(
-                    $this->createValidationOutput(
-                        'file:/tmp/web-page-hash.html',
-                        new MessageList()
-                    ),
-                    $outputParserConfiguration
-                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                    [
+                        'expectedUrl' => 'file:/tmp/valid-no-messages-hash.css',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+                    ],
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/valid-no-messages-hash.css',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/valid-no-messages-hash.css'
+                    ],
+                ]),
                 'sourceMap' => $singleStylesheetWithImportsSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
@@ -497,6 +548,135 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
+            ],
+            'html5 with single linked CSS resource with import, error in import' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssWithImportPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetWithImportsSourceMap,
+                    [
+                        'http://example.com/style.css',
+                        'http://example.com/one.css',
+                    ]
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                    [
+                        'expectedUrl' => 'file:/tmp/invalid-hash.css',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+                    ],
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/invalid-hash.css',
+                            new MessageList([
+                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/invalid-hash.css'),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/invalid-hash.css'
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [
+                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
+                ],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 1,
+            ],
+            'html5 with single linked CSS resource with import, error in linked stylesheet, error in import' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssWithImportPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetWithImportsSourceMap,
+                    [
+                        'http://example.com/style.css',
+                        'http://example.com/one.css',
+                    ]
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                    [
+                        'expectedUrl' => 'file:/tmp/invalid-import-hash.css',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList([
+                                new ErrorMessage('title content', 1, '.bar', 'file:/tmp/invalid-link-hash.css'),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+                    ],
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/invalid-import-hash.css',
+                            new MessageList([
+                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/invalid-import-hash.css'),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/invalid-import-hash.css'
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [
+                    new ErrorMessage('title content', 1, '.bar', 'http://example.com/style.css'),
+                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
+                ],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 2,
             ],
 
 
@@ -696,23 +876,25 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     /**
      * @return MockInterface|CommandExecutor
      */
-    private function createCommandExecutor(
-        OutputInterface $output,
-        OutputParserConfiguration $expectedOutputParserConfiguration
-    ): MockInterface {
+    private function createCommandExecutor(array $calls): MockInterface
+    {
         $commandExecutor = \Mockery::mock(CommandExecutor::class);
-        $commandExecutor
-            ->shouldReceive('execute')
-            ->withArgs(function (
-                string $command,
-                OutputParserConfiguration $outputParserConfiguration
-            ) use ($expectedOutputParserConfiguration) {
-                $this->assertEquals(self::CSS_VALIDATOR_COMMAND, $command);
-                $this->assertSame($expectedOutputParserConfiguration, $outputParserConfiguration);
 
-                return true;
-            })
-            ->andReturn($output);
+        foreach ($calls as $call) {
+            $output = $call['output'];
+            $expectedOutputParserConfiguration = $call['expectedOutputParserConfiguration'];
+            $expectedResourceUrl = $call['expectedResourceUrl'];
+
+            $expectedCommand = sprintf(
+                self::CSS_VALIDATOR_COMMAND,
+                $expectedResourceUrl
+            );
+
+            $commandExecutor
+                ->shouldReceive('execute')
+                ->with($expectedCommand, $expectedOutputParserConfiguration)
+                ->andReturn($output);
+        }
 
         return $commandExecutor;
     }
@@ -720,14 +902,23 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     /**
      * @return MockInterface|CommandFactory
      */
-    private function createCommandFactory(string $url, string $vendorExtensionSeverityLevel): MockInterface
+    private function createCommandFactory(array $calls): MockInterface
     {
         $commandFactory = \Mockery::mock(CommandFactory::class);
 
-        $commandFactory
-            ->shouldReceive('create')
-            ->with($url, $vendorExtensionSeverityLevel)
-            ->andReturn(self::CSS_VALIDATOR_COMMAND);
+        foreach ($calls as $call) {
+            $expectedUrl = $call['expectedUrl'];
+            $expectedVendorExtensionSeverityLevel = $call['expectedVendorExtensionSeverityLevel'];
+
+            $commandFactory
+                ->shouldReceive('create')
+                ->with($expectedUrl, $expectedVendorExtensionSeverityLevel)
+                ->andReturn(sprintf(
+                    self::CSS_VALIDATOR_COMMAND,
+                    $expectedUrl
+                ));
+
+        }
 
         return $commandFactory;
     }
