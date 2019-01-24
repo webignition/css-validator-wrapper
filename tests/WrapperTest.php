@@ -139,12 +139,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $singleStylesheetHtml
         );
 
-        $singleMbStylesheetHtml = str_replace(
-            '"/style.css"',
-            '"/搜.css"',
-            $singleStylesheetHtml
-        );
-
         $noStylesheetsSourceMap = new SourceMap([
             new Source('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
         ]);
@@ -178,18 +172,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             new Source('http://example.com/style.css'),
         ]);
 
-        $singleMbStylesheetValidNoMessagesSourceMap = new SourceMap([
-            new Source(
-                'http://example.com/',
-                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
-            ),
-            new Source('http://example.com/%E6%90%9C.css', 'file:' . $cssNoMessagesPath),
-        ]);
-
         $outputParserConfiguration = new OutputParserConfiguration();
 
         return [
-            'html5 no css no linked resources' => [
+            'no CSS' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -223,7 +209,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'html5 with single linked CSS resource, no messages' => [
+            'linked stylesheet, no messages' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -268,7 +254,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'html5 with single empty linked CSS resource, no CSS to validate' => [
+            'empty-href linked stylesheet, no CSS to validate' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -310,7 +296,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'html5 with unavailable CSS resource, file not found error is removed' => [
+            'unavailable linked stylesheet, stylesheet is ignored' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -354,7 +340,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'html5 with inline style, single error' => [
+            'in-document CSS, single error' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -392,7 +378,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 1,
             ],
-            'html5 with single linked stylesheet, single error in linked stylesheet' => [
+            'linked stylesheet, single error' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -441,56 +427,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 1,
             ],
-            'big5 document with no charset, charset supplied, single linked stylesheet, error stylesheet' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
-                    new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                        new Source('http://example.com/%E6%90%9C.css', 'file:/tmp/style-hash.css'),
-                    ]),
-                    str_replace(
-                        [
-                            '<link href="/搜.css" rel="stylesheet">',
-                        ],
-                        [
-                            '<link href="file:' . $cssNoMessagesPath . '" rel="stylesheet">',
-                        ],
-                        $singleMbStylesheetHtml
-                    ),
-                    $singleMbStylesheetValidNoMessagesSourceMap,
-                    [
-                        'http://example.com/%E6%90%9C.css',
-                    ]
-                ),
-                'commandFactory' => $this->createCommandFactory([
-                    [
-                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
-                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                    ],
-                ]),
-                'commandExecutor' => $this->createCommandExecutor([
-                    [
-                        'output' => $this->createValidationOutput(
-                            'file:/tmp/web-page-hash.html',
-                            new MessageList([
-                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/style-hash.css'),
-                            ])
-                        ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
-                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
-                    ],
-                ]),
-                'sourceMap' => $singleMbStylesheetValidNoMessagesSourceMap,
-                'sourceFixture' => $singleMbStylesheetHtml,
-                'sourceUrl' => 'http://example.com/',
-                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
-                'expectedMessages' => [
-                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/%E6%90%9C.css'),
-                ],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 1,
-            ],
-            'html5 with single linked CSS resource with import, no messages' => [
+            'linked stylesheet with import, no messages' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -549,7 +486,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'html5 with single linked CSS resource with import, error in import' => [
+            'linked stylesheet with import, error in import' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -612,7 +549,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 1,
             ],
-            'html5 with single linked CSS resource with import, error in linked stylesheet, error in import' => [
+            'linked stylesheet with import, error in linked stylesheet, error in import' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
@@ -678,109 +615,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 2,
             ],
-
-
-//            'domains to ignore: ignore none' => [
-//                'httpFixtures' => [
-//                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-//                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                ],
-//                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-//                'configurationValues' => [],
-//                'expectedWarningCount' => 0,
-//                'expectedErrorCount' => 3,
-//                'expectedErrorCountByUrl' => [
-//                    'http://one.example.com/style.css' => 1,
-//                    'http://two.example.com/style.css' => 2,
-//                ],
-//            ],
-//            'domains to ignore: ignore first of two' => [
-//                'httpFixtures' => [
-//                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-//                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                ],
-//                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-//                'configurationValues' => [
-//                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-//                        OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
-//                            'one.example.com',
-//                        ],
-//                    ]),
-//                ],
-//                'expectedWarningCount' => 0,
-//                'expectedErrorCount' => 2,
-//                'expectedErrorCountByUrl' => [
-//                    'http://two.example.com/style.css' => 2,
-//                ],
-//            ],
-//            'domains to ignore: ignore second of two' => [
-//                'httpFixtures' => [
-//                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-//                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                ],
-//                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-//                'configurationValues' => [
-//                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-//                        OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
-//                            'two.example.com',
-//                        ],
-//                    ]),
-//                ],
-//                'expectedWarningCount' => 0,
-//                'expectedErrorCount' => 1,
-//                'expectedErrorCountByUrl' => [
-//                    'http://one.example.com/style.css' => 1,
-//                ],
-//            ],
-//            'domains to ignore: ignore both' => [
-//                'httpFixtures' => [
-//                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-//                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                    $genericCssHttpFixture,
-//                ],
-//                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-//                'configurationValues' => [
-//                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-//                        OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
-//                            'one.example.com',
-//                            'two.example.com',
-//                        ],
-//                    ]),
-//                ],
-//                'expectedWarningCount' => 0,
-//                'expectedErrorCount' => 0,
-//            ],
-//            'encoded ampersands in css urls' => [
-//                'httpFixtures' => [
-//                    $minimalHtml5TThreeStylesheetsHttpFixture,
-//                    $minimalHtml5TThreeStylesheetsHttpFixture,
-//                    $minimalHtml5HttpFixture,
-//                    $minimalHtml5HttpFixture,
-//                    $minimalHtml5HttpFixture,
-//                    $minimalHtml5HttpFixture,
-//                    $minimalHtml5HttpFixture,
-//                    $minimalHtml5HttpFixture,
-//                ],
-//                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-//                'configurationValues' => [],
-//                'expectedWarningCount' => 0,
-//                'expectedErrorCount' => 0,
-//            ],
         ];
     }
 
