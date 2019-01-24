@@ -63,7 +63,7 @@ class OutputMutatorTest extends \PHPUnit\Framework\TestCase
         $updatedOutput = $this->outputMutator->setMessagesRef($output, $linkedResourcesMap);
 
         $this->assertNotSame($output, $updatedOutput);
-        $this->assertEquals($expectedMessages, $updatedOutput->getMessages()->getMessages());
+        $this->assertEquals($expectedMessages, array_values($updatedOutput->getMessages()->getMessages()));
     }
 
     public function setMessagesRefDataProvider(): array
