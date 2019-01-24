@@ -29,7 +29,6 @@
         "webignition/web-page-model":">=5.9,<6",
         "webignition/web-page-inspector": ">=1.2,<2",
         "webignition/absolute-url-deriver": ">=3,<4",
-        "sabberworm/php-css-parser": "^8.2",
         "webignition/url-source-map": "^0.2.0"
     },
     "require-dev": {
