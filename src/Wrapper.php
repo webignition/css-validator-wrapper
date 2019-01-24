@@ -82,6 +82,25 @@ class Wrapper
         $output = $this->commandExecutor->execute($command, $outputParserConfiguration);
 
         if ($output instanceof ValidationOutput) {
+            foreach ($importedStylesheetUrls as $importedStylesheetUrl) {
+                $stylesheetLocalSource = $localSources->getByUri($importedStylesheetUrl);
+
+                $command = $this->commandFactory->create(
+                    $stylesheetLocalSource->getMappedUri(),
+                    $vendorExtensionSeverityLevel
+                );
+
+                $importedStylesheetOutput = $this->commandExecutor->execute($command, $outputParserConfiguration);
+
+                if ($importedStylesheetOutput instanceof ValidationOutput) {
+                    $output = $output->withObservationResponse(
+                        $output->getObservationResponse()->withMessages(
+                            $output->getMessages()->merge($importedStylesheetOutput->getMessages())
+                        )
+                    );
+                }
+            }
+
             $output = $this->outputMutator->setObservationResponseRef($output, $webPageUri);
             $output = $this->outputMutator->setMessagesRef($output, $localSources);
         }
