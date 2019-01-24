@@ -917,7 +917,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     self::CSS_VALIDATOR_COMMAND,
                     $expectedUrl
                 ));
-
         }
 
         return $commandFactory;
