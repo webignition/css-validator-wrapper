@@ -8,6 +8,9 @@ use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 
 class CommandFactoryTest extends \PHPUnit\Framework\TestCase
 {
+    const JAVA_EXECUTABLE_PATH = '/usr/bin/java';
+    const CSS_VALIDATOR_JAR_PATH = '/usr/share/css-validator.jar';
+
     /**
      * @var CommandFactory
      */
@@ -17,16 +20,17 @@ class CommandFactoryTest extends \PHPUnit\Framework\TestCase
     {
         parent::setUp();
 
-        $this->commandFactory = new CommandFactory();
+        $this->commandFactory = new CommandFactory(
+            self::JAVA_EXECUTABLE_PATH,
+            self::CSS_VALIDATOR_JAR_PATH
+        );
     }
 
     /**
      * @dataProvider createDataProvider
      */
-    public function testCreateFoo(
+    public function testCreate(
         string $url,
-        string $javaExecutablePath,
-        string $cssValidatorJarPath,
         string $vendorExtensionSeverityLevel,
         string $expectedExecutableCommand
     ) {
@@ -34,8 +38,6 @@ class CommandFactoryTest extends \PHPUnit\Framework\TestCase
             $expectedExecutableCommand,
             $this->commandFactory->create(
                 $url,
-                $javaExecutablePath,
-                $cssValidatorJarPath,
                 $vendorExtensionSeverityLevel
             )
         );
@@ -46,35 +48,39 @@ class CommandFactoryTest extends \PHPUnit\Framework\TestCase
         return [
             'vendorExtensionSeverityLevel=warn' => [
                 'url' => 'http://example.com/1',
-                'javaExecutablePath' => 'java',
-                'cssValidatorJarPath' => 'css-validator.jar',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'expectedExecutableCommand' =>
-                    'java -jar css-validator.jar -output ucn -vextwarning true "http://example.com/1" 2>&1',
+                'expectedExecutableCommand' => sprintf(
+                    '%s -jar %s -output ucn -vextwarning true "http://example.com/1" 2>&1',
+                    self::JAVA_EXECUTABLE_PATH,
+                    self::CSS_VALIDATOR_JAR_PATH
+                ),
             ],
             'vendorExtensionSeverityLevel=ignore' => [
                 'url' => 'http://example.com/2',
-                'javaExecutablePath' => 'java',
-                'cssValidatorJarPath' => '/usr/bin/css-validator.jar',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_IGNORE,
-                'expectedExecutableCommand' =>
-                    'java -jar /usr/bin/css-validator.jar -output ucn -vextwarning false "http://example.com/2" 2>&1',
+                'expectedExecutableCommand' => sprintf(
+                    '%s -jar %s -output ucn -vextwarning false "http://example.com/2" 2>&1',
+                    self::JAVA_EXECUTABLE_PATH,
+                    self::CSS_VALIDATOR_JAR_PATH
+                ),
             ],
             'vendorExtensionSeverityLevel=error' => [
                 'url' => 'http://example.com/3',
-                'javaExecutablePath' => '/bin/java',
-                'cssValidatorJarPath' => 'css-validator.jar',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_ERROR,
-                'expectedExecutableCommand' =>
-                    '/bin/java -jar css-validator.jar -output ucn -vextwarning false "http://example.com/3" 2>&1',
+                'expectedExecutableCommand' => sprintf(
+                    '%s -jar %s -output ucn -vextwarning false "http://example.com/3" 2>&1',
+                    self::JAVA_EXECUTABLE_PATH,
+                    self::CSS_VALIDATOR_JAR_PATH
+                ),
             ],
             'double quotes in url' => [
                 'url' => 'http://"example".com/',
-                'javaExecutablePath' => 'java',
-                'cssValidatorJarPath' => 'css-validator.jar',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'expectedExecutableCommand' =>
-                    'java -jar css-validator.jar -output ucn -vextwarning true "http://\"example\".com/" 2>&1',
+                'expectedExecutableCommand' => sprintf(
+                    '%s -jar %s -output ucn -vextwarning true "http://\"example\".com/" 2>&1',
+                    self::JAVA_EXECUTABLE_PATH,
+                    self::CSS_VALIDATOR_JAR_PATH
+                ),
             ],
         ];
     }

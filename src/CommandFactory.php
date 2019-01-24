@@ -7,12 +7,18 @@ class CommandFactory
     const JAVA_JAR_FLAG = '-jar';
     const OUTPUT_FORMAT = 'ucn';
 
-    public function create(
-        string $url,
-        string $javaExecutablePath,
-        string $cssValidatorJarPath,
-        string $vendorExtensionSeverityLevel
-    ): string {
+    private $javaExecutablePath;
+    private $cssValidatorJarPath;
+
+
+    public function __construct(string $javaExecutablePath, string $cssValidatorJarPath)
+    {
+        $this->javaExecutablePath = $javaExecutablePath;
+        $this->cssValidatorJarPath = $cssValidatorJarPath;
+    }
+
+    public function create(string $url, string $vendorExtensionSeverityLevel): string
+    {
         $options = [
             'output' => self::OUTPUT_FORMAT,
             'vextwarning' => VendorExtensionSeverityLevel::LEVEL_WARN === $vendorExtensionSeverityLevel
@@ -21,9 +27,9 @@ class CommandFactory
         ];
 
         $commandParts = [
-            $javaExecutablePath,
+            $this->javaExecutablePath,
             self::JAVA_JAR_FLAG,
-            $cssValidatorJarPath,
+            $this->cssValidatorJarPath,
             $this->createOptionsString($options),
             '"'.str_replace('"', '\"', $url).'"',
             '2>&1'
