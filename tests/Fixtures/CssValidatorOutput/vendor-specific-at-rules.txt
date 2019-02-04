@@ -1,8 +1,8 @@
 {vextwarning=false, output=ucn, lang=en, warning=2, medium=all, profile=css3}
 <?xml version='1.0' encoding="utf-8"?>
-<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="file:/tmp/9be0f2d981ccf4ea77e4f9dad3020ff6.html" date="2014-01-15T11:51:02Z" xml:lang="en">
+<observationresponse xmlns="http://www.w3.org/2009/10/unicorn/observationresponse" ref="{{ webPageUri }}" date="2014-01-15T11:51:02Z" xml:lang="en">
 
-    <message type="error" ref="file:/tmp/7e104bcdddbafaf368960c71df2f5c17.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="655"></context>
         <title>
             Sorry, the at-rule @-webkit-keyframes is not implemented.
@@ -13,7 +13,7 @@
     </message>
 
 
-    <message type="error" ref="file:/tmp/7e104bcdddbafaf368960c71df2f5c17.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="655"></context>
         <title>
             Sorry, the at-rule @-moz-keyframes is not implemented.
@@ -24,7 +24,7 @@
     </message>
 
 
-    <message type="error" ref="file:/tmp/7e104bcdddbafaf368960c71df2f5c17.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="655"></context>
         <title>
             Sorry, the at-rule @-o-keyframes is not implemented.
@@ -35,7 +35,7 @@
     </message>
 
 
-    <message type="error" ref="file:/tmp/7e104bcdddbafaf368960c71df2f5c17.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="791"></context>
         <title>
             Sorry, the at-rule @-ms-viewport is not implemented.
@@ -46,7 +46,7 @@
     </message>
 
 
-    <message type="error" ref="file:/tmp/7e104bcdddbafaf368960c71df2f5c17.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="915"></context>
         <title>
             Sorry, the at-rule @-webkit-keyframes is not implemented.
@@ -57,7 +57,7 @@
     </message>
 
 
-    <message type="error" ref="file:/tmp/7e104bcdddbafaf368960c71df2f5c17.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="916"></context>
         <title>
             Sorry, the at-rule @-webkit-keyframes is not implemented.
@@ -68,7 +68,7 @@
     </message>
 
 
-    <message type="error" ref="http://funded.io/vendor/css/animation.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="11"></context>
         <title>
             Sorry, the at-rule @-moz-keyframes is not implemented.
@@ -79,7 +79,7 @@
     </message>
 
 
-    <message type="error" ref="http://funded.io/vendor/css/animation.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="26"></context>
         <title>
             Sorry, the at-rule @-webkit-keyframes is not implemented.
@@ -90,7 +90,7 @@
     </message>
 
 
-    <message type="error" ref="http://funded.io/vendor/css/animation.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="41"></context>
         <title>
             Sorry, the at-rule @-o-keyframes is not implemented.
@@ -101,7 +101,7 @@
     </message>
 
 
-    <message type="error" ref="http://funded.io/vendor/css/animation.css">
+    <message type="error" ref="{{ cssSourceUri }}">
         <context line="56"></context>
         <title>
             Sorry, the at-rule @-ms-keyframes is not implemented.
@@ -111,12 +111,12 @@
         </typeid>
     </message>
 
-    <message type="warning" level="0" ref="file:/tmp/7e104bcdddbafaf368960c71df2f5c17.css">
+    <message type="warning" level="0" ref="{{ cssSourceUri }}s">
         <context line="6" ></context>
         <title>Property -webkit-text-size-adjust is an unknown vendor extension</title>
         <typeid>vendor-extension</typeid>
     </message>
-    <message type="warning" level="0" ref="file:/tmp/7e104bcdddbafaf368960c71df2f5c17.css">
+    <message type="warning" level="0" ref="{{ cssSourceUri }}">
         <context line="6" ></context>
         <title>Property -ms-text-size-adjust is an unknown vendor extension</title>
         <typeid>vendor-extension</typeid>

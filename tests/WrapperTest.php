@@ -5,264 +5,117 @@
 
 namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Uri;
 use Mockery\MockInterface;
-use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorOutput\Model\ErrorMessage;
-use webignition\CssValidatorOutput\Model\ExceptionOutput;
+use webignition\CssValidatorOutput\Model\MessageList;
+use webignition\CssValidatorOutput\Model\ObservationResponse;
+use webignition\CssValidatorOutput\Model\Options;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
-use webignition\CssValidatorWrapper\Configuration\Configuration;
-use webignition\CssValidatorWrapper\Configuration\VendorExtensionSeverityLevel;
-use webignition\CssValidatorWrapper\Wrapper;
-use webignition\CssValidatorWrapper\Tests\AbstractBaseTest;
+use webignition\CssValidatorOutput\Parser\OutputParser;
+use webignition\CssValidatorWrapper\CommandExecutor;
+use webignition\CssValidatorWrapper\CommandFactory;
+use webignition\CssValidatorWrapper\SourceType;
+use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
+use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\CssValidatorWrapper\OutputMutator;
+use webignition\CssValidatorWrapper\SourceHandler;
+use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
-use webignition\CssValidatorWrapper\Tests\Factory\ResponseFactory;
+use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
+use webignition\CssValidatorWrapper\Wrapper;
+use webignition\UrlSourceMap\Source;
+use webignition\UrlSourceMap\SourceMap;
+use webignition\WebResource\WebPage\WebPage;
 
-class WrapperTest extends AbstractBaseTest
+class WrapperTest extends \PHPUnit\Framework\TestCase
 {
-    /**
-     * @var Wrapper|MockInterface
-     */
-    private $wrapper;
+    const JAVA_EXECUTABLE_PATH = '/usr/bin/java';
+    const CSS_VALIDATOR_JAR_PATH = 'css-validator.jar';
+    const CSS_VALIDATOR_COMMAND = '/java -jar css-validator.jar -output ucn -vextwarning true "%s" 2>&1';
 
-    /**
-     * @inheritdoc
-     */
-    protected function setUp()
+    public function testValidateUnknownSourceExceptionForWebPage()
     {
-        parent::setUp();
-        $this->wrapper = new Wrapper();
-        $this->wrapper->setHttpClient($this->httpClient);
+        $webPage = WebPageFactory::create('content', new Uri('http://example.com/'));
+        $wrapper = $this->createWrapper(
+            new SourceStorage(),
+            new CommandFactory(self::JAVA_EXECUTABLE_PATH, self::CSS_VALIDATOR_JAR_PATH),
+            new CommandExecutor(new OutputParser())
+        );
+
+        $sourceHandler = new SourceHandler($webPage, new SourceMap());
+
+        $this->expectException(UnknownSourceException::class);
+        $this->expectExceptionCode(UnknownSourceException::CODE);
+        $this->expectExceptionMessage('Unknown source "http://example.com/"');
+
+        $wrapper->validate($sourceHandler, VendorExtensionSeverityLevel::LEVEL_WARN);
     }
 
-    /**
-     * @dataProvider validateInvalidContentTypeOnRootWebResourceDataProvider
-     */
-    public function testValidateErrorOnRootWebResource(array $httpFixtures, string $expectedExceptionString)
+    public function testValidateUnknownSourceExceptionForLinkedCssResource()
     {
-        $this->appendHttpFixtures($httpFixtures);
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-        ]);
-
-        /* @var ExceptionOutput $output */
-        $output = $this->wrapper->validate($configuration);
-
-        $this->assertInstanceOf(ExceptionOutput::class, $output);
-        $this->assertEquals($expectedExceptionString, (string) $output);
-    }
-
-    public function validateInvalidContentTypeOnRootWebResourceDataProvider(): array
-    {
-        $curl6ConnectException = new ConnectException(
-            'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
-            new Request('GET', 'http://example.com/')
+        $webPage = WebPageFactory::create(
+            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
+            new Uri('http://example.com/')
         );
 
-        $curl28ConnectException = new ConnectException(
-            'cURL error 28: Operation timeout..',
-            new Request('GET', 'http://example.com/')
+        $wrapper = $this->createWrapper(
+            new SourceStorage(),
+            new CommandFactory(self::JAVA_EXECUTABLE_PATH, self::CSS_VALIDATOR_JAR_PATH),
+            new CommandExecutor(new OutputParser())
         );
 
-        return [
-            'application/pdf' => [
-                'httpFixtures' => [
-                    ResponseFactory::create('application/pdf'),
-                ],
-                'expectedExceptionString' => 'invalid-content-type:application/pdf'
-            ],
-            'text/plain' => [
-                'httpFixtures' => [
-                    ResponseFactory::create('text/plain'),
-                ],
-                'expectedExceptionString' => 'invalid-content-type:text/plain'
-            ],
-            'http 410' => [
-                'httpFixtures' => [
-                    ResponseFactory::createHtmlResponse('', 410),
-                    ResponseFactory::createHtmlResponse('', 410),
-                ],
-                'expectedExceptionString' => 'http:410',
-            ],
-            'http 404' => [
-                'httpFixtures' => [
-                    ResponseFactory::createHtmlResponse('', 404),
-                    ResponseFactory::createHtmlResponse('', 404),
-                ],
-                'expectedExceptionString' => 'http:404',
-            ],
-            'http 500' => [
-                'httpFixtures' => [
-                    ResponseFactory::createHtmlResponse('', 500),
-                    ResponseFactory::createHtmlResponse('', 500),
-                ],
-                'expectedExceptionString' => 'http:500',
-            ],
-            'curl 6' => [
-                'httpFixtures' => [
-                    $curl6ConnectException,
-                    $curl6ConnectException,
-                ],
-                'expectedExceptionString' => 'curl:6',
-            ],
-            'curl 28' => [
-                'httpFixtures' => [
-                    $curl28ConnectException,
-                    $curl28ConnectException,
-                ],
-                'expectedExceptionString' => 'curl:28',
-            ],
-        ];
-    }
 
-    /**
-     * @dataProvider validateErrorOnLinkedCssResourceDataProvider
-     */
-    public function testValidateErrorOnLinkedCssResource(array $httpFixtures, ErrorMessage $expectedError)
-    {
-        $this->appendHttpFixtures($httpFixtures);
+        $sourceHandler = new SourceHandler($webPage, new SourceMap([
+            new Source('http://example.com/', 'non-empty string'),
+        ]));
 
-        $this->setCssValidatorRawOutput(
-            $this->loadCssValidatorRawOutputFixture('no-messages')
-        );
+        $this->expectException(UnknownSourceException::class);
+        $this->expectExceptionCode(UnknownSourceException::CODE);
+        $this->expectExceptionMessage('Unknown source "http://example.com/style.css"');
 
-        $configuration = new Configuration([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-        ]);
-
-        /* @var ValidationOutput $output */
-        $output = $this->wrapper->validate($configuration);
-        $this->assertInstanceOf(ValidationOutput::class, $output);
-
-        $messageList = $output->getMessages();
-        $this->assertEquals(1, $messageList->getErrorCount());
-
-        /* @var ErrorMessage[] $errorsForLinkedStylesheet */
-        $errorsForLinkedStylesheet = $messageList->getErrorsByRef('http://example.com/style.css');
-
-        $this->assertCount(1, $errorsForLinkedStylesheet);
-        $this->assertEquals($expectedError, $errorsForLinkedStylesheet[0]);
-    }
-
-    public function validateErrorOnLinkedCssResourceDataProvider(): array
-    {
-        $minimalHtml5SingleStylesheetHttpFixture = ResponseFactory::createHtmlResponse(
-            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
-        );
-
-        $curl6ConnectException = new ConnectException(
-            'cURL error 6: Couldn\'t resolve host. The given remote host was not resolved.',
-            new Request('GET', 'http://example.com/')
-        );
-
-        $curl28ConnectException = new ConnectException(
-            'cURL error 28: Operation timed out.',
-            new Request('GET', 'http://example.com/')
-        );
-
-        return [
-            'invalid content type' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    ResponseFactory::create(
-                        'text/plain'
-                    ),
-                ],
-                'expectedError' => new ErrorMessage(
-                    'invalid-content-type',
-                    0,
-                    'text/plain',
-                    'http://example.com/style.css'
-                ),
-            ],
-            'http 404' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    new Response(404),
-                    new Response(404),
-                ],
-                'expectedError' => new ErrorMessage(
-                    'http',
-                    0,
-                    '404',
-                    'http://example.com/style.css'
-                ),
-            ],
-            'http 500' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    new Response(500),
-                    new Response(500),
-                ],
-                'expectedError' => new ErrorMessage(
-                    'http',
-                    0,
-                    '500',
-                    'http://example.com/style.css'
-                ),
-            ],
-            'curl 6' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $curl6ConnectException,
-                    $curl6ConnectException,
-                ],
-                'expectedError' => new ErrorMessage(
-                    'curl',
-                    0,
-                    '6',
-                    'http://example.com/style.css'
-                ),
-            ],
-            'curl 28' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $curl28ConnectException,
-                    $curl28ConnectException,
-                ],
-                'expectedError' => new ErrorMessage(
-                    'curl',
-                    0,
-                    '28',
-                    'http://example.com/style.css'
-                ),
-            ],
-        ];
+        $wrapper->validate($sourceHandler, VendorExtensionSeverityLevel::LEVEL_WARN);
     }
 
     /**
      * @dataProvider validateSuccessDataProvider
      */
     public function testValidateSuccess(
-        array $httpFixtures,
-        string $cssValidatorRawOutput,
-        array $configurationValues,
+        SourceStorage $sourceStorage,
+        CommandFactory $commandFactory,
+        CommandExecutor $commandExecutor,
+        SourceMap $sourceMap,
+        string $sourceFixture,
+        string $sourceUrl,
+        string $vendorExtensionSeverityLevel,
+        OutputParserConfiguration $outputParserConfiguration,
+        array $expectedMessages,
         int $expectedWarningCount,
         int $expectedErrorCount,
         array $expectedErrorCountByUrl = []
     ) {
-        $this->appendHttpFixtures($httpFixtures);
-        $this->setCssValidatorRawOutput($cssValidatorRawOutput);
+        $webPage = WebPageFactory::create($sourceFixture, new Uri($sourceUrl));
+        $wrapper = $this->createWrapper($sourceStorage, $commandFactory, $commandExecutor);
 
-        $configuration = new Configuration(array_merge([
-            Configuration::CONFIG_KEY_URL_TO_VALIDATE => 'http://example.com/',
-        ], $configurationValues));
+        $sourceHandler = new SourceHandler($webPage, $sourceMap);
 
         /* @var ValidationOutput $output */
-        $output = $this->wrapper->validate($configuration);
+        $output = $wrapper->validate(
+            $sourceHandler,
+            $vendorExtensionSeverityLevel,
+            $outputParserConfiguration
+        );
+
         $this->assertInstanceOf(ValidationOutput::class, $output);
+
+        $observationResponse = $output->getObservationResponse();
+        $this->assertEquals($sourceUrl, $observationResponse->getRef());
 
         $messageList = $output->getMessages();
         $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
         $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
+        $this->assertEquals($expectedMessages, array_values($messageList->getMessages()));
 
         foreach ($expectedErrorCountByUrl as $url => $expectedErrorCountForUrl) {
             /* @var array $errorsByUrl */
@@ -274,333 +127,641 @@ class WrapperTest extends AbstractBaseTest
 
     public function validateSuccessDataProvider(): array
     {
-        $minimalHtml5HttpFixture = ResponseFactory::createHtmlResponse(
-            FixtureLoader::load('Html/minimal-html5.html')
+        $noStylesheetsHtml = FixtureLoader::load('Html/minimal-html5.html');
+        $singleStylesheetHtml = FixtureLoader::load('Html/minimal-html5-single-stylesheet.html');
+        $singleEmptyHrefStylesheetHtml = FixtureLoader::load('Html/minimal-html5-unavailable-stylesheet.html');
+        $cssNoMessagesPath = FixtureLoader::getPath('Css/valid-no-messages.css');
+        $cssWithImportPath = FixtureLoader::getPath('Css/valid-with-import.css');
+
+        $singleStylesheetHtmlRelBeforeHref = str_replace(
+            '<link href="/style.css" rel="stylesheet">',
+            '<link rel="stylesheet" href="/style.css">',
+            $singleStylesheetHtml
         );
 
-        $minimalHtml5SingleStylesheetHttpFixture = ResponseFactory::createHtmlResponse(
-            FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
-        );
+        $noStylesheetsSourceMap = new SourceMap([
+            new Source('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
+        ]);
 
-        $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture = ResponseFactory::createHtmlResponse(
-            FixtureLoader::load('Html/minimal-html5-two-stylesheets-different-domains.html')
-        );
+        $singleStylesheetValidNoMessagesSourceMap = new SourceMap([
+            new Source(
+                'http://example.com/',
+                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
+            ),
+            new Source('http://example.com/style.css', 'file:' . $cssNoMessagesPath),
+        ]);
 
-        $minimalHtml5TThreeStylesheetsHttpFixture = ResponseFactory::createHtmlResponse(
-            FixtureLoader::load('Html/minimal-html5-three-stylesheets.html')
-        );
+        $singleStylesheetWithImportsSourceMap = new SourceMap([
+            new Source(
+                'http://example.com/',
+                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
+            ),
+            new Source('http://example.com/style.css', 'file:' . $cssWithImportPath),
+            new Source(
+                'http://example.com/one.css',
+                'file:' . FixtureLoader::getPath('Css/one.css'),
+                SourceType::TYPE_IMPORT
+            ),
+        ]);
 
-        $minimalHtml5MalformedSingleStylesheetHttpFixture = ResponseFactory::createHtmlResponse(
-            FixtureLoader::load('Html/minimal-html5-malformed-single-stylesheet.html')
-        );
+        $singleStylesheetUnavailableSourceMap = new SourceMap([
+            new Source(
+                'http://example.com/',
+                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
+            ),
+            new Source('http://example.com/style.css'),
+        ]);
 
-        $genericCssHttpFixture = ResponseFactory::createCssResponse('foo');
+        $outputParserConfiguration = new OutputParserConfiguration();
 
         return [
-            'ignore false image data url messages' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture(
-                    'incorrect-data-url-background-image-errors'
+            'no CSS' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                    ]),
+                    $noStylesheetsHtml,
+                    $noStylesheetsSourceMap,
+                    []
                 ),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_FALSE_DATA_URL_MESSAGES => true,
-                    ]),
-                ],
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
+                'sourceMap' => $noStylesheetsSourceMap,
+                'sourceFixture' => $noStylesheetsHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'ignore warnings' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('single-warning'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
+            'linked stylesheet, no messages' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
-                ],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'vendor extension issues:warn and ignore warnings' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                        OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
-                    ]),
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_WARN,
-                ],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'ignore vendor extension warnings' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                    ]),
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_IGNORE,
-                ],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'ignore vendor extension errors' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_IGNORE_VENDOR_EXTENSION_ISSUES => true,
-                    ]),
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_IGNORE,
-                ],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'domains to ignore: ignore none' => [
-                'httpFixtures' => [
-                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-                'configurationValues' => [],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 3,
-                'expectedErrorCountByUrl' => [
-                    'http://one.example.com/style.css' => 1,
-                    'http://two.example.com/style.css' => 2,
-                ],
-            ],
-            'domains to ignore: ignore first of two' => [
-                'httpFixtures' => [
-                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
-                            'one.example.com',
+                    str_replace(
+                        [
+                            '<link rel="stylesheet" href="/style.css">',
                         ],
-                    ]),
-                ],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 2,
-                'expectedErrorCountByUrl' => [
-                    'http://two.example.com/style.css' => 2,
-                ],
-            ],
-            'domains to ignore: ignore second of two' => [
-                'httpFixtures' => [
-                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
-                            'two.example.com',
+                        [
+                            '<link rel="stylesheet" href="file:' . $cssNoMessagesPath . '">',
                         ],
+                        $singleStylesheetHtmlRelBeforeHref
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleStylesheetHtmlRelBeforeHref,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'empty-href linked stylesheet, no CSS to validate' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                     ]),
+                    str_replace(
+                        [
+                            '<link href="" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="">',
+                        ],
+                        $singleEmptyHrefStylesheetHtml
+                    ),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    []
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleEmptyHrefStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'unavailable linked stylesheet, stylesheet is ignored' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="/style.css">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetUnavailableSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetUnavailableSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'in-document CSS, single error' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                    ]),
+                    $noStylesheetsHtml,
+                    $noStylesheetsSourceMap,
+                    []
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList([
+                                new ErrorMessage('title content', 3, '.bar', ''),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
+                'sourceMap' => $noStylesheetsSourceMap,
+                'sourceFixture' => $noStylesheetsHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [
+                    new ErrorMessage('title content', 3, '.bar', ''),
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 1,
-                'expectedErrorCountByUrl' => [
-                    'http://one.example.com/style.css' => 1,
-                ],
             ],
-            'domains to ignore: ignore both' => [
-                'httpFixtures' => [
-                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-                    $minimalHtml5TwoStylesheetsDifferentDomainsHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('domains-to-ignore'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
-                            'one.example.com',
-                            'two.example.com',
+            'linked stylesheet, single error' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/style-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
                         ],
-                    ]),
-                ],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'encoded ampersands in css urls' => [
-                'httpFixtures' => [
-                    $minimalHtml5TThreeStylesheetsHttpFixture,
-                    $minimalHtml5TThreeStylesheetsHttpFixture,
-                    $minimalHtml5HttpFixture,
-                    $minimalHtml5HttpFixture,
-                    $minimalHtml5HttpFixture,
-                    $minimalHtml5HttpFixture,
-                    $minimalHtml5HttpFixture,
-                    $minimalHtml5HttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-                'configurationValues' => [],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'html5 no css no linked resources' => [
-                'httpFixtures' => [
-                    $minimalHtml5HttpFixture,
-                    $minimalHtml5HttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-                'configurationValues' => [],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'html5 content type with charset no css no linked resources' => [
-                'httpFixtures' => [
-                    ResponseFactory::create(
-                        'text/html; charset=utf-8',
-                        FixtureLoader::load('Html/minimal-html5.html')
+                        [
+                            '<link href="file:' . $cssNoMessagesPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
                     ),
-                    ResponseFactory::create(
-                        'text/html; charset=utf-8',
-                        FixtureLoader::load('Html/minimal-html5.html')
-                    ),
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-                'configurationValues' => [],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'html5 malformed single linked resource' => [
-                'httpFixtures' => [
-                    $minimalHtml5MalformedSingleStylesheetHttpFixture,
-                    $minimalHtml5MalformedSingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('no-messages'),
-                'configurationValues' => [],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 0,
-            ],
-            'vendor extension warnings: default' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'configurationValues' => [],
-                'expectedWarningCount' => 3,
-                'expectedErrorCount' => 0,
-            ],
-            'vendor extension warnings: warn' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-warnings'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_WARN,
-                ],
-                'expectedWarningCount' => 3,
-                'expectedErrorCount' => 0,
-            ],
-            'vendor extension warnings: error' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('three-vendor-extension-errors'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_ERROR,
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ]
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList([
+                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/style-hash.css'),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [
+                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/style.css'),
                 ],
                 'expectedWarningCount' => 0,
-                'expectedErrorCount' => 3,
+                'expectedErrorCount' => 1,
             ],
-            'vendor extension warnings: warn, with at-rule errors that should be warnings' => [
-                'httpFixtures' => [
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $minimalHtml5SingleStylesheetHttpFixture,
-                    $genericCssHttpFixture,
-                    $genericCssHttpFixture,
-                ],
-                'cssValidatorRawOutput' => $this->loadCssValidatorRawOutputFixture('vendor-specific-at-rules'),
-                'configurationValues' => [
-                    Configuration::CONFIG_KEY_VENDOR_EXTENSION_SEVERITY_LEVEL =>
-                        VendorExtensionSeverityLevel::LEVEL_WARN,
-                    Configuration::CONFIG_KEY_OUTPUT_PARSER_CONFIGURATION => new OutputParserConfiguration([
-                        OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
+            'linked stylesheet with import, no messages' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
-                ],
-                'expectedWarningCount' => 12,
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssWithImportPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetWithImportsSourceMap,
+                    [
+                        'http://example.com/style.css',
+                        'http://example.com/one.css',
+                    ]
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                    [
+                        'expectedUrl' => 'file:/tmp/valid-no-messages-hash.css',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+                    ],
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/valid-no-messages-hash.css',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/valid-no-messages-hash.css'
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
+            ],
+            'linked stylesheet with import, error in import' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssWithImportPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetWithImportsSourceMap,
+                    [
+                        'http://example.com/style.css',
+                        'http://example.com/one.css',
+                    ]
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                    [
+                        'expectedUrl' => 'file:/tmp/invalid-hash.css',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+                    ],
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/invalid-hash.css',
+                            new MessageList([
+                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/invalid-hash.css'),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/invalid-hash.css'
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [
+                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
+                ],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 1,
+            ],
+            'linked stylesheet with import, error in linked stylesheet, error in import' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:' . $cssWithImportPath . '" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    $singleStylesheetWithImportsSourceMap,
+                    [
+                        'http://example.com/style.css',
+                        'http://example.com/one.css',
+                    ]
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                    [
+                        'expectedUrl' => 'file:/tmp/invalid-import-hash.css',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList([
+                                new ErrorMessage('title content', 1, '.bar', 'file:/tmp/invalid-link-hash.css'),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+                    ],
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/invalid-import-hash.css',
+                            new MessageList([
+                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/invalid-import-hash.css'),
+                            ])
+                        ),
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedResourceUrl' => 'file:/tmp/invalid-import-hash.css'
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'outputParserConfiguration' => $outputParserConfiguration,
+                'expectedMessages' => [
+                    new ErrorMessage('title content', 1, '.bar', 'http://example.com/style.css'),
+                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
+                ],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 2,
             ],
         ];
     }
 
-    private function setCssValidatorRawOutput(string $rawOutput)
-    {
-        PHPMockery::mock(
-            'webignition\CssValidatorWrapper',
-            'shell_exec'
-        )->andReturn(
-            $rawOutput
+    private function createWrapper(
+        SourceStorage $sourceStorage,
+        CommandFactory $commandFactory,
+        CommandExecutor $commandExecutor
+    ): Wrapper {
+        return new Wrapper(
+            $sourceStorage,
+            new OutputMutator(),
+            $commandFactory,
+            $commandExecutor
         );
     }
 
-    private function loadCssValidatorRawOutputFixture(string $name): string
+    /**
+     * @return MockInterface|SourceStorage
+     */
+    private function createSourceStorage()
     {
-        return file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
+        $sourceStorage = \Mockery::mock(SourceStorage::class);
+
+        return $sourceStorage;
+    }
+
+    private function createSourceStorageWithValidateExpectations(
+        SourceMap $getPathsSourceMap,
+        string $expectedStoreWebPageContent,
+        SourceMap $expectedStoreSourceMap,
+        array $expectedStoreStylesheetUrls
+    ) {
+        $sourceStorage = $this->createSourceStorage();
+
+        $this->createSourceStorageStoreExpectation(
+            $sourceStorage,
+            $expectedStoreWebPageContent,
+            $expectedStoreSourceMap,
+            $expectedStoreStylesheetUrls
+        );
+
+        $this->createSourceStorageGetSourcesExpectation($sourceStorage, $getPathsSourceMap);
+        $this->createSourceStorageDeleteAllExpectation($sourceStorage);
+
+        return $sourceStorage;
+    }
+
+    private function createSourceStorageStoreExpectation(
+        MockInterface $sourceStorageMock,
+        string $expectedWebPageContent,
+        SourceMap $expectedSourceMap,
+        array $expectedStylesheetUrls
+    ) {
+        $sourceStorageMock
+            ->shouldReceive('store')
+            ->withArgs(function (
+                WebPage $webPage,
+                SourceMap $sourceMap,
+                array $stylesheetUrls
+            ) use (
+                $expectedWebPageContent,
+                $expectedSourceMap,
+                $expectedStylesheetUrls
+            ) {
+                $this->assertEquals($expectedWebPageContent, $webPage->getContent());
+                $this->assertEquals($expectedSourceMap, $sourceMap);
+                $this->assertEquals($expectedStylesheetUrls, $stylesheetUrls);
+
+                return true;
+            });
+
+        return $sourceStorageMock;
+    }
+
+
+    private function createSourceStorageGetSourcesExpectation(MockInterface $sourceStorageMock, SourceMap $paths)
+    {
+        $sourceStorageMock
+            ->shouldReceive('getSources')
+            ->andReturn($paths);
+
+        return $sourceStorageMock;
+    }
+
+    private function createSourceStorageDeleteAllExpectation(MockInterface $sourceStorageMock)
+    {
+        $sourceStorageMock
+            ->shouldReceive('deleteAll');
+
+        return $sourceStorageMock;
+    }
+
+    /**
+     * @return MockInterface|CommandExecutor
+     */
+    private function createCommandExecutor(array $calls): MockInterface
+    {
+        $commandExecutor = \Mockery::mock(CommandExecutor::class);
+
+        foreach ($calls as $call) {
+            $output = $call['output'];
+            $expectedOutputParserConfiguration = $call['expectedOutputParserConfiguration'];
+            $expectedResourceUrl = $call['expectedResourceUrl'];
+
+            $expectedCommand = sprintf(
+                self::CSS_VALIDATOR_COMMAND,
+                $expectedResourceUrl
+            );
+
+            $commandExecutor
+                ->shouldReceive('execute')
+                ->with($expectedCommand, $expectedOutputParserConfiguration)
+                ->andReturn($output);
+        }
+
+        return $commandExecutor;
+    }
+
+    /**
+     * @return MockInterface|CommandFactory
+     */
+    private function createCommandFactory(array $calls): MockInterface
+    {
+        $commandFactory = \Mockery::mock(CommandFactory::class);
+
+        foreach ($calls as $call) {
+            $expectedUrl = $call['expectedUrl'];
+            $expectedVendorExtensionSeverityLevel = $call['expectedVendorExtensionSeverityLevel'];
+
+            $commandFactory
+                ->shouldReceive('create')
+                ->with($expectedUrl, $expectedVendorExtensionSeverityLevel)
+                ->andReturn(sprintf(
+                    self::CSS_VALIDATOR_COMMAND,
+                    $expectedUrl
+                ));
+        }
+
+        return $commandFactory;
+    }
+
+    private function createValidationOutput(string $observationResponseRef, MessageList $messageList): ValidationOutput
+    {
+        $options = new Options(false, 'ucn', 'en', 0, 'all', 'css3');
+        $observationResponse = new ObservationResponse($observationResponseRef, new \DateTime(), $messageList);
+
+        return new ValidationOutput($options, $observationResponse);
     }
 
     protected function tearDown()
