@@ -43,11 +43,11 @@ class Wrapper
         ?OutputParserConfiguration $outputParserConfiguration = null
     ): OutputInterface {
         $webPage = $sourceHandler->getWebPage();
-        $sourceMap = $sourceHandler->getSourceMap();
+        $remoteSources = $sourceHandler->getSourceMap();
         $sourceInspector = $sourceHandler->getInspector();
 
         $webPageUri = (string) $webPage->getUri();
-        $webPageSource = $sourceMap->getByUri($webPageUri);
+        $webPageSource = $remoteSources->getByUri($webPageUri);
 
         if (empty($webPageSource)) {
             throw new UnknownSourceException($webPageUri);
@@ -55,13 +55,13 @@ class Wrapper
 
         $embeddedStylesheetUrls = $sourceInspector->findStylesheetUrls();
         foreach ($embeddedStylesheetUrls as $stylesheetUrl) {
-            if (!$sourceMap->getByUri($stylesheetUrl)) {
+            if (!$remoteSources->getByUri($stylesheetUrl)) {
                 throw new UnknownSourceException($stylesheetUrl);
             }
         }
 
         $importedStylesheetUrls = [];
-        $importSources = $sourceMap->byType(SourceType::TYPE_IMPORT);
+        $importSources = $remoteSources->byType(SourceType::TYPE_IMPORT);
         foreach ($importSources as $importSource) {
             $importedStylesheetUrls[] = $importSource->getUri();
         }
@@ -73,9 +73,8 @@ class Wrapper
         $stylesheetReferences = $sourceInspector->findStylesheetReferences();
         $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($stylesheetReferences);
 
-        $this->sourceStorage->store($mutatedWebPage, $sourceMap, $stylesheetUrls);
+        $localSources = $this->sourceStorage->store($mutatedWebPage, $remoteSources, $stylesheetUrls);
 
-        $localSources = $this->sourceStorage->getSources();
         $webPageLocalSource = $localSources[$webPageUri];
 
         $command = $this->commandFactory->create($webPageLocalSource->getMappedUri(), $vendorExtensionSeverityLevel);
@@ -105,7 +104,8 @@ class Wrapper
             $output = $this->outputMutator->setMessagesRef($output, $localSources);
         }
 
-        $this->sourceStorage->deleteAll();
+        $sourcePurger = new SourcePurger();
+        $sourcePurger->purge($localSources);
 
         return $output;
     }

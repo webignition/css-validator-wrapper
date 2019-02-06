@@ -16,7 +16,6 @@ use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfigura
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandExecutor;
 use webignition\CssValidatorWrapper\CommandFactory;
-use webignition\CssValidatorWrapper\ResourceStorage;
 use webignition\CssValidatorWrapper\SourceType;
 use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
@@ -38,12 +37,9 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
     public function testValidateUnknownSourceExceptionForWebPage()
     {
-        $localSources = new SourceMap();
-        $resourceStorage = new ResourceStorage($localSources);
-
         $webPage = WebPageFactory::create('content', new Uri('http://example.com/'));
         $wrapper = $this->createWrapper(
-            new SourceStorage($resourceStorage),
+            new SourceStorage(),
             new CommandFactory(self::JAVA_EXECUTABLE_PATH, self::CSS_VALIDATOR_JAR_PATH),
             new CommandExecutor(new OutputParser())
         );
@@ -64,11 +60,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             new Uri('http://example.com/')
         );
 
-        $localSources = new SourceMap();
-        $resourceStorage = new ResourceStorage($localSources);
-
         $wrapper = $this->createWrapper(
-            new SourceStorage($resourceStorage),
+            new SourceStorage(),
             new CommandFactory(self::JAVA_EXECUTABLE_PATH, self::CSS_VALIDATOR_JAR_PATH),
             new CommandExecutor(new OutputParser())
         );
@@ -649,7 +642,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     }
 
     private function createSourceStorageWithValidateExpectations(
-        SourceMap $getPathsSourceMap,
+        SourceMap $expectedLocalSourceMap,
         string $expectedStoreWebPageContent,
         SourceMap $expectedStoreSourceMap,
         array $expectedStoreStylesheetUrls
@@ -660,10 +653,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $sourceStorage,
             $expectedStoreWebPageContent,
             $expectedStoreSourceMap,
+            $expectedLocalSourceMap,
             $expectedStoreStylesheetUrls
         );
 
-        $this->createSourceStorageGetSourcesExpectation($sourceStorage, $getPathsSourceMap);
         $this->createSourceStorageDeleteAllExpectation($sourceStorage);
 
         return $sourceStorage;
@@ -673,6 +666,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         MockInterface $sourceStorageMock,
         string $expectedWebPageContent,
         SourceMap $expectedSourceMap,
+        SourceMap $expectedLocalSourceMap,
         array $expectedStylesheetUrls
     ) {
         $sourceStorageMock
@@ -691,17 +685,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 $this->assertEquals($expectedStylesheetUrls, $stylesheetUrls);
 
                 return true;
-            });
-
-        return $sourceStorageMock;
-    }
-
-
-    private function createSourceStorageGetSourcesExpectation(MockInterface $sourceStorageMock, SourceMap $paths)
-    {
-        $sourceStorageMock
-            ->shouldReceive('getSources')
-            ->andReturn($paths);
+            })
+            ->andReturn($expectedLocalSourceMap);
 
         return $sourceStorageMock;
     }
