@@ -1,7 +1,7 @@
 <?php
 /** @noinspection PhpDocSignatureInspection */
 
-namespace webignition\CssValidatorWrapper\Tests\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests;
 
 use webignition\CssValidatorWrapper\StringUtils;
 

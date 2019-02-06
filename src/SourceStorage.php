@@ -45,7 +45,7 @@ class SourceStorage
         foreach ($stylesheetUrls as $stylesheetUrl) {
             $source = $remoteSources->getByUri($stylesheetUrl);
 
-            if ($source->isAvailable()) {
+            if ($source && is_string($source->getMappedUri()) && $source->isAvailable()) {
                 $localPath = preg_replace('/^file:/', '', $source->getMappedUri());
 
                 $this->resourceStorage->duplicate($localSources, $stylesheetUrl, $localPath, 'css');

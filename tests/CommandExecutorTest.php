@@ -2,7 +2,7 @@
 /** @noinspection PhpDocSignatureInspection */
 /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace webignition\CssValidatorWrapper\Tests\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests;
 
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
@@ -42,9 +42,11 @@ class CommandExecutorTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(ValidationOutput::class, $output);
 
-        $messageList = $output->getMessages();
-        $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
-        $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
+        if ($output instanceof ValidationOutput) {
+            $messageList = $output->getMessages();
+            $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
+            $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
+        }
     }
 
     public function executeDataProvider(): array
@@ -132,7 +134,7 @@ class CommandExecutorTest extends \PHPUnit\Framework\TestCase
 
     private function loadCssValidatorRawOutputFixture(string $name, array $replacements = []): string
     {
-        $fixtureContent = file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
+        $fixtureContent = (string) file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
 
         foreach ($replacements as $search => $replace) {
             $fixtureContent = str_replace($search, $replace, $fixtureContent);

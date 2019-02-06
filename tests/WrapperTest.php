@@ -3,7 +3,7 @@
 /** @noinspection PhpDocMissingThrowsInspection */
 /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace webignition\CssValidatorWrapper\Tests\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests;
 
 use GuzzleHttp\Psr7\Uri;
 use Mockery\MockInterface;
@@ -109,19 +109,21 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(ValidationOutput::class, $output);
 
-        $observationResponse = $output->getObservationResponse();
-        $this->assertEquals($sourceUrl, $observationResponse->getRef());
+        if ($output instanceof ValidationOutput) {
+            $observationResponse = $output->getObservationResponse();
+            $this->assertEquals($sourceUrl, $observationResponse->getRef());
 
-        $messageList = $output->getMessages();
-        $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
-        $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
-        $this->assertEquals($expectedMessages, array_values($messageList->getMessages()));
+            $messageList = $output->getMessages();
+            $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
+            $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
+            $this->assertEquals($expectedMessages, array_values($messageList->getMessages()));
 
-        foreach ($expectedErrorCountByUrl as $url => $expectedErrorCountForUrl) {
-            /* @var array $errorsByUrl */
-            $errorsByUrl = $messageList->getErrorsByRef($url);
+            foreach ($expectedErrorCountByUrl as $url => $expectedErrorCountForUrl) {
+                /* @var array $errorsByUrl */
+                $errorsByUrl = $messageList->getErrorsByRef($url);
 
-            $this->assertCount($expectedErrorCountForUrl, $errorsByUrl);
+                $this->assertCount($expectedErrorCountForUrl, $errorsByUrl);
+            }
         }
     }
 
@@ -643,7 +645,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
     private function createSourceStorageWithValidateExpectations(
         SourceMap $expectedLocalSourceMap,
-        string $expectedStoreWebPageContent,
+        $expectedStoreWebPageContent,
         SourceMap $expectedStoreSourceMap,
         array $expectedStoreStylesheetUrls
     ) {
@@ -702,7 +704,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     /**
      * @return MockInterface|CommandExecutor
      */
-    private function createCommandExecutor(array $calls): MockInterface
+    private function createCommandExecutor(array $calls)
     {
         $commandExecutor = \Mockery::mock(CommandExecutor::class);
 

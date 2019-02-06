@@ -2,7 +2,7 @@
 /** @noinspection PhpDocSignatureInspection */
 /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace webignition\CssValidatorWrapper\Tests\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests;
 
 use GuzzleHttp\Psr7\Uri;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
@@ -103,10 +103,14 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         foreach ($expectedStoredResources as $url => $expectedContent) {
             $source = $localSources[$url];
 
-            $this->assertEquals(
-                $expectedContent,
-                file_get_contents(preg_replace('/^file:/', '', $source->getMappedUri()))
-            );
+            if ($source) {
+                $mappedUri = (string) $source->getMappedUri();
+
+                $this->assertEquals(
+                    $expectedContent,
+                    file_get_contents((string) preg_replace('/^file:/', '', $mappedUri))
+                );
+            }
         }
 
         $sourcePurger = new SourcePurger();

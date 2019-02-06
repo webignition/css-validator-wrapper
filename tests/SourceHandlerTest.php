@@ -2,7 +2,7 @@
 /** @noinspection PhpUnhandledExceptionInspection */
 /** @noinspection PhpDocSignatureInspection */
 
-namespace webignition\CssValidatorWrapper\Tests\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests;
 
 use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceInspector;
@@ -64,17 +64,24 @@ class SourceHandlerTest extends \PHPUnit\Framework\TestCase
 
         /* @var WebPage $webPage */
         $webPage = WebPage::createFromContent($encodedContent);
+        $this->assertInstanceOf(WebPage::class, $webPage);
 
         $expectedContent = mb_convert_encoding($encodedContent, 'utf-8', $encoding);
 
-        $sourceHandler = new SourceHandler($webPage, new SourceMap());
-        $mutatedWebPage = $sourceHandler->getWebPage();
+        if ($webPage instanceof WebPage) {
+            $sourceHandler = new SourceHandler($webPage, new SourceMap());
 
-        $this->assertNotSame($webPage, $mutatedWebPage);
-        $this->assertEquals($webPage->getCharacterSet(), $mutatedWebPage->getCharacterSet());
-        $this->assertNotEquals($webPage->getCharacterEncoding(), $mutatedWebPage->getCharacterEncoding());
-        $this->assertEquals('utf-8', $mutatedWebPage->getCharacterEncoding());
-        $this->assertEquals($expectedContent, $mutatedWebPage->getContent());
+            $mutatedWebPage = $sourceHandler->getWebPage();
+            $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
+
+            if ($mutatedWebPage instanceof WebPage) {
+                $this->assertNotSame($webPage, $mutatedWebPage);
+                $this->assertEquals($webPage->getCharacterSet(), $mutatedWebPage->getCharacterSet());
+                $this->assertNotEquals($webPage->getCharacterEncoding(), $mutatedWebPage->getCharacterEncoding());
+                $this->assertEquals('utf-8', $mutatedWebPage->getCharacterEncoding());
+                $this->assertEquals($expectedContent, $mutatedWebPage->getContent());
+            }
+        }
     }
 
     public function hasContentEncodingChangesDataProvider(): array

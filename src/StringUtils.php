@@ -50,6 +50,8 @@ class StringUtils
         string $encoding,
         ?int $offset = 0
     ) {
+        $offset = $offset ?? 0;
+
         $fragment = mb_substr(
             $content,
             $offset,
@@ -59,7 +61,7 @@ class StringUtils
 
         $targetPosition = null;
         $targetPositionOffset = 0;
-        $targetLength = mb_strlen($target, $encoding);
+        $targetLength = (int) mb_strlen($target, $encoding);
 
         $mutableFragment = $fragment;
 

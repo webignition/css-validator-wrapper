@@ -78,16 +78,17 @@ class SourceInspector
             $webPageFragment = $webPageContent;
 
             while (null !== ($reference = $this->findStylesheetUrlReference($webPageFragment, $hrefValue, $encoding))) {
+                $reference = (string) $reference;
                 $references[] = $reference;
 
-                $referencePosition = mb_strpos($webPageFragment, $reference, null, $encoding);
+                $referencePosition = mb_strpos($webPageFragment, $reference, 0, $encoding);
                 $referenceLength = mb_strlen($reference);
 
                 $webPageFragment = mb_substr($webPageFragment, $referencePosition + $referenceLength, null, $encoding);
             }
         }
 
-        return array_values(array_unique($references));
+        return array_values(array_unique($references, SORT_STRING));
     }
 
     /**
@@ -108,7 +109,7 @@ class SourceInspector
 
         $content = $this->webPage->getContent();
 
-        $referenceStartPosition = mb_strpos($content, $reference, null, $encoding);
+        $referenceStartPosition = mb_strpos($content, $reference, 0, $encoding);
 
         if (false === $referenceStartPosition) {
             return $fragments;
@@ -132,14 +133,7 @@ class SourceInspector
         return $fragments;
     }
 
-    /**
-     * @param string $content
-     * @param string $hrefValue
-     * @param string $encoding
-     *
-     * @return null
-     */
-    private function findStylesheetUrlReference(string $content, string $hrefValue, string $encoding)
+    private function findStylesheetUrlReference(string $content, string $hrefValue, string $encoding): ?string
     {
         $hrefValueStartPosition = mb_strpos($content, $hrefValue, 0, $encoding);
 
