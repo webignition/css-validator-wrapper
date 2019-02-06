@@ -35,24 +35,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     const CSS_VALIDATOR_JAR_PATH = 'css-validator.jar';
     const CSS_VALIDATOR_COMMAND = '/java -jar css-validator.jar -output ucn -vextwarning true "%s" 2>&1';
 
-    public function testValidateUnknownSourceExceptionForWebPage()
-    {
-        $webPage = WebPageFactory::create('content', new Uri('http://example.com/'));
-        $wrapper = $this->createWrapper(
-            new SourceStorage(),
-            new CommandFactory(self::JAVA_EXECUTABLE_PATH, self::CSS_VALIDATOR_JAR_PATH),
-            new CommandExecutor(new OutputParser())
-        );
-
-        $sourceHandler = new SourceHandler($webPage, new SourceMap());
-
-        $this->expectException(UnknownSourceException::class);
-        $this->expectExceptionCode(UnknownSourceException::CODE);
-        $this->expectExceptionMessage('Unknown source "http://example.com/"');
-
-        $wrapper->validate($sourceHandler, VendorExtensionSeverityLevel::LEVEL_WARN);
-    }
-
     public function testValidateUnknownSourceExceptionForLinkedCssResource()
     {
         $webPage = WebPageFactory::create(
