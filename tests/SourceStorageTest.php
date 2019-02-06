@@ -6,8 +6,8 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use GuzzleHttp\Psr7\Uri;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
-use webignition\CssValidatorWrapper\ResourceStorage;
 use webignition\CssValidatorWrapper\SourceInspector;
+use webignition\CssValidatorWrapper\SourcePurger;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
@@ -25,11 +25,8 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         SourceMap $sourceMap,
         string $expectedExceptionMessage
     ) {
-        $localSources = new SourceMap();
-        $resourceStorage = new ResourceStorage($localSources);
-
         $sourceInspector = new SourceInspector($webPage);
-        $sourceStorage = new SourceStorage($resourceStorage);
+        $sourceStorage = new SourceStorage();
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
 
         $this->expectException(UnknownSourceException::class);
@@ -95,14 +92,11 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
             file_put_contents($filename, $content);
         }
 
-        $localSources = new SourceMap();
-        $resourceStorage = new ResourceStorage($localSources);
-
         $sourceInspector = new SourceInspector($webPage);
-        $sourceStorage = new SourceStorage($resourceStorage);
+        $sourceStorage = new SourceStorage();
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
 
-        $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
+        $localSources = $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
 
         $this->assertEquals(count($expectedStoredResources), count($localSources));
 
@@ -115,7 +109,8 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
             );
         }
 
-        $sourceStorage->deleteAll();
+        $sourcePurger = new SourcePurger();
+        $sourcePurger->purgeLocalResources($localSources);
     }
 
     public function storeSuccessDataProvider()
