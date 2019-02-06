@@ -87,7 +87,7 @@ class SourceInspector
             }
         }
 
-        return array_values(array_unique($references));
+        return array_values(array_unique($references, SORT_STRING));
     }
 
     /**
@@ -132,14 +132,7 @@ class SourceInspector
         return $fragments;
     }
 
-    /**
-     * @param string $content
-     * @param string $hrefValue
-     * @param string $encoding
-     *
-     * @return null
-     */
-    private function findStylesheetUrlReference(string $content, string $hrefValue, string $encoding)
+    private function findStylesheetUrlReference(string $content, string $hrefValue, string $encoding): ?string
     {
         $hrefValueStartPosition = mb_strpos($content, $hrefValue, 0, $encoding);
 
