@@ -59,7 +59,7 @@ class StringUtils
 
         $targetPosition = null;
         $targetPositionOffset = 0;
-        $targetLength = mb_strlen($target, $encoding);
+        $targetLength = (int) mb_strlen($target, $encoding);
 
         $mutableFragment = $fragment;
 

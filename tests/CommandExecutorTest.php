@@ -134,7 +134,7 @@ class CommandExecutorTest extends \PHPUnit\Framework\TestCase
 
     private function loadCssValidatorRawOutputFixture(string $name, array $replacements = []): string
     {
-        $fixtureContent = file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
+        $fixtureContent = (string) file_get_contents(__DIR__ . '/Fixtures/CssValidatorOutput/' . $name . '.txt');
 
         foreach ($replacements as $search => $replace) {
             $fixtureContent = str_replace($search, $replace, $fixtureContent);

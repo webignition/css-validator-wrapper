@@ -645,7 +645,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
     private function createSourceStorageWithValidateExpectations(
         SourceMap $expectedLocalSourceMap,
-        string $expectedStoreWebPageContent,
+        $expectedStoreWebPageContent,
         SourceMap $expectedStoreSourceMap,
         array $expectedStoreStylesheetUrls
     ) {
