@@ -80,7 +80,7 @@ class SourceInspector
             while (null !== ($reference = $this->findStylesheetUrlReference($webPageFragment, $hrefValue, $encoding))) {
                 $references[] = $reference;
 
-                $referencePosition = mb_strpos($webPageFragment, $reference, null, $encoding);
+                $referencePosition = mb_strpos($webPageFragment, $reference, 0, $encoding);
                 $referenceLength = mb_strlen($reference);
 
                 $webPageFragment = mb_substr($webPageFragment, $referencePosition + $referenceLength, null, $encoding);
@@ -108,7 +108,7 @@ class SourceInspector
 
         $content = $this->webPage->getContent();
 
-        $referenceStartPosition = mb_strpos($content, $reference, null, $encoding);
+        $referenceStartPosition = mb_strpos($content, $reference, 0, $encoding);
 
         if (false === $referenceStartPosition) {
             return $fragments;

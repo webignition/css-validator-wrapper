@@ -68,17 +68,19 @@ class SourceHandlerTest extends \PHPUnit\Framework\TestCase
 
         $expectedContent = mb_convert_encoding($encodedContent, 'utf-8', $encoding);
 
-        $sourceHandler = new SourceHandler($webPage, new SourceMap());
-        $mutatedWebPage = $sourceHandler->getWebPage();
+        if ($webPage instanceof WebPage) {
+            $sourceHandler = new SourceHandler($webPage, new SourceMap());
 
-        $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
+            $mutatedWebPage = $sourceHandler->getWebPage();
+            $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
 
-        if ($webPage instanceof  WebPage && $mutatedWebPage instanceof WebPage) {
-            $this->assertNotSame($webPage, $mutatedWebPage);
-            $this->assertEquals($webPage->getCharacterSet(), $mutatedWebPage->getCharacterSet());
-            $this->assertNotEquals($webPage->getCharacterEncoding(), $mutatedWebPage->getCharacterEncoding());
-            $this->assertEquals('utf-8', $mutatedWebPage->getCharacterEncoding());
-            $this->assertEquals($expectedContent, $mutatedWebPage->getContent());
+            if ($mutatedWebPage instanceof WebPage) {
+                $this->assertNotSame($webPage, $mutatedWebPage);
+                $this->assertEquals($webPage->getCharacterSet(), $mutatedWebPage->getCharacterSet());
+                $this->assertNotEquals($webPage->getCharacterEncoding(), $mutatedWebPage->getCharacterEncoding());
+                $this->assertEquals('utf-8', $mutatedWebPage->getCharacterEncoding());
+                $this->assertEquals($expectedContent, $mutatedWebPage->getContent());
+            }
         }
     }
 

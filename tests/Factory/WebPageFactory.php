@@ -20,8 +20,13 @@ class WebPageFactory
         $webPage = WebPage::createFromContent($content, $contentType);
         $webPage = $webPage->setUri($uri);
 
-        $sourceHandler = new SourceHandler($webPage, new SourceMap());
+        if ($webPage instanceof WebPage) {
+            $sourceHandler = new SourceHandler($webPage, new SourceMap());
 
-        return $sourceHandler->getWebPage();
+            return $sourceHandler->getWebPage();
+        }
+
+        /** @noinspection PhpUnhandledExceptionInspection */
+        return new WebPage();
     }
 }
