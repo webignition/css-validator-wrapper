@@ -42,9 +42,11 @@ class CommandExecutorTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(ValidationOutput::class, $output);
 
-        $messageList = $output->getMessages();
-        $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
-        $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
+        if ($output instanceof ValidationOutput) {
+            $messageList = $output->getMessages();
+            $this->assertEquals($expectedWarningCount, $messageList->getWarningCount());
+            $this->assertEquals($expectedErrorCount, $messageList->getErrorCount());
+        }
     }
 
     public function executeDataProvider(): array

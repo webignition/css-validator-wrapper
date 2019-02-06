@@ -64,17 +64,22 @@ class SourceHandlerTest extends \PHPUnit\Framework\TestCase
 
         /* @var WebPage $webPage */
         $webPage = WebPage::createFromContent($encodedContent);
+        $this->assertInstanceOf(WebPage::class, $webPage);
 
         $expectedContent = mb_convert_encoding($encodedContent, 'utf-8', $encoding);
 
         $sourceHandler = new SourceHandler($webPage, new SourceMap());
         $mutatedWebPage = $sourceHandler->getWebPage();
 
-        $this->assertNotSame($webPage, $mutatedWebPage);
-        $this->assertEquals($webPage->getCharacterSet(), $mutatedWebPage->getCharacterSet());
-        $this->assertNotEquals($webPage->getCharacterEncoding(), $mutatedWebPage->getCharacterEncoding());
-        $this->assertEquals('utf-8', $mutatedWebPage->getCharacterEncoding());
-        $this->assertEquals($expectedContent, $mutatedWebPage->getContent());
+        $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
+
+        if ($webPage instanceof  WebPage && $mutatedWebPage instanceof WebPage) {
+            $this->assertNotSame($webPage, $mutatedWebPage);
+            $this->assertEquals($webPage->getCharacterSet(), $mutatedWebPage->getCharacterSet());
+            $this->assertNotEquals($webPage->getCharacterEncoding(), $mutatedWebPage->getCharacterEncoding());
+            $this->assertEquals('utf-8', $mutatedWebPage->getCharacterEncoding());
+            $this->assertEquals($expectedContent, $mutatedWebPage->getContent());
+        }
     }
 
     public function hasContentEncodingChangesDataProvider(): array
