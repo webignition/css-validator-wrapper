@@ -642,7 +642,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     }
 
     private function createSourceStorageWithValidateExpectations(
-        SourceMap $getPathsSourceMap,
+        SourceMap $expectedLocalSourceMap,
         string $expectedStoreWebPageContent,
         SourceMap $expectedStoreSourceMap,
         array $expectedStoreStylesheetUrls
@@ -653,10 +653,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $sourceStorage,
             $expectedStoreWebPageContent,
             $expectedStoreSourceMap,
+            $expectedLocalSourceMap,
             $expectedStoreStylesheetUrls
         );
 
-        $this->createSourceStorageGetSourcesExpectation($sourceStorage, $getPathsSourceMap);
         $this->createSourceStorageDeleteAllExpectation($sourceStorage);
 
         return $sourceStorage;
@@ -666,6 +666,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         MockInterface $sourceStorageMock,
         string $expectedWebPageContent,
         SourceMap $expectedSourceMap,
+        SourceMap $expectedLocalSourceMap,
         array $expectedStylesheetUrls
     ) {
         $sourceStorageMock
@@ -684,17 +685,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 $this->assertEquals($expectedStylesheetUrls, $stylesheetUrls);
 
                 return true;
-            });
-
-        return $sourceStorageMock;
-    }
-
-
-    private function createSourceStorageGetSourcesExpectation(MockInterface $sourceStorageMock, SourceMap $paths)
-    {
-        $sourceStorageMock
-            ->shouldReceive('getSources')
-            ->andReturn($paths);
+            })
+            ->andReturn($expectedLocalSourceMap);
 
         return $sourceStorageMock;
     }

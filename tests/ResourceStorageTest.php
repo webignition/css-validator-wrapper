@@ -5,6 +5,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorWrapper\ResourceStorage;
+use webignition\CssValidatorWrapper\SourcePurger;
 use webignition\UrlSourceMap\Source;
 use webignition\UrlSourceMap\SourceMap;
 
@@ -26,16 +27,17 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $this->mockMicrotime(self::MICROTIME);
         $this->mockMd5($content . self::MICROTIME, $filenameHash);
 
-        $paths = new SourceMap();
-        $resourceStorage = new ResourceStorage($paths);
+        $localSources = new SourceMap();
+        $resourceStorage = new ResourceStorage();
 
-        $path = $resourceStorage->store($uri, $content, $type);
+        $path = $resourceStorage->store($localSources, $uri, $content, $type);
         $expectedSource = new Source($uri, 'file:' . $path);
 
         $this->assertStoredFile($expectedPath, $path, $content);
-        $this->assertEquals($expectedSource, $paths[$uri]);
+        $this->assertEquals($expectedSource, $localSources[$uri]);
 
-        $resourceStorage->deleteAll();
+        $sourcePurger = new SourcePurger();
+        $sourcePurger->purgeLocalResources($localSources);
 
         $this->assertFalse(file_exists($expectedPath));
     }
@@ -77,16 +79,17 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $this->mockMicrotime(self::MICROTIME);
         $this->mockMd5($localPath . self::MICROTIME, $filenameHash);
 
-        $paths = new SourceMap();
-        $resourceStorage = new ResourceStorage($paths);
+        $localSources = new SourceMap();
+        $resourceStorage = new ResourceStorage();
 
-        $path = $resourceStorage->duplicate($uri, $localPath, $type);
+        $path = $resourceStorage->duplicate($localSources, $uri, $localPath, $type);
         $expectedSource = new Source($uri, 'file:' . $path);
 
         $this->assertStoredFile($expectedPath, $path, $content);
-        $this->assertEquals($expectedSource, $paths[$uri]);
+        $this->assertEquals($expectedSource, $localSources[$uri]);
 
-        $resourceStorage->deleteAll();
+        $sourcePurger = new SourcePurger();
+        $sourcePurger->purgeLocalResources($localSources);
 
         $this->assertFalse(file_exists($expectedPath));
         @unlink($localPath);

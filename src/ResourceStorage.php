@@ -7,36 +7,34 @@ use webignition\UrlSourceMap\SourceMap;
 
 class ResourceStorage
 {
-    private $localSources;
-
-    public function __construct(SourceMap $localSources)
+    public function store(SourceMap $localSources, string $uri, string $content, string $type): string
     {
-        $this->localSources = $localSources;
-    }
-
-    public function store(string $uri, string $content, string $type): string
-    {
-        return $this->persist($uri, $content, $type, function (string $path, string $content) {
+        return $this->persist($localSources, $uri, $content, $type, function (string $path, string $content) {
             file_put_contents($path, $content);
         });
     }
 
-    public function duplicate(string $uri, string $localUri, string $type): string
+    public function duplicate(SourceMap $localSources, string $uri, string $localUri, string $type): string
     {
-        return $this->persist($uri, $localUri, $type, function (string $path, string $localPath) {
+        return $this->persist($localSources, $uri, $localUri, $type, function (string $path, string $localPath) {
             copy($localPath, $path);
         });
     }
 
-    private function persist(string $uri, string $hashInput, string $type, callable $persister): string
-    {
+    private function persist(
+        SourceMap $localSources,
+        string $uri,
+        string $hashInput,
+        string $type,
+        callable $persister
+    ): string {
         $path = $this->createPath($hashInput, $type);
         $localUri = 'file:' . $path;
         $source = new Source($uri, $localUri);
 
         $persister($path, $hashInput);
 
-        $this->localSources[$uri] = $source;
+        $localSources[$uri] = $source;
 
         return $path;
     }
@@ -49,14 +47,5 @@ class ResourceStorage
             md5($hashInput . microtime(true)),
             $type
         );
-    }
-
-    public function deleteAll()
-    {
-        foreach ($this->localSources as $source) {
-            $path = preg_replace('/^file:/', '', $source->getMappedUri());
-
-            @unlink($path);
-        }
     }
 }

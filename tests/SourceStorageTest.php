@@ -7,6 +7,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 use GuzzleHttp\Psr7\Uri;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\SourceInspector;
+use webignition\CssValidatorWrapper\SourcePurger;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
@@ -95,15 +96,12 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         $sourceStorage = new SourceStorage();
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
 
-        $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
+        $localSources = $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
 
-        $sources = $sourceStorage->getSources();
-
-        $this->assertInstanceOf(SourceMap::class, $sources);
-        $this->assertEquals(count($expectedStoredResources), count($sources));
+        $this->assertEquals(count($expectedStoredResources), count($localSources));
 
         foreach ($expectedStoredResources as $url => $expectedContent) {
-            $source = $sources[$url];
+            $source = $localSources[$url];
 
             $this->assertEquals(
                 $expectedContent,
@@ -111,7 +109,8 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
             );
         }
 
-        $sourceStorage->deleteAll();
+        $sourcePurger = new SourcePurger();
+        $sourcePurger->purgeLocalResources($localSources);
     }
 
     public function storeSuccessDataProvider()
