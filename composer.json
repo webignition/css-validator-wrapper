@@ -29,7 +29,8 @@
         "webignition/web-page-model":">=5.9,<6",
         "webignition/web-page-inspector": ">=1.2,<2",
         "webignition/absolute-url-deriver": ">=3,<4",
-        "webignition/url-source-map": "^0.2.0"
+        "webignition/url-source-map": "^0.2.0",
+        "webignition/resource-storage": ">=0.1,<1"
     },
     "require-dev": {
         "phpunit/phpunit": "^7",

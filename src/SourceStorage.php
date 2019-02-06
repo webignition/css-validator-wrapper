@@ -3,6 +3,7 @@
 namespace webignition\CssValidatorWrapper;
 
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\ResourceStorage\ResourceStorage;
 use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResourceInterfaces\WebPageInterface;
 
