@@ -2,7 +2,7 @@
 /** @noinspection PhpDocSignatureInspection */
 /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace webignition\CssValidatorWrapper\Tests\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests;
 
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorOutput\Model\ValidationOutput;

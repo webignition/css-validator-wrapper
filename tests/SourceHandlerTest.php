@@ -2,7 +2,7 @@
 /** @noinspection PhpUnhandledExceptionInspection */
 /** @noinspection PhpDocSignatureInspection */
 
-namespace webignition\CssValidatorWrapper\Tests\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests;
 
 use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceInspector;

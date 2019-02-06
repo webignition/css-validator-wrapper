@@ -2,7 +2,7 @@
 /** @noinspection PhpDocSignatureInspection */
 /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace webignition\CssValidatorWrapper\Tests\Wrapper;
+namespace webignition\CssValidatorWrapper\Tests;
 
 use GuzzleHttp\Psr7\Uri;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
