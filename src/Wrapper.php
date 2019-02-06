@@ -48,11 +48,6 @@ class Wrapper
         $sourceInspector = $sourceHandler->getInspector();
 
         $webPageUri = (string) $webPage->getUri();
-        $webPageSource = $remoteSources->getByUri($webPageUri);
-
-        if (empty($webPageSource)) {
-            throw new UnknownSourceException($webPageUri);
-        }
 
         $embeddedStylesheetUrls = $sourceInspector->findStylesheetUrls();
         foreach ($embeddedStylesheetUrls as $stylesheetUrl) {
@@ -75,7 +70,6 @@ class Wrapper
         $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($stylesheetReferences);
 
         $localSources = $this->sourceStorage->store($mutatedWebPage, $remoteSources, $stylesheetUrls);
-
         $webPageLocalSource = $localSources[$webPageUri];
 
         $command = $this->commandFactory->create($webPageLocalSource->getMappedUri(), $vendorExtensionSeverityLevel);
