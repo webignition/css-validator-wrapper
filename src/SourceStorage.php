@@ -8,18 +8,11 @@ use webignition\WebResourceInterfaces\WebPageInterface;
 
 class SourceStorage
 {
-    private $paths;
     private $resourceStorage;
 
-    public function __construct()
+    public function __construct(ResourceStorage $resourceStorage)
     {
-        $this->paths = new SourceMap();
-        $this->resourceStorage = new ResourceStorage($this->paths);
-    }
-
-    public function getSources(): SourceMap
-    {
-        return $this->paths;
+        $this->resourceStorage = $resourceStorage;
     }
 
     /**

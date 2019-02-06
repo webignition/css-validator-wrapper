@@ -6,6 +6,7 @@ namespace webignition\CssValidatorWrapper\Tests\Wrapper;
 
 use GuzzleHttp\Psr7\Uri;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\CssValidatorWrapper\ResourceStorage;
 use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
@@ -24,8 +25,11 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         SourceMap $sourceMap,
         string $expectedExceptionMessage
     ) {
+        $localSources = new SourceMap();
+        $resourceStorage = new ResourceStorage($localSources);
+
         $sourceInspector = new SourceInspector($webPage);
-        $sourceStorage = new SourceStorage();
+        $sourceStorage = new SourceStorage($resourceStorage);
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
 
         $this->expectException(UnknownSourceException::class);
@@ -91,19 +95,19 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
             file_put_contents($filename, $content);
         }
 
+        $localSources = new SourceMap();
+        $resourceStorage = new ResourceStorage($localSources);
+
         $sourceInspector = new SourceInspector($webPage);
-        $sourceStorage = new SourceStorage();
+        $sourceStorage = new SourceStorage($resourceStorage);
         $stylesheetUrls = $sourceInspector->findStylesheetUrls();
 
         $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
 
-        $sources = $sourceStorage->getSources();
-
-        $this->assertInstanceOf(SourceMap::class, $sources);
-        $this->assertEquals(count($expectedStoredResources), count($sources));
+        $this->assertEquals(count($expectedStoredResources), count($localSources));
 
         foreach ($expectedStoredResources as $url => $expectedContent) {
-            $source = $sources[$url];
+            $source = $localSources[$url];
 
             $this->assertEquals(
                 $expectedContent,
