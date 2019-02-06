@@ -16,6 +16,7 @@ use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfigura
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandExecutor;
 use webignition\CssValidatorWrapper\CommandFactory;
+use webignition\CssValidatorWrapper\ResourceStorage;
 use webignition\CssValidatorWrapper\SourceType;
 use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
@@ -37,9 +38,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
     public function testValidateUnknownSourceExceptionForWebPage()
     {
+        $localSources = new SourceMap();
+        $resourceStorage = new ResourceStorage($localSources);
+
         $webPage = WebPageFactory::create('content', new Uri('http://example.com/'));
         $wrapper = $this->createWrapper(
-            new SourceStorage(),
+            new SourceStorage($resourceStorage),
             new CommandFactory(self::JAVA_EXECUTABLE_PATH, self::CSS_VALIDATOR_JAR_PATH),
             new CommandExecutor(new OutputParser())
         );
@@ -60,8 +64,11 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             new Uri('http://example.com/')
         );
 
+        $localSources = new SourceMap();
+        $resourceStorage = new ResourceStorage($localSources);
+
         $wrapper = $this->createWrapper(
-            new SourceStorage(),
+            new SourceStorage($resourceStorage),
             new CommandFactory(self::JAVA_EXECUTABLE_PATH, self::CSS_VALIDATOR_JAR_PATH),
             new CommandExecutor(new OutputParser())
         );
