@@ -94,7 +94,7 @@ class SourceMutator
 
     private function stripHrefValueFromReference(string $reference, string $hrefUrl): string
     {
-        return preg_replace('/(' . preg_quote($hrefUrl, '/') . ')$/', '', $reference);
+        return (string) preg_replace('/(' . preg_quote($hrefUrl, '/') . ')$/', '', $reference);
     }
 
     private function getReferenceHrefValue(string $reference, string $encoding): string
@@ -111,7 +111,7 @@ class SourceMutator
     {
         $pattern = '/\s+rel\s*=\s*("|\')stylesheet("|\')/';
 
-        return preg_replace($pattern, '', $reference);
+        return (string) preg_replace($pattern, '', $reference);
     }
 
     private function findLeadingRelStylesheetQuote(string $fragment): string
@@ -122,6 +122,8 @@ class SourceMutator
         $stylesheetWithLeadingQuote = $stylesheetWithLeadingQuoteMatches[0];
 
         $leadingQuote = preg_replace('/^rel\s*=/', '', $stylesheetWithLeadingQuote);
+        $leadingQuote = $leadingQuote ?? '';
+
         $leadingQuote = preg_replace('/stylesheet$/', '', $leadingQuote);
 
         return trim($leadingQuote);

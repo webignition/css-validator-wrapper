@@ -50,6 +50,8 @@ class StringUtils
         string $encoding,
         ?int $offset = 0
     ) {
+        $offset = $offset ?? 0;
+
         $fragment = mb_substr(
             $content,
             $offset,

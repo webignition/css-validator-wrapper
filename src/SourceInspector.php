@@ -78,6 +78,7 @@ class SourceInspector
             $webPageFragment = $webPageContent;
 
             while (null !== ($reference = $this->findStylesheetUrlReference($webPageFragment, $hrefValue, $encoding))) {
+                $reference = (string) $reference;
                 $references[] = $reference;
 
                 $referencePosition = mb_strpos($webPageFragment, $reference, 0, $encoding);
