@@ -105,7 +105,7 @@ class Wrapper
         }
 
         $sourcePurger = new SourcePurger();
-        $sourcePurger->purge($localSources);
+        $sourcePurger->purgeLocalResources($localSources);
 
         return $output;
     }

@@ -110,7 +110,7 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         }
 
         $sourcePurger = new SourcePurger();
-        $sourcePurger->purge($localSources);
+        $sourcePurger->purgeLocalResources($localSources);
     }
 
     public function storeSuccessDataProvider()

@@ -37,7 +37,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expectedSource, $localSources[$uri]);
 
         $sourcePurger = new SourcePurger();
-        $sourcePurger->purge($localSources);
+        $sourcePurger->purgeLocalResources($localSources);
 
         $this->assertFalse(file_exists($expectedPath));
     }
@@ -89,7 +89,7 @@ class ResourceStorageTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expectedSource, $localSources[$uri]);
 
         $sourcePurger = new SourcePurger();
-        $sourcePurger->purge($localSources);
+        $sourcePurger->purgeLocalResources($localSources);
 
         $this->assertFalse(file_exists($expectedPath));
         @unlink($localPath);

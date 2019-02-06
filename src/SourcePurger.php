@@ -6,7 +6,7 @@ use webignition\UrlSourceMap\SourceMap;
 
 class SourcePurger
 {
-    public function purge(SourceMap $sources)
+    public function purgeLocalResources(SourceMap $sources)
     {
         $filePathPattern = '/^file:/';
 
