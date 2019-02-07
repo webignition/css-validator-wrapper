@@ -8,20 +8,29 @@ use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfigura
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\ResourceStorage\SourcePurger;
+use webignition\UrlSourceMap\SourceMap;
+use webignition\WebResource\WebPage\ContentEncodingValidator;
+use webignition\WebResource\WebPage\WebPage;
 
 class Wrapper
 {
+    private $sourceInspector;
+    private $sourceMutator;
     private $sourceStorage;
     private $outputMutator;
     private $commandFactory;
     private $commandExecutor;
 
     public function __construct(
+        SourceInspector $sourceInspector,
+        SourceMutator $sourceMutator,
         SourceStorage $sourceStorage,
         OutputMutator $outputMutator,
         CommandFactory $commandFactory,
         CommandExecutor $commandExecutor
     ) {
+        $this->sourceInspector = $sourceInspector;
+        $this->sourceMutator = $sourceMutator;
         $this->sourceStorage = $sourceStorage;
         $this->outputMutator = $outputMutator;
         $this->commandFactory = $commandFactory;
@@ -29,7 +38,8 @@ class Wrapper
     }
 
     /**
-     * @param SourceHandler $sourceHandler
+     * @param WebPage $webPage
+     * @param SourceMap $remoteSources
      * @param string $vendorExtensionSeverityLevel
      * @param OutputParserConfiguration|null $outputParserConfiguration
      *
@@ -39,17 +49,19 @@ class Wrapper
      * @throws UnknownSourceException
      */
     public function validate(
-        SourceHandler $sourceHandler,
+        WebPage $webPage,
+        SourceMap $remoteSources,
         string $vendorExtensionSeverityLevel,
         ?OutputParserConfiguration $outputParserConfiguration = null
     ): OutputInterface {
-        $webPage = $sourceHandler->getWebPage();
-        $remoteSources = $sourceHandler->getSourceMap();
-        $sourceInspector = $sourceHandler->getInspector();
+        $contentEncodingValidator = new ContentEncodingValidator();
+        if (!$contentEncodingValidator->isValid($webPage)) {
+            $webPage = $contentEncodingValidator->convertToUtf8($webPage);
+        }
 
         $webPageUri = (string) $webPage->getUri();
 
-        $embeddedStylesheetUrls = $sourceInspector->findStylesheetUrls();
+        $embeddedStylesheetUrls = $this->sourceInspector->findStylesheetUrls($webPage);
         foreach ($embeddedStylesheetUrls as $stylesheetUrl) {
             if (!$remoteSources->getByUri($stylesheetUrl)) {
                 throw new UnknownSourceException($stylesheetUrl);
@@ -64,10 +76,8 @@ class Wrapper
 
         $stylesheetUrls = array_unique(array_merge($embeddedStylesheetUrls, $importedStylesheetUrls));
 
-        $sourceMutator = $sourceHandler->getMutator();
-
-        $stylesheetReferences = $sourceInspector->findStylesheetReferences();
-        $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($stylesheetReferences);
+        $stylesheetReferences = $this->sourceInspector->findStylesheetReferences($webPage);
+        $mutatedWebPage = $this->sourceMutator->replaceStylesheetUrls($webPage, $remoteSources, $stylesheetReferences);
 
         $localSources = $this->sourceStorage->store($mutatedWebPage, $remoteSources, $stylesheetUrls);
         $webPageLocalSource = $localSources[$webPageUri];

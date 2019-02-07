@@ -3,9 +3,8 @@
 namespace webignition\CssValidatorWrapper\Tests\Factory;
 
 use Psr\Http\Message\UriInterface;
-use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\InternetMediaTypeInterface\InternetMediaTypeInterface;
-use webignition\UrlSourceMap\SourceMap;
+use webignition\WebResource\WebPage\ContentEncodingValidator;
 use webignition\WebResource\WebPage\WebPage;
 
 class WebPageFactory
@@ -20,13 +19,11 @@ class WebPageFactory
         $webPage = WebPage::createFromContent($content, $contentType);
         $webPage = $webPage->setUri($uri);
 
-        if ($webPage instanceof WebPage) {
-            $sourceHandler = new SourceHandler($webPage, new SourceMap());
-
-            return $sourceHandler->getWebPage();
+        $contentEncodingValidator = new ContentEncodingValidator();
+        if (!$contentEncodingValidator->isValid($webPage)) {
+            $webPage = $contentEncodingValidator->convertToUtf8($webPage);
         }
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        return new WebPage();
+        return $webPage;
     }
 }

@@ -22,9 +22,11 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
      */
     public function testReplaceStylesheetUrlsNoChangesMade(WebPage $webPage, SourceMap $sourceMap)
     {
-        $sourceInspector = new SourceInspector($webPage);
-        $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
-        $returnedWebPage = $mutator->replaceStylesheetUrls($sourceInspector->findStylesheetReferences());
+        $sourceInspector = new SourceInspector();
+        $stylesheetReferences = $sourceInspector->findStylesheetReferences($webPage);
+
+        $mutator = new SourceMutator();
+        $returnedWebPage = $mutator->replaceStylesheetUrls($webPage, $sourceMap, $stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $returnedWebPage);
         $this->assertSame($webPage, $returnedWebPage);
@@ -52,9 +54,11 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         SourceMap $sourceMap,
         string $expectedWebPageContent
     ) {
-        $sourceInspector = new SourceInspector($webPage);
-        $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
-        $mutatedWebPage = $mutator->replaceStylesheetUrls($sourceInspector->findStylesheetReferences());
+        $sourceInspector = new SourceInspector();
+        $stylesheetReferences = $sourceInspector->findStylesheetReferences($webPage);
+
+        $mutator = new SourceMutator();
+        $mutatedWebPage = $mutator->replaceStylesheetUrls($webPage, $sourceMap, $stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
         $this->assertNotSame($webPage, $mutatedWebPage);
@@ -545,9 +549,11 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
             FixtureLoader::load('Html/minimal-html5-single-stylesheet.html')
         );
 
-        $sourceInspector = new SourceInspector($webPage);
-        $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
-        $mutatedWebPage = $mutator->replaceStylesheetUrls($sourceInspector->findStylesheetReferences());
+        $sourceInspector = new SourceInspector();
+        $stylesheetReferences = $sourceInspector->findStylesheetReferences($webPage);
+
+        $mutator = new SourceMutator();
+        $mutatedWebPage = $mutator->replaceStylesheetUrls($webPage, $sourceMap, $stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
         $this->assertNotSame($webPage, $mutatedWebPage);

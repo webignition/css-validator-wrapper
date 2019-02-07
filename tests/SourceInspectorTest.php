@@ -15,13 +15,23 @@ use webignition\WebResource\WebPage\WebPage;
 class SourceInspectorTest extends \PHPUnit\Framework\TestCase
 {
     /**
+     * @var SourceInspector
+     */
+    private $sourceInspector;
+
+    protected function setUp()
+    {
+        parent::setUp();
+
+        $this->sourceInspector = new SourceInspector();
+    }
+
+    /**
      * @dataProvider findStylesheetUrlsDataProvider
      */
     public function testFindStylesheetUrls(WebPage $webPage, array $expectedStylesheetUrls)
     {
-        $sourceInspector = new SourceInspector($webPage);
-
-        $this->assertEquals($expectedStylesheetUrls, $sourceInspector->findStylesheetUrls());
+        $this->assertEquals($expectedStylesheetUrls, $this->sourceInspector->findStylesheetUrls($webPage));
     }
 
     public function findStylesheetUrlsDataProvider()
@@ -243,9 +253,10 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
      */
     public function testFindStylesheetUrlReferences(WebPage $webPage, array $expectedStylesheetUrlReferences)
     {
-        $sourceInspector = new SourceInspector($webPage);
-
-        $this->assertEquals($expectedStylesheetUrlReferences, $sourceInspector->findStylesheetReferences());
+        $this->assertEquals(
+            $expectedStylesheetUrlReferences,
+            $this->sourceInspector->findStylesheetReferences($webPage)
+        );
     }
 
     public function findStylesheetUrlReferencesDataProvider()
@@ -458,11 +469,9 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
         string $reference,
         array $expectedStylesheetUrlReferences
     ) {
-        $sourceInspector = new SourceInspector($webPage);
-
         $this->assertEquals(
             $expectedStylesheetUrlReferences,
-            $sourceInspector->findStylesheetReferenceFragments($reference)
+            $this->sourceInspector->findStylesheetReferenceFragments($webPage, $reference)
         );
     }
 
