@@ -23,9 +23,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
     public function testReplaceStylesheetUrlsNoChangesMade(WebPage $webPage, SourceMap $sourceMap)
     {
         $sourceInspector = new SourceInspector();
-        $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
         $stylesheetReferences = $sourceInspector->findStylesheetReferences($webPage);
 
+        $mutator = new SourceMutator($sourceMap);
         $returnedWebPage = $mutator->replaceStylesheetUrls($webPage, $stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $returnedWebPage);
@@ -55,9 +55,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         string $expectedWebPageContent
     ) {
         $sourceInspector = new SourceInspector();
-        $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
         $stylesheetReferences = $sourceInspector->findStylesheetReferences($webPage);
 
+        $mutator = new SourceMutator($sourceMap);
         $mutatedWebPage = $mutator->replaceStylesheetUrls($webPage, $stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $mutatedWebPage);
@@ -550,9 +550,9 @@ class SourceMutatorTest extends \PHPUnit\Framework\TestCase
         );
 
         $sourceInspector = new SourceInspector();
-        $mutator = new SourceMutator($webPage, $sourceMap, $sourceInspector);
         $stylesheetReferences = $sourceInspector->findStylesheetReferences($webPage);
 
+        $mutator = new SourceMutator($sourceMap);
         $mutatedWebPage = $mutator->replaceStylesheetUrls($webPage, $stylesheetReferences);
 
         $this->assertInstanceOf(WebPage::class, $mutatedWebPage);

@@ -9,31 +9,24 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceMutator
 {
-    private $webPage;
     private $sourceMap;
     private $sourceInspector;
 
-    public function __construct(WebPage $webPage, SourceMap $sourceMap, SourceInspector $sourceInspector)
+    public function __construct(SourceMap $sourceMap)
     {
-        $this->webPage = $webPage;
         $this->sourceMap = $sourceMap;
-        $this->sourceInspector = $sourceInspector;
-    }
-
-    public function getWebPage(): WebPage
-    {
-        return $this->webPage;
+        $this->sourceInspector = new SourceInspector();
     }
 
     public function replaceStylesheetUrls(WebPage $webPage, array $stylesheetReferences): WebPage
     {
         if (empty($stylesheetReferences)) {
-            return $this->webPage;
+            return $webPage;
         }
 
         $mutatedWebPage = clone $webPage;
-        $encoding = $this->webPage->getCharacterEncoding();
-        $baseUrl = $this->webPage->getBaseUrl();
+        $encoding = $webPage->getCharacterEncoding();
+        $baseUrl = $webPage->getBaseUrl();
 
         foreach ($stylesheetReferences as $reference) {
             $hrefUrl = $this->getReferenceHrefValue($reference, $encoding);

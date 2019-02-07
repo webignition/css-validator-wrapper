@@ -10,7 +10,6 @@ class SourceHandler
 {
     private $webPage;
     private $sourceMap;
-    private $inspector;
     private $mutator;
 
     public function __construct(WebPage $webPage, SourceMap $sourceMap)
@@ -23,8 +22,7 @@ class SourceHandler
         $this->webPage = $webPage;
         $this->sourceMap = $sourceMap;
 
-        $this->inspector = new SourceInspector($webPage);
-        $this->mutator = new SourceMutator($webPage, $sourceMap, $this->inspector);
+        $this->mutator = new SourceMutator($sourceMap);
     }
 
     public function getWebPage(): WebPage
@@ -35,11 +33,6 @@ class SourceHandler
     public function getSourceMap(): SourceMap
     {
         return $this->sourceMap;
-    }
-
-    public function getInspector(): SourceInspector
-    {
-        return $this->inspector;
     }
 
     public function getMutator(): SourceMutator
