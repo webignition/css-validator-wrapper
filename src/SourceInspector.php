@@ -19,7 +19,7 @@ class SourceInspector
         $urls = [];
         $hrefValues = $this->findStylesheetUrlHrefValues($webPage);
 
-        $baseUri = new Uri($webPage->getBaseUrl());
+        $baseUri = new Uri((string) $webPage->getBaseUrl());
 
         foreach ($hrefValues as $hrefValue) {
             $hrefValue = trim($hrefValue);
@@ -44,6 +44,8 @@ class SourceInspector
     public function findStylesheetReferences(WebPage $webPage): array
     {
         $encoding = $webPage->getCharacterEncoding();
+        $encoding = $encoding ?? 'utf-8';
+
         $references = [];
         $hrefValues = $this->findStylesheetUrlHrefValues($webPage);
 
@@ -64,7 +66,7 @@ class SourceInspector
             }
         }
 
-        $webPageContent = $webPage->getContent();
+        $webPageContent = (string) $webPage->getContent();
 
         foreach ($modifiedHrefAttributes as $hrefValue) {
             $webPageFragment = $webPageContent;
@@ -98,9 +100,10 @@ class SourceInspector
         }
 
         $encoding = $webPage->getCharacterEncoding();
+        $encoding = $encoding ?? 'utf-8';
         $fragments = [];
 
-        $content = $webPage->getContent();
+        $content = (string) $webPage->getContent();
 
         $referenceStartPosition = mb_strpos($content, $reference, 0, $encoding);
 
