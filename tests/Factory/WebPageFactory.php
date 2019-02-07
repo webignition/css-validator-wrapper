@@ -19,9 +19,11 @@ class WebPageFactory
         $webPage = WebPage::createFromContent($content, $contentType);
         $webPage = $webPage->setUri($uri);
 
-        $contentEncodingValidator = new ContentEncodingValidator();
-        if (!$contentEncodingValidator->isValid($webPage)) {
-            $webPage = $contentEncodingValidator->convertToUtf8($webPage);
+        if ($webPage instanceof WebPage) {
+            $contentEncodingValidator = new ContentEncodingValidator();
+            if (!$contentEncodingValidator->isValid($webPage)) {
+                $webPage = $contentEncodingValidator->convertToUtf8($webPage);
+            }
         }
 
         return $webPage;
