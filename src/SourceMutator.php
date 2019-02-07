@@ -25,13 +25,13 @@ class SourceMutator
         return $this->webPage;
     }
 
-    public function replaceStylesheetUrls(array $stylesheetReferences): WebPage
+    public function replaceStylesheetUrls(WebPage $webPage, array $stylesheetReferences): WebPage
     {
         if (empty($stylesheetReferences)) {
             return $this->webPage;
         }
 
-        $webPageContent = $this->webPage->getContent();
+        $mutatedWebPage = clone $webPage;
         $encoding = $this->webPage->getCharacterEncoding();
         $baseUrl = $this->webPage->getBaseUrl();
 
@@ -46,50 +46,49 @@ class SourceMutator
                     $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
                     $referenceReplacement = $referenceWithoutHrefValue . $source->getMappedUri();
 
-                    $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
+                    $mutatedWebPage = $this->replaceWebPageContent($mutatedWebPage, $reference, $referenceReplacement);
                 } else {
                     $referenceReplacement = $this->removeRelStylesheetFromReference($reference);
 
                     if ($reference !== $referenceReplacement) {
-                        $webPageContent = str_replace($reference, $referenceReplacement, $webPageContent);
+                        $mutatedWebPage = $this->replaceWebPageContent(
+                            $mutatedWebPage,
+                            $reference,
+                            $referenceReplacement
+                        );
                     } else {
-                        $webPageContent = $this->replaceReferenceByFragment($webPageContent, $reference);
+                        $mutatedWebPage = $this->replaceReferenceByFragment($webPage, $mutatedWebPage, $reference);
                     }
                 }
             } else {
-                $webPageContent = $this->replaceReferenceByFragment($webPageContent, $reference);
+                $mutatedWebPage = $this->replaceReferenceByFragment($webPage, $mutatedWebPage, $reference);
             }
         }
-
-        /* @var WebPage $mutatedWebPage */
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $mutatedWebPage = $this->webPage->setContent($webPageContent);
 
         return $mutatedWebPage;
     }
 
-    private function replaceReferenceByFragment(string $webPageContent, string $reference): string
-    {
+    private function replaceReferenceByFragment(
+        WebPage $originalWebPage,
+        WebPage $mutatedWebPage,
+        string $reference
+    ): WebPage {
         $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
 
         foreach ($referenceFragments as $referenceFragment) {
-            $webPageContent = $this->replaceReferenceFragment($webPageContent, $referenceFragment);
+            $mutatedWebPage = $this->replaceReferenceFragment($mutatedWebPage, $referenceFragment);
         }
 
-        return $webPageContent;
+        return $mutatedWebPage;
     }
 
-    private function replaceReferenceFragment(string $webPageContent, string $referenceFragment): string
+    private function replaceReferenceFragment(WebPage $webPage, string $referenceFragment): WebPage
     {
         $quoteCharacter = $this->findLeadingRelStylesheetQuote($referenceFragment);
         $quotedReferenceFragment = $referenceFragment . $quoteCharacter;
         $fragmentReplacement = $this->removeRelStylesheetFromReference($quotedReferenceFragment);
 
-        return str_replace(
-            $quotedReferenceFragment,
-            $fragmentReplacement,
-            $webPageContent
-        );
+        return $this->replaceWebPageContent($webPage, $quotedReferenceFragment, $fragmentReplacement);
     }
 
     private function stripHrefValueFromReference(string $reference, string $hrefUrl): string
@@ -127,5 +126,14 @@ class SourceMutator
         $leadingQuote = preg_replace('/stylesheet$/', '', $leadingQuote);
 
         return trim($leadingQuote);
+    }
+
+    private function replaceWebPageContent(WebPage $webPage, string $search, string $replace): WebPage
+    {
+        /* @var WebPage $mutatedWebPage */
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $mutatedWebPage = $webPage->setContent(str_replace($search, $replace, $webPage->getContent()));
+
+        return $mutatedWebPage;
     }
 }
