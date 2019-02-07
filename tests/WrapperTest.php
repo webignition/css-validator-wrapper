@@ -17,6 +17,7 @@ use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandExecutor;
 use webignition\CssValidatorWrapper\CommandFactory;
 use webignition\CssValidatorWrapper\SourceInspector;
+use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\SourceType;
 use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
@@ -610,6 +611,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
     ): Wrapper {
         return new Wrapper(
             new SourceInspector(),
+            new SourceMutator(),
             $sourceStorage,
             new OutputMutator(),
             $commandFactory,

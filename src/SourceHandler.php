@@ -10,7 +10,6 @@ class SourceHandler
 {
     private $webPage;
     private $sourceMap;
-    private $mutator;
 
     public function __construct(WebPage $webPage, SourceMap $sourceMap)
     {
@@ -21,8 +20,6 @@ class SourceHandler
 
         $this->webPage = $webPage;
         $this->sourceMap = $sourceMap;
-
-        $this->mutator = new SourceMutator($sourceMap);
     }
 
     public function getWebPage(): WebPage
@@ -33,10 +30,5 @@ class SourceHandler
     public function getSourceMap(): SourceMap
     {
         return $this->sourceMap;
-    }
-
-    public function getMutator(): SourceMutator
-    {
-        return $this->mutator;
     }
 }

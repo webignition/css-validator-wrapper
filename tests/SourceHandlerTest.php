@@ -5,7 +5,6 @@
 namespace webignition\CssValidatorWrapper\Tests;
 
 use webignition\CssValidatorWrapper\SourceHandler;
-use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureFactory;
 use webignition\UrlSourceMap\SourceMap;
@@ -13,17 +12,6 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceHandlerTest extends \PHPUnit\Framework\TestCase
 {
-    public function testCreate()
-    {
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $webPage = new WebPage();
-        $sourceMap = new SourceMap();
-
-        $sourceHandler = new SourceHandler($webPage, $sourceMap);
-
-        $this->assertInstanceOf(SourceMutator::class, $sourceHandler->getMutator());
-    }
-
     /**
      * @dataProvider noContentEncodingChangesDataProvider
      */

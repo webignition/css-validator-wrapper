@@ -12,6 +12,7 @@ use webignition\ResourceStorage\SourcePurger;
 class Wrapper
 {
     private $sourceInspector;
+    private $sourceMutator;
     private $sourceStorage;
     private $outputMutator;
     private $commandFactory;
@@ -19,12 +20,14 @@ class Wrapper
 
     public function __construct(
         SourceInspector $sourceInspector,
+        SourceMutator $sourceMutator,
         SourceStorage $sourceStorage,
         OutputMutator $outputMutator,
         CommandFactory $commandFactory,
         CommandExecutor $commandExecutor
     ) {
         $this->sourceInspector = $sourceInspector;
+        $this->sourceMutator = $sourceMutator;
         $this->sourceStorage = $sourceStorage;
         $this->outputMutator = $outputMutator;
         $this->commandFactory = $commandFactory;
@@ -66,10 +69,8 @@ class Wrapper
 
         $stylesheetUrls = array_unique(array_merge($embeddedStylesheetUrls, $importedStylesheetUrls));
 
-        $sourceMutator = $sourceHandler->getMutator();
-
         $stylesheetReferences = $this->sourceInspector->findStylesheetReferences($webPage);
-        $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($webPage, $remoteSources, $stylesheetReferences);
+        $mutatedWebPage = $this->sourceMutator->replaceStylesheetUrls($webPage, $remoteSources, $stylesheetReferences);
 
         $localSources = $this->sourceStorage->store($mutatedWebPage, $remoteSources, $stylesheetUrls);
         $webPageLocalSource = $localSources[$webPageUri];
