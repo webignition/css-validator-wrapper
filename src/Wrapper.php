@@ -9,6 +9,7 @@ use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\ResourceStorage\SourcePurger;
 use webignition\UrlSourceMap\SourceMap;
+use webignition\WebResource\WebPage\ContentEncodingValidator;
 use webignition\WebResource\WebPage\WebPage;
 
 class Wrapper
@@ -53,6 +54,11 @@ class Wrapper
         string $vendorExtensionSeverityLevel,
         ?OutputParserConfiguration $outputParserConfiguration = null
     ): OutputInterface {
+        $contentEncodingValidator = new ContentEncodingValidator();
+        if (!$contentEncodingValidator->isValid($webPage)) {
+            $webPage = $contentEncodingValidator->convertToUtf8($webPage);
+        }
+
         $webPageUri = (string) $webPage->getUri();
 
         $embeddedStylesheetUrls = $this->sourceInspector->findStylesheetUrls($webPage);
