@@ -9,16 +9,14 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceMutator
 {
-    private $sourceMap;
     private $sourceInspector;
 
-    public function __construct(SourceMap $sourceMap)
+    public function __construct()
     {
-        $this->sourceMap = $sourceMap;
         $this->sourceInspector = new SourceInspector();
     }
 
-    public function replaceStylesheetUrls(WebPage $webPage, array $stylesheetReferences): WebPage
+    public function replaceStylesheetUrls(WebPage $webPage, SourceMap $sourceMap, array $stylesheetReferences): WebPage
     {
         if (empty($stylesheetReferences)) {
             return $webPage;
@@ -33,7 +31,7 @@ class SourceMutator
 
             if ($hrefUrl) {
                 $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
-                $source = $this->sourceMap->getByUri($referenceAbsoluteUrl);
+                $source = $sourceMap->getByUri($referenceAbsoluteUrl);
 
                 if ($source->isAvailable()) {
                     $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);

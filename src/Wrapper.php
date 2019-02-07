@@ -69,7 +69,7 @@ class Wrapper
         $sourceMutator = $sourceHandler->getMutator();
 
         $stylesheetReferences = $this->sourceInspector->findStylesheetReferences($webPage);
-        $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($webPage, $stylesheetReferences);
+        $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($webPage, $remoteSources, $stylesheetReferences);
 
         $localSources = $this->sourceStorage->store($mutatedWebPage, $remoteSources, $stylesheetUrls);
         $webPageLocalSource = $localSources[$webPageUri];
