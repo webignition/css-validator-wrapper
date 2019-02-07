@@ -73,7 +73,7 @@ class SourceMutator
         WebPage $mutatedWebPage,
         string $reference
     ): WebPage {
-        $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($reference);
+        $referenceFragments = $this->sourceInspector->findStylesheetReferenceFragments($originalWebPage, $reference);
 
         foreach ($referenceFragments as $referenceFragment) {
             $mutatedWebPage = $this->replaceReferenceFragment($mutatedWebPage, $referenceFragment);

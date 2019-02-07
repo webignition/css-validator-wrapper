@@ -9,27 +9,17 @@ use webignition\WebResource\WebPage\WebPage;
 
 class SourceInspector
 {
-    private $webPage;
-
-    public function __construct(WebPage $webPage)
-    {
-        $this->webPage = $webPage;
-    }
-
-    public function getWebPage(): WebPage
-    {
-        return $this->webPage;
-    }
-
     /**
+     * @param WebPage $webPage
+     *
      * @return string[]
      */
-    public function findStylesheetUrls(): array
+    public function findStylesheetUrls(WebPage $webPage): array
     {
         $urls = [];
-        $hrefValues = $this->findStylesheetUrlHrefValues();
+        $hrefValues = $this->findStylesheetUrlHrefValues($webPage);
 
-        $baseUri = new Uri($this->webPage->getBaseUrl());
+        $baseUri = new Uri($webPage->getBaseUrl());
 
         foreach ($hrefValues as $hrefValue) {
             $hrefValue = trim($hrefValue);
@@ -47,13 +37,15 @@ class SourceInspector
     }
 
     /**
+     * @param WebPage $webPage
+     *
      * @return string[]
      */
-    public function findStylesheetReferences(): array
+    public function findStylesheetReferences(WebPage $webPage): array
     {
-        $encoding = $this->webPage->getCharacterEncoding();
+        $encoding = $webPage->getCharacterEncoding();
         $references = [];
-        $hrefValues = $this->findStylesheetUrlHrefValues();
+        $hrefValues = $this->findStylesheetUrlHrefValues($webPage);
 
         foreach ($hrefValues as $hrefValue) {
             if (mb_substr_count($hrefValue, '&', $encoding)) {
@@ -72,7 +64,7 @@ class SourceInspector
             }
         }
 
-        $webPageContent = $this->webPage->getContent();
+        $webPageContent = $webPage->getContent();
 
         foreach ($modifiedHrefAttributes as $hrefValue) {
             $webPageFragment = $webPageContent;
@@ -92,11 +84,12 @@ class SourceInspector
     }
 
     /**
+     * @param WebPage $webPage
      * @param string $reference
      *
      * @return string[]
      */
-    public function findStylesheetReferenceFragments(string $reference): array
+    public function findStylesheetReferenceFragments(WebPage $webPage, string $reference): array
     {
         if (preg_match('/rel\s*=\s*("|\')stylesheet/', $reference)) {
             return [
@@ -104,10 +97,10 @@ class SourceInspector
             ];
         }
 
-        $encoding = $this->webPage->getCharacterEncoding();
+        $encoding = $webPage->getCharacterEncoding();
         $fragments = [];
 
-        $content = $this->webPage->getContent();
+        $content = $webPage->getContent();
 
         $referenceStartPosition = mb_strpos($content, $reference, 0, $encoding);
 
@@ -161,11 +154,11 @@ class SourceInspector
         return $hrefLinkPrefix . $hrefValue;
     }
 
-    private function findStylesheetUrlHrefValues(): array
+    private function findStylesheetUrlHrefValues(WebPage $webPage): array
     {
         $hrefAttributes = [];
         $selector = 'link[rel=stylesheet][href]';
-        $webPageInspector = $this->webPage->getInspector();
+        $webPageInspector = $webPage->getInspector();
 
         /* @var \DOMElement[] $stylesheetLinkElements */
         $stylesheetLinkElements = $webPageInspector->querySelectorAll($selector);
