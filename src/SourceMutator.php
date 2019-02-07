@@ -24,7 +24,9 @@ class SourceMutator
 
         $mutatedWebPage = clone $webPage;
         $encoding = $webPage->getCharacterEncoding();
-        $baseUrl = $webPage->getBaseUrl();
+        $encoding = $encoding ?? 'utf-8';
+
+        $baseUrl = (string) $webPage->getBaseUrl();
 
         foreach ($stylesheetReferences as $reference) {
             $hrefUrl = $this->getReferenceHrefValue($reference, $encoding);
@@ -33,7 +35,7 @@ class SourceMutator
                 $referenceAbsoluteUrl = AbsoluteUrlDeriver::derive(new Uri($baseUrl), new Uri($hrefUrl));
                 $source = $sourceMap->getByUri($referenceAbsoluteUrl);
 
-                if ($source->isAvailable()) {
+                if ($source && $source->isAvailable()) {
                     $referenceWithoutHrefValue = $this->stripHrefValueFromReference($reference, $hrefUrl);
                     $referenceReplacement = $referenceWithoutHrefValue . $source->getMappedUri();
 
@@ -123,7 +125,7 @@ class SourceMutator
     {
         /* @var WebPage $mutatedWebPage */
         /** @noinspection PhpUnhandledExceptionInspection */
-        $mutatedWebPage = $webPage->setContent(str_replace($search, $replace, $webPage->getContent()));
+        $mutatedWebPage = $webPage->setContent(str_replace($search, $replace, (string) $webPage->getContent()));
 
         return $mutatedWebPage;
     }

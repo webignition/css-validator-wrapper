@@ -10,3 +10,11 @@ parameters:
     -
       message: '#function trim expects string#'
       path: '%currentWorkingDirectory%/src/SourceMutator.php'
+
+    -
+      message: '#return webignition\\WebResource\\WebPage\\WebPage#'
+      path: '%currentWorkingDirectory%/src/SourceMutator.php'
+
+    -
+      message: '#return webignition\\WebResource\\WebPage\\WebPage#'
+      path: '%currentWorkingDirectory%/tests/Factory/WebPageFactory.php'
