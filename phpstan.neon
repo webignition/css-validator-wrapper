@@ -1,12 +1,12 @@
 includes:
   - vendor/phpstan/phpstan-mockery/extension.neon
 
-#parameters:
-#  ignoreErrors:
-#    -
-#      message: '#function ltrim expects string#'
-#      path: '%currentWorkingDirectory%/src/SourceMutator.php'
-#
-#    -
-#      message: '#function trim expects string#'
-#      path: '%currentWorkingDirectory%/src/SourceMutator.php'
+parameters:
+  ignoreErrors:
+    -
+      message: '#return webignition\\WebResource\\WebPage\\WebPage#'
+      path: '%currentWorkingDirectory%/src/SourceMutator.php'
+
+    -
+      message: '#return webignition\\WebResource\\WebPage\\WebPage#'
+      path: '%currentWorkingDirectory%/tests/Factory/WebPageFactory.php'
