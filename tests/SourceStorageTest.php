@@ -25,9 +25,10 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         SourceMap $sourceMap,
         string $expectedExceptionMessage
     ) {
-        $sourceInspector = new SourceInspector($webPage);
+        $sourceInspector = new SourceInspector();
+        $stylesheetUrls = $sourceInspector->findStylesheetUrls($webPage);
+
         $sourceStorage = new SourceStorage();
-        $stylesheetUrls = $sourceInspector->findStylesheetUrls();
 
         $this->expectException(UnknownSourceException::class);
         $this->expectExceptionCode(UnknownSourceException::CODE);
@@ -92,10 +93,10 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
             file_put_contents($filename, $content);
         }
 
-        $sourceInspector = new SourceInspector($webPage);
-        $sourceStorage = new SourceStorage();
-        $stylesheetUrls = $sourceInspector->findStylesheetUrls();
+        $sourceInspector = new SourceInspector();
+        $stylesheetUrls = $sourceInspector->findStylesheetUrls($webPage);
 
+        $sourceStorage = new SourceStorage();
         $localSources = $sourceStorage->store($webPage, $sourceMap, $stylesheetUrls);
 
         $this->assertEquals(count($expectedStoredResources), count($localSources));

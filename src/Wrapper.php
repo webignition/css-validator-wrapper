@@ -11,17 +11,20 @@ use webignition\ResourceStorage\SourcePurger;
 
 class Wrapper
 {
+    private $sourceInspector;
     private $sourceStorage;
     private $outputMutator;
     private $commandFactory;
     private $commandExecutor;
 
     public function __construct(
+        SourceInspector $sourceInspector,
         SourceStorage $sourceStorage,
         OutputMutator $outputMutator,
         CommandFactory $commandFactory,
         CommandExecutor $commandExecutor
     ) {
+        $this->sourceInspector = $sourceInspector;
         $this->sourceStorage = $sourceStorage;
         $this->outputMutator = $outputMutator;
         $this->commandFactory = $commandFactory;
@@ -45,11 +48,10 @@ class Wrapper
     ): OutputInterface {
         $webPage = $sourceHandler->getWebPage();
         $remoteSources = $sourceHandler->getSourceMap();
-        $sourceInspector = $sourceHandler->getInspector();
 
         $webPageUri = (string) $webPage->getUri();
 
-        $embeddedStylesheetUrls = $sourceInspector->findStylesheetUrls();
+        $embeddedStylesheetUrls = $this->sourceInspector->findStylesheetUrls($webPage);
         foreach ($embeddedStylesheetUrls as $stylesheetUrl) {
             if (!$remoteSources->getByUri($stylesheetUrl)) {
                 throw new UnknownSourceException($stylesheetUrl);
@@ -66,8 +68,8 @@ class Wrapper
 
         $sourceMutator = $sourceHandler->getMutator();
 
-        $stylesheetReferences = $sourceInspector->findStylesheetReferences();
-        $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($stylesheetReferences);
+        $stylesheetReferences = $this->sourceInspector->findStylesheetReferences($webPage);
+        $mutatedWebPage = $sourceMutator->replaceStylesheetUrls($webPage, $stylesheetReferences);
 
         $localSources = $this->sourceStorage->store($mutatedWebPage, $remoteSources, $stylesheetUrls);
         $webPageLocalSource = $localSources[$webPageUri];

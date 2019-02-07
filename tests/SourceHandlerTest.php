@@ -5,7 +5,6 @@
 namespace webignition\CssValidatorWrapper\Tests;
 
 use webignition\CssValidatorWrapper\SourceHandler;
-use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceMutator;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFixtureFactory;
@@ -22,11 +21,7 @@ class SourceHandlerTest extends \PHPUnit\Framework\TestCase
 
         $sourceHandler = new SourceHandler($webPage, $sourceMap);
 
-        $this->assertInstanceOf(SourceInspector::class, $sourceHandler->getInspector());
         $this->assertInstanceOf(SourceMutator::class, $sourceHandler->getMutator());
-
-        $this->assertSame($webPage, $sourceHandler->getInspector()->getWebPage());
-        $this->assertSame($webPage, $sourceHandler->getMutator()->getWebPage());
     }
 
     /**

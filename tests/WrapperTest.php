@@ -16,6 +16,7 @@ use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfigura
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandExecutor;
 use webignition\CssValidatorWrapper\CommandFactory;
+use webignition\CssValidatorWrapper\SourceInspector;
 use webignition\CssValidatorWrapper\SourceType;
 use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
@@ -608,6 +609,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         CommandExecutor $commandExecutor
     ): Wrapper {
         return new Wrapper(
+            new SourceInspector(),
             $sourceStorage,
             new OutputMutator(),
             $commandFactory,
