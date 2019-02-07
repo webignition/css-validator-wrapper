@@ -22,7 +22,6 @@ use webignition\CssValidatorWrapper\SourceType;
 use webignition\CssValidatorWrapper\VendorExtensionSeverityLevel;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\CssValidatorWrapper\OutputMutator;
-use webignition\CssValidatorWrapper\SourceHandler;
 use webignition\CssValidatorWrapper\SourceStorage;
 use webignition\CssValidatorWrapper\Tests\Factory\FixtureLoader;
 use webignition\CssValidatorWrapper\Tests\Factory\WebPageFactory;
@@ -50,16 +49,15 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             new CommandExecutor(new OutputParser())
         );
 
-
-        $sourceHandler = new SourceHandler($webPage, new SourceMap([
+        $remoteSources = new SourceMap([
             new Source('http://example.com/', 'non-empty string'),
-        ]));
+        ]);
 
         $this->expectException(UnknownSourceException::class);
         $this->expectExceptionCode(UnknownSourceException::CODE);
         $this->expectExceptionMessage('Unknown source "http://example.com/style.css"');
 
-        $wrapper->validate($sourceHandler, VendorExtensionSeverityLevel::LEVEL_WARN);
+        $wrapper->validate($webPage, $remoteSources, VendorExtensionSeverityLevel::LEVEL_WARN);
     }
 
     /**
@@ -82,11 +80,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $webPage = WebPageFactory::create($sourceFixture, new Uri($sourceUrl));
         $wrapper = $this->createWrapper($sourceStorage, $commandFactory, $commandExecutor);
 
-        $sourceHandler = new SourceHandler($webPage, $sourceMap);
-
         /* @var ValidationOutput $output */
         $output = $wrapper->validate(
-            $sourceHandler,
+            $webPage,
+            $sourceMap,
             $vendorExtensionSeverityLevel,
             $outputParserConfiguration
         );

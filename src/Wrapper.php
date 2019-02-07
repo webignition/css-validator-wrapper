@@ -8,6 +8,8 @@ use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfigura
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\ResourceStorage\SourcePurger;
+use webignition\UrlSourceMap\SourceMap;
+use webignition\WebResource\WebPage\WebPage;
 
 class Wrapper
 {
@@ -35,7 +37,8 @@ class Wrapper
     }
 
     /**
-     * @param SourceHandler $sourceHandler
+     * @param WebPage $webPage
+     * @param SourceMap $remoteSources
      * @param string $vendorExtensionSeverityLevel
      * @param OutputParserConfiguration|null $outputParserConfiguration
      *
@@ -45,13 +48,11 @@ class Wrapper
      * @throws UnknownSourceException
      */
     public function validate(
-        SourceHandler $sourceHandler,
+        WebPage $webPage,
+        SourceMap $remoteSources,
         string $vendorExtensionSeverityLevel,
         ?OutputParserConfiguration $outputParserConfiguration = null
     ): OutputInterface {
-        $webPage = $sourceHandler->getWebPage();
-        $remoteSources = $sourceHandler->getSourceMap();
-
         $webPageUri = (string) $webPage->getUri();
 
         $embeddedStylesheetUrls = $this->sourceInspector->findStylesheetUrls($webPage);
