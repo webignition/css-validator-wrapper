@@ -18,9 +18,9 @@ use webignition\WebResource\WebPage\WebPage;
 class SourceStorageTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @dataProvider storeUnknownSourceExceptionDataProvider
+     * @dataProvider storeCssResourcesUnknownSourceExceptionDataProvider
      */
-    public function testStoreUnknownSourceException(
+    public function testStoreCssResourcesUnknownSourceException(
         WebPage $webPage,
         SourceMap $sourceMap,
         string $expectedExceptionMessage
@@ -34,10 +34,10 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         $this->expectExceptionCode(UnknownSourceException::CODE);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $sourceStorage->store($webPage, $sourceMap, new SourceMap(), $stylesheetUrls);
+        $sourceStorage->storeCssResources($sourceMap, new SourceMap(), $stylesheetUrls);
     }
 
-    public function storeUnknownSourceExceptionDataProvider()
+    public function storeCssResourcesUnknownSourceExceptionDataProvider()
     {
         return [
             'single linked stylesheet' => [
@@ -81,9 +81,9 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @dataProvider storeSuccessDataProvider
+     * @dataProvider storeCssResourcesSuccessDataProvider
      */
-    public function testStoreSuccess(
+    public function testStoreCssResourcesSuccess(
         array $sources,
         WebPage $webPage,
         SourceMap $sourceMap,
@@ -97,7 +97,7 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         $stylesheetUrls = $sourceInspector->findStylesheetUrls($webPage);
 
         $sourceStorage = new SourceStorage();
-        $localSources = $sourceStorage->store($webPage, $sourceMap, new SourceMap(), $stylesheetUrls);
+        $localSources = $sourceStorage->storeCssResources($sourceMap, new SourceMap(), $stylesheetUrls);
 
         $this->assertEquals(count($expectedStoredResources), count($localSources));
 
@@ -118,7 +118,7 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         $sourcePurger->purgeLocalResources($localSources);
     }
 
-    public function storeSuccessDataProvider()
+    public function storeCssResourcesSuccessDataProvider()
     {
         return [
             'no linked resources' => [
@@ -128,9 +128,7 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                     new Uri('http://example.com/')
                 ),
                 'sourceMap' => new SourceMap(),
-                'expectedStoredResources' => [
-                    'http://example.com/' => FixtureLoader::load('Html/minimal-html5.html'),
-                ],
+                'expectedStoredResources' => [],
             ],
             'single linked stylesheet, unavailable' => [
                 'sources' => [],
@@ -141,9 +139,7 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                 'sourceMap' => new SourceMap([
                     new Source('http://example.com/style.css'),
                 ]),
-                'expectedStoredResources' => [
-                    'http://example.com/' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
-                ],
+                'expectedStoredResources' => [],
             ],
             'single linked stylesheet, available' => [
                 'sources' => [
@@ -157,7 +153,6 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                     new Source('http://example.com/style.css', '/tmp/style.css'),
                 ]),
                 'expectedStoredResources' => [
-                    'http://example.com/' => FixtureLoader::load('Html/minimal-html5-single-stylesheet.html'),
                     'http://example.com/style.css' => 'html {}',
                 ],
             ],
@@ -177,12 +172,36 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
                     new Source('http://example.com/three.css?foo=bar&foobar=foobar', '/tmp/three.css'),
                 ]),
                 'expectedStoredResources' => [
-                    'http://example.com/' => FixtureLoader::load('Html/minimal-html5-three-stylesheets.html'),
                     'http://example.com/one.css' => 'one {}',
                     'http://example.com/two.css' => 'two {}',
                     'http://example.com/three.css?foo=bar&foobar=foobar' => 'three {}',
                 ],
             ],
         ];
+    }
+
+    public function testStoreWebPage()
+    {
+        $url = 'http://example.com/';
+        $content = FixtureLoader::load('Html/minimal-html5.html');
+
+        $webPage = WebPageFactory::create($content, new Uri($url));
+
+        $sourceStorage = new SourceStorage();
+        $localSources = $sourceStorage->storeWebPage($webPage, new SourceMap());
+
+        $source = $localSources[$url];
+
+        if ($source) {
+            $mappedUri = (string) $source->getMappedUri();
+
+            $this->assertEquals(
+                $content,
+                file_get_contents((string) preg_replace('/^file:/', '', $mappedUri))
+            );
+        }
+
+        $sourcePurger = new SourcePurger();
+        $sourcePurger->purgeLocalResources($localSources);
     }
 }

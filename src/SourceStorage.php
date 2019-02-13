@@ -16,8 +16,16 @@ class SourceStorage
         $this->resourceStorage = new ResourceStorage();
     }
 
+    public function storeWebPage(
+        WebPageInterface $webPage,
+        SourceMap $localSources
+    ): SourceMap {
+        $this->resourceStorage->store($localSources, (string) $webPage->getUri(), $webPage->getContent(), 'html');
+
+        return $localSources;
+    }
+
     /**
-     * @param WebPageInterface $webPage
      * @param SourceMap $remoteSources
      * @param SourceMap $localSources
      * @param array $stylesheetUrls
@@ -26,14 +34,11 @@ class SourceStorage
      *
      * @throws UnknownSourceException
      */
-    public function store(
-        WebPageInterface $webPage,
+    public function storeCssResources(
         SourceMap $remoteSources,
         SourceMap $localSources,
         array $stylesheetUrls
     ): SourceMap {
-        $this->resourceStorage->store($localSources, (string) $webPage->getUri(), $webPage->getContent(), 'html');
-
         if (count($stylesheetUrls)) {
             foreach ($stylesheetUrls as $stylesheetUrl) {
                 if (!$remoteSources->getByUri($stylesheetUrl)) {
