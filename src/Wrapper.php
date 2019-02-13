@@ -75,11 +75,14 @@ class Wrapper
         }
 
         $stylesheetUrls = array_unique(array_merge($embeddedStylesheetUrls, $importedStylesheetUrls));
-
         $stylesheetReferences = $this->sourceInspector->findStylesheetReferences($webPage);
-        $mutatedWebPage = $this->sourceMutator->replaceStylesheetUrls($webPage, $remoteSources, $stylesheetReferences);
 
-        $localSources = $this->sourceStorage->store($mutatedWebPage, $remoteSources, $stylesheetUrls);
+        $localSources = new SourceMap();
+        $localSources = $this->sourceStorage->storeCssResources($remoteSources, $localSources, $stylesheetUrls);
+
+        $mutatedWebPage = $this->sourceMutator->replaceStylesheetUrls($webPage, $localSources, $stylesheetReferences);
+
+        $localSources = $this->sourceStorage->storeWebPage($mutatedWebPage, $localSources);
         $webPageLocalSource = $localSources[$webPageUri];
 
         $command = $this->commandFactory->create($webPageLocalSource->getMappedUri(), $vendorExtensionSeverityLevel);
