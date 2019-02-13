@@ -191,12 +191,15 @@ class SourceStorageTest extends \PHPUnit\Framework\TestCase
         $localSources = $sourceStorage->storeWebPage($webPage, new SourceMap());
 
         $source = $localSources[$url];
-        $mappedUri = (string) $source->getMappedUri();
 
-        $this->assertEquals(
-            $content,
-            file_get_contents((string) preg_replace('/^file:/', '', $mappedUri))
-        );
+        if ($source) {
+            $mappedUri = (string) $source->getMappedUri();
+
+            $this->assertEquals(
+                $content,
+                file_get_contents((string) preg_replace('/^file:/', '', $mappedUri))
+            );
+        }
 
         $sourcePurger = new SourcePurger();
         $sourcePurger->purgeLocalResources($localSources);
