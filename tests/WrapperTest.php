@@ -159,13 +159,13 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
         return [
             'no CSS' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
-                    $noStylesheetsHtml,
-                    new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                    ]),
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
                     $noStylesheetsSourceMap,
                     [],
+                    new SourceMap(),
+                    $noStylesheetsHtml,
+                    new SourceMap(),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                     ])
@@ -196,23 +196,27 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'linked stylesheet, no messages' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ],
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
                     str_replace(
                         [
                             '<link rel="stylesheet" href="/style.css">',
                         ],
                         [
-                            '<link rel="stylesheet" href="file:' . $cssNoMessagesPath . '">',
+                            '<link rel="stylesheet" href="file:/tmp/valid-no-messages-hash.css">',
                         ],
                         $singleStylesheetHtmlRelBeforeHref
                     ),
                     new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
-                    $singleStylesheetValidNoMessagesSourceMap,
-                    [
-                        'http://example.com/style.css',
-                    ],
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
@@ -244,7 +248,11 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'empty-href linked stylesheet, no CSS to validate' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [],
+                    new SourceMap(),
                     str_replace(
                         [
                             '<link href="" rel="stylesheet">',
@@ -254,11 +262,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         ],
                         $singleEmptyHrefStylesheetHtml
                     ),
-                    new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                    ]),
-                    $singleStylesheetValidNoMessagesSourceMap,
-                    [],
+                    new SourceMap(),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                     ])
@@ -289,7 +293,13 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'unavailable linked stylesheet, stylesheet is ignored' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
+                    $singleStylesheetUnavailableSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ],
+                    new SourceMap(),
                     str_replace(
                         [
                             '<link href="/style.css" rel="stylesheet">',
@@ -299,13 +309,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         ],
                         $singleStylesheetHtml
                     ),
-                    new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                    ]),
-                    $singleStylesheetUnavailableSourceMap,
-                    [
-                        'http://example.com/style.css',
-                    ],
+                    new SourceMap(),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                     ])
@@ -336,13 +340,13 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'in-document CSS, single error' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
-                    $noStylesheetsHtml,
-                    new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                    ]),
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
                     $noStylesheetsSourceMap,
                     [],
+                    new SourceMap(),
+                    $noStylesheetsHtml,
+                    new SourceMap(),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                     ])
@@ -377,23 +381,27 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 1,
             ],
             'linked stylesheet, single error' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ],
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/style-hash.css'),
+                    ]),
                     str_replace(
                         [
                             '<link href="/style.css" rel="stylesheet">',
                         ],
                         [
-                            '<link href="file:' . $cssNoMessagesPath . '" rel="stylesheet">',
+                            '<link href="file:/tmp/style-hash.css" rel="stylesheet">',
                         ],
                         $singleStylesheetHtml
                     ),
                     new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/style-hash.css'),
                     ]),
-                    $singleStylesheetValidNoMessagesSourceMap,
-                    [
-                        'http://example.com/style.css',
-                    ],
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/style-hash.css'),
@@ -429,24 +437,30 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 1,
             ],
             'linked stylesheet with import, no messages' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
-                    str_replace(
-                        [
-                            '<link href="/style.css" rel="stylesheet">',
-                        ],
-                        [
-                            '<link href="file:' . $cssWithImportPath . '" rel="stylesheet">',
-                        ],
-                        $singleStylesheetHtml
-                    ),
-                    new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                    ]),
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
                     $singleStylesheetWithImportsSourceMap,
                     [
                         'http://example.com/style.css',
                         'http://example.com/one.css',
                     ],
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:/tmp/valid-no-messages-hash.css" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
@@ -491,24 +505,30 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 0,
             ],
             'linked stylesheet with import, error in import' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
-                    str_replace(
-                        [
-                            '<link href="/style.css" rel="stylesheet">',
-                        ],
-                        [
-                            '<link href="file:' . $cssWithImportPath . '" rel="stylesheet">',
-                        ],
-                        $singleStylesheetHtml
-                    ),
-                    new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                    ]),
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
                     $singleStylesheetWithImportsSourceMap,
                     [
                         'http://example.com/style.css',
                         'http://example.com/one.css',
                     ],
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:/tmp/valid-no-messages-hash.css" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                    ]),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
@@ -557,24 +577,30 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedErrorCount' => 1,
             ],
             'linked stylesheet with import, error in linked stylesheet, error in import' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectations(
-                    str_replace(
-                        [
-                            '<link href="/style.css" rel="stylesheet">',
-                        ],
-                        [
-                            '<link href="file:' . $cssWithImportPath . '" rel="stylesheet">',
-                        ],
-                        $singleStylesheetHtml
-                    ),
-                    new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                    ]),
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
                     $singleStylesheetWithImportsSourceMap,
                     [
                         'http://example.com/style.css',
                         'http://example.com/one.css',
                     ],
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:/tmp/invalid-link-hash.css" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
+                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+                    ]),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
@@ -653,48 +679,33 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         return $sourceStorage;
     }
 
-    private function createSourceStorageWithValidateExpectations(
-        $expectedWebPageContent,
-        SourceMap $expectedStoreWebPageLocalSourceMap,
+    private function createSourceStorageWithValidateExpectationsFoo(
+        SourceMap $expectedStoreCssResourcesLocalSources,
         SourceMap $expectedStoreCssResourcesRemoteSources,
         array $expectedStoreCssResourcesStylesheetUrls,
-        SourceMap $expectedStoreCssResourcesLocalSourceMap
+        SourceMap $expectedStoreCssResourcesReturnSourceMap,
+        $expectedStoreWebPageWebPageContent,
+        SourceMap $expectedStoreWebPageLocalSourceMap,
+        SourceMap $expectedStoreWebPageReturnSourceMap
     ) {
         $sourceStorage = $this->createSourceStorage();
-
-        $this->createSourceStorageStoreWebPageExpectation(
-            $sourceStorage,
-            $expectedWebPageContent,
-            $expectedStoreWebPageLocalSourceMap
-        );
 
         $this->createSourceStorageStoreCssResourcesExpectation(
             $sourceStorage,
             $expectedStoreCssResourcesRemoteSources,
-            $expectedStoreWebPageLocalSourceMap,
+            $expectedStoreCssResourcesLocalSources,
             $expectedStoreCssResourcesStylesheetUrls,
-            $expectedStoreCssResourcesLocalSourceMap
+            $expectedStoreCssResourcesReturnSourceMap
+        );
+
+        $this->createSourceStorageStoreWebPageExpectation(
+            $sourceStorage,
+            $expectedStoreWebPageWebPageContent,
+            $expectedStoreWebPageLocalSourceMap,
+            $expectedStoreWebPageReturnSourceMap
         );
 
         return $sourceStorage;
-    }
-
-    private function createSourceStorageStoreWebPageExpectation(
-        MockInterface $sourceStorageMock,
-        string $expectedWebPageContent,
-        SourceMap $expectedReturnedSourceMap
-    ) {
-        $sourceStorageMock
-            ->shouldReceive('storeWebPage')
-            ->withArgs(function (WebPage $webPage, SourceMap $localSources) use ($expectedWebPageContent) {
-                $this->assertEquals($expectedWebPageContent, $webPage->getContent());
-                $this->assertEquals(0, $localSources->count());
-
-                return true;
-            })
-            ->andReturn($expectedReturnedSourceMap);
-
-        return $sourceStorageMock;
     }
 
     private function createSourceStorageStoreCssResourcesExpectation(
@@ -715,7 +726,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 $expectedLocalSources,
                 $expectedStylesheetUrls
             ) {
-                $this->assertEquals($expectedRemoteSources, $remoteSources);
+                $this->assertSame($expectedRemoteSources, $remoteSources);
                 $this->assertEquals($expectedLocalSources, $localSources);
                 $this->assertEquals($expectedStylesheetUrls, $stylesheetUrls);
 
@@ -724,6 +735,31 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             ->andReturn($expectedReturnedSourceMap);
 
         return $sourceStorage;
+    }
+
+    private function createSourceStorageStoreWebPageExpectation(
+        MockInterface $sourceStorageMock,
+        string $expectedWebPageContent,
+        SourceMap $expectedLocalSources,
+        SourceMap $expectedReturnedSourceMap
+    ) {
+        $sourceStorageMock
+            ->shouldReceive('storeWebPage')
+            ->withArgs(function (
+                WebPage $webPage,
+                SourceMap $localSources
+            ) use (
+                $expectedWebPageContent,
+                $expectedLocalSources
+            ) {
+                $this->assertEquals($expectedWebPageContent, $webPage->getContent());
+                $this->assertEquals($expectedLocalSources, $localSources);
+
+                return true;
+            })
+            ->andReturn($expectedReturnedSourceMap);
+
+        return $sourceStorageMock;
     }
 
     /**
