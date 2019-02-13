@@ -19,6 +19,7 @@ class SourceStorage
     /**
      * @param WebPageInterface $webPage
      * @param SourceMap $remoteSources
+     * @param SourceMap $localSources
      * @param array $stylesheetUrls
      *
      * @return SourceMap
@@ -28,10 +29,9 @@ class SourceStorage
     public function store(
         WebPageInterface $webPage,
         SourceMap $remoteSources,
+        SourceMap $localSources,
         array $stylesheetUrls
-    ) {
-        $localSources = new SourceMap();
-
+    ): SourceMap {
         $this->resourceStorage->store($localSources, (string) $webPage->getUri(), $webPage->getContent(), 'html');
 
         if (count($stylesheetUrls)) {
