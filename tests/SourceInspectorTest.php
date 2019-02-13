@@ -688,6 +688,76 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
+    /**
+     * @dataProvider findIeConditionalCommentStylesheetUrlsDataProvider
+     */
+    public function testFindIeConditionalCommentStylesheetUrls(WebPage $webPage, array $expectedUrls)
+    {
+        $this->assertEquals($expectedUrls, $this->sourceInspector->findIeConditionalCommentStylesheetUrls($webPage));
+    }
+
+    public function findIeConditionalCommentStylesheetUrlsDataProvider()
+    {
+        return [
+            'collection of ie conditional comments' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        implode("\n", [
+                            '<!--[if true]>',
+                            '<link rel="stylesheet" href="/if-true.css">',
+                            '<link rel="stylesheet" href="/搜.css">',
+                            '<![endif]-->',
+                            '<!--[if false]><link rel="stylesheet" href="/if-false.css"><![endif]-->',
+                            '<!--[if IE 8]>',
+                            '<link rel="stylesheet" href="/if-ie-8.css">',
+                            '<![endif]-->',
+                            '<![if !IE]><link rel="stylesheet" href="/downlevel-revealed-not-ie.css"><![endif]>',
+                            '<!--[if false]><script type="text/javascript"></script><![endif]-->',
+                            '<!--[if false]>plain text<![endif]-->',
+                        ]),
+                        null,
+                        'utf-8'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html')
+                ),
+                'expectedUrls' => [
+                    'http://example.com/if-true.css',
+                    'http://example.com/' . rawurlencode('搜') . '.css',
+                    'http://example.com/if-false.css',
+                    'http://example.com/if-ie-8.css',
+                ],
+            ],
+            'big5 document with no charset, charset supplied' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<!--[if true]><link rel="stylesheet" href="搜"><![endif]-->',
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html; charset=big5')
+                ),
+                'expectedUrls' => [
+                    'http://example.com/' . rawurlencode('搜'),
+                ],
+            ],
+            'big5 document with no charset, no charset supplied' => [
+                'webPage' => WebPageFactory::create(
+                    WebPageFixtureFactory::createMarkupContainingFragment(
+                        '<!--[if true]><link rel="stylesheet" href="搜"><![endif]-->',
+                        null,
+                        'big5'
+                    ),
+                    new Uri('http://example.com/'),
+                    ContentTypeFactory::createFromString('text/html')
+                ),
+                'expectedUrls' => [
+                    'http://example.com/j',
+                ],
+            ],
+        ];
+    }
+
     protected function tearDown()
     {
         parent::tearDown();
