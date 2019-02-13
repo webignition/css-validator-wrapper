@@ -658,7 +658,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             ->shouldReceive('store')
             ->withArgs(function (
                 WebPage $webPage,
-                SourceMap $sourceMap,
+                SourceMap $remoteSources,
+                SourceMap $localSources,
                 array $stylesheetUrls
             ) use (
                 $expectedWebPageContent,
@@ -666,7 +667,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 $expectedStylesheetUrls
             ) {
                 $this->assertEquals($expectedWebPageContent, $webPage->getContent());
-                $this->assertEquals($expectedSourceMap, $sourceMap);
+                $this->assertEquals($expectedSourceMap, $remoteSources);
+                $this->assertInstanceOf(SourceMap::class, $localSources);
                 $this->assertEquals($expectedStylesheetUrls, $stylesheetUrls);
 
                 return true;
