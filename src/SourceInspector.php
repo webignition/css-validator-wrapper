@@ -5,6 +5,7 @@ namespace webignition\CssValidatorWrapper;
 use webignition\AbsoluteUrlDeriver\AbsoluteUrlDeriver;
 use webignition\Uri\Normalizer;
 use webignition\Uri\Uri;
+use webignition\WebResource\WebPage\ContentEncodingValidator;
 use webignition\WebResource\WebPage\WebPage;
 
 class SourceInspector
@@ -16,24 +17,23 @@ class SourceInspector
      */
     public function findStylesheetUrls(WebPage $webPage): array
     {
-        $urls = [];
-        $hrefValues = $this->findStylesheetUrlHrefValues($webPage);
+        return $this->createAbsoluteUrlCollection(
+            new Uri((string) $webPage->getBaseUrl()),
+            $this->findLinkElementHrefValues($webPage)
+        );
+    }
 
-        $baseUri = new Uri((string) $webPage->getBaseUrl());
-
-        foreach ($hrefValues as $hrefValue) {
-            $hrefValue = trim($hrefValue);
-
-            if (!empty($hrefValue)) {
-                $uri = AbsoluteUrlDeriver::derive($baseUri, new Uri($hrefValue));
-                $uri = Normalizer::normalize($uri);
-                $uri = Normalizer::normalize($uri, Normalizer::REMOVE_FRAGMENT);
-
-                $urls[] = (string) $uri;
-            }
-        }
-
-        return array_unique($urls);
+    /**
+     * @param WebPage $webPage
+     *
+     * @return string[]
+     */
+    public function findIeConditionalCommentStylesheetUrls(WebPage $webPage): array
+    {
+        return $this->createAbsoluteUrlCollection(
+            new Uri((string) $webPage->getBaseUrl()),
+            $this->findIeConditionalCommentStylesheetHrefValues($webPage)
+        );
     }
 
     /**
@@ -47,7 +47,7 @@ class SourceInspector
         $encoding = $encoding ?? 'utf-8';
 
         $references = [];
-        $hrefValues = $this->findStylesheetUrlHrefValues($webPage);
+        $hrefValues = $this->findLinkElementHrefValues($webPage);
 
         foreach ($hrefValues as $hrefValue) {
             if (mb_substr_count($hrefValue, '&', $encoding)) {
@@ -157,7 +157,7 @@ class SourceInspector
         return $hrefLinkPrefix . $hrefValue;
     }
 
-    private function findStylesheetUrlHrefValues(WebPage $webPage): array
+    private function findLinkElementHrefValues(WebPage $webPage): array
     {
         $hrefAttributes = [];
         $selector = 'link[rel=stylesheet][href]';
@@ -174,5 +174,54 @@ class SourceInspector
         }
 
         return $hrefAttributes;
+    }
+
+    private function findIeConditionalCommentStylesheetHrefValues(WebPage $webPage): array
+    {
+        $inspector = $webPage->getInspector();
+        $ieConditionalCommentData = $inspector->extractIeConditionalCommentData();
+
+        $hrefValues = [];
+
+        foreach ($ieConditionalCommentData as $commentData) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $webPageFromComment = WebPage::createFromContent($commentData);
+
+            if ($webPageFromComment instanceof WebPage) {
+                $contentEncodingValidator = new ContentEncodingValidator();
+                if (!$contentEncodingValidator->isValid($webPageFromComment)) {
+                    $webPageFromComment = $contentEncodingValidator->convertToUtf8($webPageFromComment);
+                }
+
+                $hrefValues = array_merge($hrefValues, $this->findLinkElementHrefValues($webPageFromComment));
+            }
+        }
+
+        return $hrefValues;
+    }
+
+    /**
+     * @param Uri $baseUri
+     * @param string[] $hrefValues
+     *
+     * @return string[]
+     */
+    private function createAbsoluteUrlCollection(Uri $baseUri, array $hrefValues): array
+    {
+        $urls = [];
+
+        foreach ($hrefValues as $hrefValue) {
+            $hrefValue = trim($hrefValue);
+
+            if (!empty($hrefValue)) {
+                $uri = AbsoluteUrlDeriver::derive($baseUri, new Uri($hrefValue));
+                $uri = Normalizer::normalize($uri);
+                $uri = Normalizer::normalize($uri, Normalizer::REMOVE_FRAGMENT);
+
+                $urls[] = (string) $uri;
+            }
+        }
+
+        return array_unique($urls);
     }
 }
