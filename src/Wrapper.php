@@ -100,6 +100,11 @@ class Wrapper
                 $importedStylesheetOutput = $this->commandExecutor->execute($command, $outputParserConfiguration);
 
                 if ($importedStylesheetOutput instanceof ValidationOutput) {
+                    $importedStylesheetOutput = $this->outputMutator->setMessagesRefFromUrl(
+                        $importedStylesheetOutput,
+                        $stylesheetLocalSource->getMappedUri()
+                    );
+
                     $output = $output->withObservationResponse(
                         $output->getObservationResponse()->withMessages(
                             $output->getMessages()->merge($importedStylesheetOutput->getMessages())

@@ -558,7 +558,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'output' => $this->createValidationOutput(
                             'file:/tmp/invalid-hash.css',
                             new MessageList([
-                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/invalid-hash.css'),
+                                new ErrorMessage('title content', 2, '.foo', ''),
                             ])
                         ),
                         'expectedOutputParserConfiguration' => $outputParserConfiguration,
@@ -632,7 +632,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'output' => $this->createValidationOutput(
                             'file:/tmp/invalid-import-hash.css',
                             new MessageList([
-                                new ErrorMessage('title content', 2, '.foo', 'file:/tmp/invalid-import-hash.css'),
+                                new ErrorMessage('title content', 2, '.foo', ''),
                             ])
                         ),
                         'expectedOutputParserConfiguration' => $outputParserConfiguration,
