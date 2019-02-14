@@ -18,7 +18,7 @@ class SourceInspector
     public function findStylesheetUrls(WebPage $webPage): array
     {
         return $this->createAbsoluteUrlCollection(
-            new Uri($webPage->getBaseUrl()),
+            new Uri((string) $webPage->getBaseUrl()),
             $this->findLinkElementHrefValues($webPage)
         );
     }
@@ -31,7 +31,7 @@ class SourceInspector
     public function findIeConditionalCommentStylesheetUrls(WebPage $webPage): array
     {
         return $this->createAbsoluteUrlCollection(
-            new Uri($webPage->getBaseUrl()),
+            new Uri((string) $webPage->getBaseUrl()),
             $this->findIeConditionalCommentStylesheetHrefValues($webPage)
         );
     }
@@ -187,12 +187,14 @@ class SourceInspector
             /** @noinspection PhpUnhandledExceptionInspection */
             $webPageFromComment = WebPage::createFromContent($commentData);
 
-            $contentEncodingValidator = new ContentEncodingValidator();
-            if ($webPageFromComment instanceof WebPage && !$contentEncodingValidator->isValid($webPageFromComment)) {
-                $webPageFromComment = $contentEncodingValidator->convertToUtf8($webPageFromComment);
-            }
+            if ($webPageFromComment instanceof WebPage) {
+                $contentEncodingValidator = new ContentEncodingValidator();
+                if (!$contentEncodingValidator->isValid($webPageFromComment)) {
+                    $webPageFromComment = $contentEncodingValidator->convertToUtf8($webPageFromComment);
+                }
 
-            $hrefValues = array_merge($hrefValues, $this->findLinkElementHrefValues($webPageFromComment));
+                $hrefValues = array_merge($hrefValues, $this->findLinkElementHrefValues($webPageFromComment));
+            }
         }
 
         return $hrefValues;
