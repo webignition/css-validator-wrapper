@@ -20,8 +20,10 @@ class OutputMutator
         return $output;
     }
 
-    public function setMessagesRef(ValidationOutput $output, SourceMap $localLinkedSources): ValidationOutput
-    {
+    public function setMessagesRefFromSourceMap(
+        ValidationOutput $output,
+        SourceMap $localLinkedSources
+    ): ValidationOutput {
         $mutator = function (AbstractMessage $message) use ($localLinkedSources) {
             if ($message instanceof AbstractIssueMessage) {
                 $source = $localLinkedSources->getByMappedUri($message->getRef());
@@ -29,6 +31,26 @@ class OutputMutator
                 if ($source) {
                     $message = $message->withRef($source->getUri());
                 }
+            }
+
+            return $message;
+        };
+
+        return $this->modifyMessages(
+            $output,
+            function (MessageList $messageList) use ($mutator): MessageList {
+                return $messageList->mutate($mutator);
+            }
+        );
+    }
+
+    public function setMessagesRefFromUrl(
+        ValidationOutput $output,
+        string $url
+    ): ValidationOutput {
+        $mutator = function (AbstractMessage $message) use ($url) {
+            if ($message instanceof AbstractIssueMessage) {
+                $message = $message->withRef($url);
             }
 
             return $message;

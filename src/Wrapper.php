@@ -100,6 +100,11 @@ class Wrapper
                 $importedStylesheetOutput = $this->commandExecutor->execute($command, $outputParserConfiguration);
 
                 if ($importedStylesheetOutput instanceof ValidationOutput) {
+                    $importedStylesheetOutput = $this->outputMutator->setMessagesRefFromUrl(
+                        $importedStylesheetOutput,
+                        $stylesheetLocalSource->getMappedUri()
+                    );
+
                     $output = $output->withObservationResponse(
                         $output->getObservationResponse()->withMessages(
                             $output->getMessages()->merge($importedStylesheetOutput->getMessages())
@@ -109,7 +114,7 @@ class Wrapper
             }
 
             $output = $this->outputMutator->setObservationResponseRef($output, $webPageUri);
-            $output = $this->outputMutator->setMessagesRef($output, $localSources);
+            $output = $this->outputMutator->setMessagesRefFromSourceMap($output, $localSources);
         }
 
         $sourcePurger = new SourcePurger();

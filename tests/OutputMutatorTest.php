@@ -56,17 +56,20 @@ class OutputMutatorTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @dataProvider setMessagesRefDataProvider
+     * @dataProvider setMessagesRefFromSourceMapDataProvider
      */
-    public function testSetMessagesRef(ValidationOutput $output, SourceMap $linkedResourcesMap, array $expectedMessages)
-    {
-        $updatedOutput = $this->outputMutator->setMessagesRef($output, $linkedResourcesMap);
+    public function testSetMessagesRefFromSourceMap(
+        ValidationOutput $output,
+        SourceMap $linkedResourcesMap,
+        array $expectedMessages
+    ) {
+        $updatedOutput = $this->outputMutator->setMessagesRefFromSourceMap($output, $linkedResourcesMap);
 
         $this->assertNotSame($output, $updatedOutput);
         $this->assertEquals($expectedMessages, array_values($updatedOutput->getMessages()->getMessages()));
     }
 
-    public function setMessagesRefDataProvider(): array
+    public function setMessagesRefFromSourceMapDataProvider(): array
     {
         return [
             'no messages' => [
@@ -118,6 +121,74 @@ class OutputMutatorTest extends \PHPUnit\Framework\TestCase
                 'expectedMessages' => [
                     new WarningMessage('warning title', 0, 'warning context', 'http://example.com/warning.css', 0),
                     new ErrorMessage('error title', 0, 'error context', 'http://example.com/error.css'),
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider setMessagesRefFromUrlDataProvider
+     */
+    public function testSetMessagesRefFromUrl(
+        ValidationOutput $output,
+        string $url,
+        array $expectedMessages
+    ) {
+        $updatedOutput = $this->outputMutator->setMessagesRefFromUrl($output, $url);
+
+        $this->assertNotSame($output, $updatedOutput);
+        $this->assertEquals($expectedMessages, array_values($updatedOutput->getMessages()->getMessages()));
+    }
+
+    public function setMessagesRefFromUrlDataProvider(): array
+    {
+        return [
+            'no messages, empty url' => [
+                'output' => new ValidationOutput(
+                    $this->createCssValidationOutputOptions(),
+                    new ObservationResponse('http://example.com/', new \DateTime(), $this->createMessageList([]))
+                ),
+                'url' => '',
+                'expectedMessages' => [],
+            ],
+            'info message only, empty url' => [
+                'output' => new ValidationOutput(
+                    $this->createCssValidationOutputOptions(),
+                    new ObservationResponse('http://example.com/', new \DateTime(), $this->createMessageList([
+                        new InfoMessage('info title', 'info description'),
+                    ]))
+                ),
+                'url' => '',
+                'expectedMessages' => [
+                    new InfoMessage('info title', 'info description'),
+                ],
+            ],
+            'error and warning, empty url' => [
+                'output' => new ValidationOutput(
+                    $this->createCssValidationOutputOptions(),
+                    new ObservationResponse('http://example.com/', new \DateTime(), $this->createMessageList([
+                        new WarningMessage('warning title', 0, 'warning context', '/tmp/warning.html', 0),
+                        new ErrorMessage('error title', 0, 'error context', '/tmp/error.html'),
+                    ]))
+                ),
+                'url' => '',
+                'expectedMessages' => [
+                    new WarningMessage('warning title', 0, 'warning context', '', 0),
+                    new ErrorMessage('error title', 0, 'error context', ''),
+                ],
+            ],
+            'error and warning, has url' => [
+                'output' => new ValidationOutput(
+                    $this->createCssValidationOutputOptions(),
+                    new ObservationResponse('http://example.com/', new \DateTime(), $this->createMessageList([
+                        new WarningMessage('warning title', 0, 'warning context', '/tmp/warning.html', 0),
+                        new ErrorMessage('error title', 0, 'error context', '/tmp/error.html'),
+                    ]))
+                ),
+                'url' => 'file:/tmp/source.css',
+                'expectedMessages' => [
+                    new WarningMessage('warning title', 0, 'warning context', 'file:/tmp/source.css', 0),
+                    new ErrorMessage('error title', 0, 'error context', 'file:/tmp/source.css'),
                 ],
             ],
         ];
