@@ -44,6 +44,26 @@ class OutputMutator
         );
     }
 
+    public function setMessagesRefFromUrl(
+        ValidationOutput $output,
+        string $url
+    ): ValidationOutput {
+        $mutator = function (AbstractMessage $message) use ($url) {
+            if ($message instanceof AbstractIssueMessage) {
+                $message = $message->withRef($url);
+            }
+
+            return $message;
+        };
+
+        return $this->modifyMessages(
+            $output,
+            function (MessageList $messageList) use ($mutator): MessageList {
+                return $messageList->mutate($mutator);
+            }
+        );
+    }
+
     private function modifyMessages(ValidationOutput $output, callable $modifier)
     {
         $observationResponse = $output->getObservationResponse();
