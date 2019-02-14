@@ -109,7 +109,7 @@ class Wrapper
             }
 
             $output = $this->outputMutator->setObservationResponseRef($output, $webPageUri);
-            $output = $this->outputMutator->setMessagesRef($output, $localSources);
+            $output = $this->outputMutator->setMessagesRefFromSourceMap($output, $localSources);
         }
 
         $sourcePurger = new SourcePurger();

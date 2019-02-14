@@ -56,17 +56,20 @@ class OutputMutatorTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @dataProvider setMessagesRefDataProvider
+     * @dataProvider setMessagesRefFromSourceMapDataProvider
      */
-    public function testSetMessagesRef(ValidationOutput $output, SourceMap $linkedResourcesMap, array $expectedMessages)
-    {
-        $updatedOutput = $this->outputMutator->setMessagesRef($output, $linkedResourcesMap);
+    public function testSetMessagesRefFromSourceMap(
+        ValidationOutput $output,
+        SourceMap $linkedResourcesMap,
+        array $expectedMessages
+    ) {
+        $updatedOutput = $this->outputMutator->setMessagesRefFromSourceMap($output, $linkedResourcesMap);
 
         $this->assertNotSame($output, $updatedOutput);
         $this->assertEquals($expectedMessages, array_values($updatedOutput->getMessages()->getMessages()));
     }
 
-    public function setMessagesRefDataProvider(): array
+    public function setMessagesRefFromSourceMapDataProvider(): array
     {
         return [
             'no messages' => [
