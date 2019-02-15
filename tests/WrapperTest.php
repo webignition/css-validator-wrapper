@@ -162,6 +162,14 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             ),
         ]);
 
+        $singleStylesheetWithImportsImportDomainIgnoredSourceMap = new SourceMap([
+            new Source(
+                'http://example.com/',
+                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
+            ),
+            new Source('http://example.com/style.css', 'file:' . $cssWithImportPath),
+        ]);
+
         $singleStylesheetUnavailableSourceMap = new SourceMap([
             new Source(
                 'http://example.com/',
@@ -582,14 +590,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             'linked stylesheet with import, import domain ignored, no messages' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
                     new SourceMap(),
-                    $singleStylesheetWithImportsSourceMap,
+                    $singleStylesheetWithImportsImportDomainIgnoredSourceMap,
                     [
                         'http://example.com/style.css',
-                        'http://foo.example.com/import.css',
                     ],
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     str_replace(
                         [
@@ -602,12 +608,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     ),
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ])
                 ),
                 'commandFactory' => $this->createCommandFactory([
@@ -630,7 +634,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                 ]),
-                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+                'sourceMap' => $singleStylesheetWithImportsImportDomainIgnoredSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
