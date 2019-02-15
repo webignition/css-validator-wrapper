@@ -71,6 +71,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         string $sourceFixture,
         string $sourceUrl,
         string $vendorExtensionSeverityLevel,
+        array $domainsToIgnore,
         OutputParserConfiguration $outputParserConfiguration,
         array $expectedMessages,
         int $expectedWarningCount,
@@ -85,6 +86,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $webPage,
             $sourceMap,
             $vendorExtensionSeverityLevel,
+            $domainsToIgnore,
             $outputParserConfiguration
         );
 
@@ -170,12 +172,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
 
         $outputParserConfiguration = new OutputParserConfiguration();
 
-        $ignoredDomainOutputParserConfiguration = new OutputParserConfiguration([
-            OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
-                'foo.example.com',
-            ],
-        ]);
-
         return [
             'no CSS' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
@@ -209,6 +205,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
                 'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
@@ -261,6 +258,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtmlRelBeforeHref,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
                 'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
@@ -305,7 +303,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $ignoredDomainOutputParserConfiguration,
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -313,7 +311,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtmlIgnoredDomain,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $ignoredDomainOutputParserConfiguration,
+                'domainsToIgnore' => [
+                    'foo.example.com',
+                ],
+                'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -358,6 +359,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleEmptyHrefStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
                 'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
@@ -405,6 +407,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
                 'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
@@ -444,6 +447,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
                 'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 3, '.bar', ''),
@@ -500,6 +504,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
                 'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 2, '.foo', 'http://example.com/style.css'),
@@ -570,6 +575,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
                 'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
@@ -622,7 +628,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $ignoredDomainOutputParserConfiguration,
+                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                 ]),
@@ -630,7 +636,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $ignoredDomainOutputParserConfiguration,
+                'domainsToIgnore' => [
+                    'foo.example.com',
+                ],
+                'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -700,6 +709,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
                 'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 2, '.foo', 'http://foo.example.com/import.css'),
@@ -774,6 +784,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
                 'outputParserConfiguration' => $outputParserConfiguration,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 1, '.bar', 'http://example.com/style.css'),
