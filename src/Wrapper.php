@@ -62,9 +62,16 @@ class Wrapper
 
         $webPageUri = (string) $webPage->getUri();
 
+        $domainsToIgnore = [];
+        if ($outputParserConfiguration) {
+            $domainsToIgnore = $outputParserConfiguration->getRefDomainsToIgnore();
+        }
+
         $embeddedStylesheetUrls = $this->sourceInspector->findStylesheetUrls($webPage);
         foreach ($embeddedStylesheetUrls as $stylesheetUrl) {
-            if (!$remoteSources->getByUri($stylesheetUrl)) {
+            $isUrlIgnored = $this->isUrlIgnored($stylesheetUrl, $domainsToIgnore);
+
+            if (!$isUrlIgnored && !$remoteSources->getByUri($stylesheetUrl)) {
                 throw new UnknownSourceException($stylesheetUrl);
             }
         }
@@ -90,11 +97,6 @@ class Wrapper
         $output = $this->commandExecutor->execute($command, $outputParserConfiguration);
 
         if ($output instanceof ValidationOutput) {
-            $domainsToIgnore = [];
-            if ($outputParserConfiguration) {
-                $domainsToIgnore = $outputParserConfiguration->getRefDomainsToIgnore();
-            }
-
             foreach ($importedStylesheetUrls as $importedStylesheetUrl) {
                 if ($this->isUrlIgnored($importedStylesheetUrl, $domainsToIgnore)) {
                     continue;
