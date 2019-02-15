@@ -3,7 +3,7 @@
 namespace webignition\CssValidatorWrapper;
 
 use webignition\CssValidatorOutput\Model\OutputInterface;
-use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
+use webignition\CssValidatorOutput\Parser\Flags;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorOutput\Parser\OutputParser;
 
@@ -18,21 +18,16 @@ class CommandExecutor
 
     /**
      * @param string $command
-     * @param OutputParserConfiguration|null $outputParserConfiguration
+     * @param int $flags
      *
      * @return OutputInterface
      *
      * @throws InvalidValidatorOutputException
      */
-    public function execute(
-        string $command,
-        ?OutputParserConfiguration $outputParserConfiguration = null
-    ): OutputInterface {
+    public function execute(string $command, int $flags = Flags::NONE): OutputInterface
+    {
         $validatorOutput = shell_exec($command);
 
-        return $this->outputParser->parse(
-            $validatorOutput,
-            $outputParserConfiguration ?? new OutputParserConfiguration()
-        );
+        return $this->outputParser->parse($validatorOutput, $flags);
     }
 }

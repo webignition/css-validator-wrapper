@@ -4,7 +4,7 @@ namespace webignition\CssValidatorWrapper;
 
 use webignition\CssValidatorOutput\Model\OutputInterface;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
-use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
+use webignition\CssValidatorOutput\Parser\Flags;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\ResourceStorage\SourcePurger;
@@ -43,7 +43,7 @@ class Wrapper
      * @param SourceMap $remoteSources
      * @param string $vendorExtensionSeverityLevel
      * @param array $domainsToIgnore
-     * @param OutputParserConfiguration|null $outputParserConfiguration
+     * @param int $outputParserFlags
      *
      * @return OutputInterface
      *
@@ -55,7 +55,7 @@ class Wrapper
         SourceMap $remoteSources,
         string $vendorExtensionSeverityLevel,
         array $domainsToIgnore = [],
-        ?OutputParserConfiguration $outputParserConfiguration = null
+        int $outputParserFlags = Flags::NONE
     ): OutputInterface {
         $contentEncodingValidator = new ContentEncodingValidator();
         if (!$contentEncodingValidator->isValid($webPage)) {
@@ -91,7 +91,7 @@ class Wrapper
         $webPageLocalSource = $localSources[$webPageUri];
 
         $command = $this->commandFactory->create($webPageLocalSource->getMappedUri(), $vendorExtensionSeverityLevel);
-        $output = $this->commandExecutor->execute($command, $outputParserConfiguration);
+        $output = $this->commandExecutor->execute($command, $outputParserFlags);
 
         if ($output instanceof ValidationOutput) {
             foreach ($importedStylesheetUrls as $importedStylesheetUrl) {
@@ -106,7 +106,7 @@ class Wrapper
                     $vendorExtensionSeverityLevel
                 );
 
-                $importedStylesheetOutput = $this->commandExecutor->execute($command, $outputParserConfiguration);
+                $importedStylesheetOutput = $this->commandExecutor->execute($command, $outputParserFlags);
 
                 if ($importedStylesheetOutput instanceof ValidationOutput) {
                     $importedStylesheetOutput = $this->outputMutator->setMessagesRefFromUrl(
