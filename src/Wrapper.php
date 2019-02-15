@@ -42,6 +42,7 @@ class Wrapper
      * @param WebPage $webPage
      * @param SourceMap $remoteSources
      * @param string $vendorExtensionSeverityLevel
+     * @param array $domainsToIgnore
      * @param OutputParserConfiguration|null $outputParserConfiguration
      *
      * @return OutputInterface
@@ -53,6 +54,7 @@ class Wrapper
         WebPage $webPage,
         SourceMap $remoteSources,
         string $vendorExtensionSeverityLevel,
+        array $domainsToIgnore = [],
         ?OutputParserConfiguration $outputParserConfiguration = null
     ): OutputInterface {
         $contentEncodingValidator = new ContentEncodingValidator();
@@ -61,11 +63,6 @@ class Wrapper
         }
 
         $webPageUri = (string) $webPage->getUri();
-
-        $domainsToIgnore = [];
-        if ($outputParserConfiguration) {
-            $domainsToIgnore = $outputParserConfiguration->getRefDomainsToIgnore();
-        }
 
         $embeddedStylesheetUrls = $this->sourceInspector->findStylesheetUrls($webPage);
         foreach ($embeddedStylesheetUrls as $stylesheetUrl) {
