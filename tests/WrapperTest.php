@@ -12,7 +12,7 @@ use webignition\CssValidatorOutput\Model\MessageList;
 use webignition\CssValidatorOutput\Model\ObservationResponse;
 use webignition\CssValidatorOutput\Model\Options;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
-use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
+use webignition\CssValidatorOutput\Parser\Flags;
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandExecutor;
 use webignition\CssValidatorWrapper\CommandFactory;
@@ -72,7 +72,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         string $sourceUrl,
         string $vendorExtensionSeverityLevel,
         array $domainsToIgnore,
-        OutputParserConfiguration $outputParserConfiguration,
+        int $outputParserFlags,
         array $expectedMessages,
         int $expectedWarningCount,
         int $expectedErrorCount,
@@ -87,7 +87,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $sourceMap,
             $vendorExtensionSeverityLevel,
             $domainsToIgnore,
-            $outputParserConfiguration
+            $outputParserFlags
         );
 
         $this->assertInstanceOf(ValidationOutput::class, $output);
@@ -170,8 +170,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             new Source('http://example.com/style.css'),
         ]);
 
-        $outputParserConfiguration = new OutputParserConfiguration();
-
         return [
             'no CSS' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
@@ -197,7 +195,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -206,7 +204,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'domainsToIgnore' => [],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -250,7 +248,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -259,7 +257,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'domainsToIgnore' => [],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -303,7 +301,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -314,7 +312,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'domainsToIgnore' => [
                     'foo.example.com',
                 ],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -351,7 +349,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -360,7 +358,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'domainsToIgnore' => [],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -399,7 +397,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -408,7 +406,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'domainsToIgnore' => [],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -439,7 +437,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 3, '.bar', ''),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -448,7 +446,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'domainsToIgnore' => [],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 3, '.bar', ''),
                 ],
@@ -496,7 +494,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 2, '.foo', 'file:/tmp/style-hash.css'),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                 ]),
@@ -505,7 +503,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'domainsToIgnore' => [],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 2, '.foo', 'http://example.com/style.css'),
                 ],
@@ -559,7 +557,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                     [
@@ -567,7 +565,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/valid-no-messages-hash.css',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/valid-no-messages-hash.css'
                     ],
                 ]),
@@ -576,7 +574,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'domainsToIgnore' => [],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -628,7 +626,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                 ]),
@@ -639,7 +637,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'domainsToIgnore' => [
                     'foo.example.com',
                 ],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -691,7 +689,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                     [
@@ -701,7 +699,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 2, '.foo', ''),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/invalid-hash.css'
                     ],
                 ]),
@@ -710,7 +708,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'domainsToIgnore' => [],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 2, '.foo', 'http://foo.example.com/import.css'),
                 ],
@@ -766,7 +764,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 1, '.bar', 'file:/tmp/invalid-link-hash.css'),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                     [
@@ -776,7 +774,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 2, '.foo', ''),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/invalid-import-hash.css'
                     ],
                 ]),
@@ -785,7 +783,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                 'domainsToIgnore' => [],
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 1, '.bar', 'http://example.com/style.css'),
                     new ErrorMessage('title content', 2, '.foo', 'http://foo.example.com/import.css'),
