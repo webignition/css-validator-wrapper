@@ -8,7 +8,6 @@ use webignition\CssValidatorOutput\Parser\Flags;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\ResourceStorage\SourcePurger;
-use webignition\Uri\Uri;
 use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\ContentEncodingValidator;
 use webignition\WebResource\WebPage\WebPage;
@@ -63,10 +62,11 @@ class Wrapper
         }
 
         $webPageUri = (string) $webPage->getUri();
+        $ignoredUrlVerifier = new IgnoredUrlVerifier();
 
         $embeddedStylesheetUrls = $this->sourceInspector->findStylesheetUrls($webPage);
         foreach ($embeddedStylesheetUrls as $stylesheetUrl) {
-            $isUrlIgnored = $this->isUrlIgnored($stylesheetUrl, $domainsToIgnore);
+            $isUrlIgnored = $ignoredUrlVerifier->isUrlIgnored($stylesheetUrl, $domainsToIgnore);
 
             if (!$isUrlIgnored && !$remoteSources->getByUri($stylesheetUrl)) {
                 throw new UnknownSourceException($stylesheetUrl);
@@ -95,7 +95,7 @@ class Wrapper
 
         if ($output instanceof ValidationOutput) {
             foreach ($importedStylesheetUrls as $importedStylesheetUrl) {
-                if ($this->isUrlIgnored($importedStylesheetUrl, $domainsToIgnore)) {
+                if ($ignoredUrlVerifier->isUrlIgnored($importedStylesheetUrl, $domainsToIgnore)) {
                     continue;
                 }
 
@@ -130,13 +130,5 @@ class Wrapper
         $sourcePurger->purgeLocalResources($localSources);
 
         return $output;
-    }
-
-    private function isUrlIgnored(string $url, array $domainsToIgnore): bool
-    {
-        $uri = new Uri($url);
-        $host = $uri->getHost();
-
-        return in_array($host, $domainsToIgnore);
     }
 }
