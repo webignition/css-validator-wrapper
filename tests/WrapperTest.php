@@ -141,7 +141,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             ),
             new Source('http://example.com/style.css', 'file:' . $cssWithImportPath),
             new Source(
-                'http://example.com/one.css',
+                'http://foo.example.com/import.css',
                 'file:' . FixtureLoader::getPath('Css/one.css'),
                 SourceType::TYPE_IMPORT
             ),
@@ -156,6 +156,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         ]);
 
         $outputParserConfiguration = new OutputParserConfiguration();
+
+        $ignoredDomainOutputParserConfiguration = new OutputParserConfiguration([
+            OutputParserConfiguration::KEY_REF_DOMAINS_TO_IGNORE => [
+                'foo.example.com',
+            ],
+        ]);
 
         return [
             'no CSS' => [
@@ -442,11 +448,11 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     $singleStylesheetWithImportsSourceMap,
                     [
                         'http://example.com/style.css',
-                        'http://example.com/one.css',
+                        'http://foo.example.com/import.css',
                     ],
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     str_replace(
                         [
@@ -459,12 +465,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     ),
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ])
                 ),
                 'commandFactory' => $this->createCommandFactory([
@@ -504,17 +510,17 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'linked stylesheet with import, error in import' => [
+            'linked stylesheet with import, import domain ignored, no messages' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
                     new SourceMap(),
                     $singleStylesheetWithImportsSourceMap,
                     [
                         'http://example.com/style.css',
-                        'http://example.com/one.css',
+                        'http://foo.example.com/import.css',
                     ],
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     str_replace(
                         [
@@ -527,12 +533,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     ),
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ])
                 ),
                 'commandFactory' => $this->createCommandFactory([
@@ -541,7 +547,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                     ],
                     [
-                        'expectedUrl' => 'file:/tmp/invalid-hash.css',
+                        'expectedUrl' => 'file:/tmp/valid-no-messages-hash.css',
                         'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
                     ],
                 ]),
@@ -551,106 +557,166 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => $ignoredDomainOutputParserConfiguration,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
-                    ],
-                    [
-                        'output' => $this->createValidationOutput(
-                            'file:/tmp/invalid-hash.css',
-                            new MessageList([
-                                new ErrorMessage('title content', 2, '.foo', ''),
-                            ])
-                        ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
-                        'expectedResourceUrl' => 'file:/tmp/invalid-hash.css'
                     ],
                 ]),
                 'sourceMap' => $singleStylesheetWithImportsSourceMap,
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
-                'expectedMessages' => [
-                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
-                ],
+                'outputParserConfiguration' => $ignoredDomainOutputParserConfiguration,
+                'expectedMessages' => [],
                 'expectedWarningCount' => 0,
-                'expectedErrorCount' => 1,
+                'expectedErrorCount' => 0,
             ],
-            'linked stylesheet with import, error in linked stylesheet, error in import' => [
-                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
-                    new SourceMap(),
-                    $singleStylesheetWithImportsSourceMap,
-                    [
-                        'http://example.com/style.css',
-                        'http://example.com/one.css',
-                    ],
-                    new SourceMap([
-                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
-                    ]),
-                    str_replace(
-                        [
-                            '<link href="/style.css" rel="stylesheet">',
-                        ],
-                        [
-                            '<link href="file:/tmp/invalid-link-hash.css" rel="stylesheet">',
-                        ],
-                        $singleStylesheetHtml
-                    ),
-                    new SourceMap([
-                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
-                    ]),
-                    new SourceMap([
-                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
-                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
-                    ])
-                ),
-                'commandFactory' => $this->createCommandFactory([
-                    [
-                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
-                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                    ],
-                    [
-                        'expectedUrl' => 'file:/tmp/invalid-import-hash.css',
-                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                    ],
-                ]),
-                'commandExecutor' => $this->createCommandExecutor([
-                    [
-                        'output' => $this->createValidationOutput(
-                            'file:/tmp/web-page-hash.html',
-                            new MessageList([
-                                new ErrorMessage('title content', 1, '.bar', 'file:/tmp/invalid-link-hash.css'),
-                            ])
-                        ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
-                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
-                    ],
-                    [
-                        'output' => $this->createValidationOutput(
-                            'file:/tmp/invalid-import-hash.css',
-                            new MessageList([
-                                new ErrorMessage('title content', 2, '.foo', ''),
-                            ])
-                        ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
-                        'expectedResourceUrl' => 'file:/tmp/invalid-import-hash.css'
-                    ],
-                ]),
-                'sourceMap' => $singleStylesheetWithImportsSourceMap,
-                'sourceFixture' => $singleStylesheetHtml,
-                'sourceUrl' => 'http://example.com/',
-                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
-                'expectedMessages' => [
-                    new ErrorMessage('title content', 1, '.bar', 'http://example.com/style.css'),
-                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
-                ],
-                'expectedWarningCount' => 0,
-                'expectedErrorCount' => 2,
-            ],
+//            'linked stylesheet with import, error in import' => [
+//                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+//                    new SourceMap(),
+//                    $singleStylesheetWithImportsSourceMap,
+//                    [
+//                        'http://example.com/style.css',
+//                        'http://example.com/one.css',
+//                    ],
+//                    new SourceMap([
+//                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+//                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+//                    ]),
+//                    str_replace(
+//                        [
+//                            '<link href="/style.css" rel="stylesheet">',
+//                        ],
+//                        [
+//                            '<link href="file:/tmp/valid-no-messages-hash.css" rel="stylesheet">',
+//                        ],
+//                        $singleStylesheetHtml
+//                    ),
+//                    new SourceMap([
+//                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+//                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+//                    ]),
+//                    new SourceMap([
+//                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+//                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+//                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+//                    ])
+//                ),
+//                'commandFactory' => $this->createCommandFactory([
+//                    [
+//                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+//                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+//                    ],
+//                    [
+//                        'expectedUrl' => 'file:/tmp/invalid-hash.css',
+//                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+//                    ],
+//                ]),
+//                'commandExecutor' => $this->createCommandExecutor([
+//                    [
+//                        'output' => $this->createValidationOutput(
+//                            'file:/tmp/web-page-hash.html',
+//                            new MessageList()
+//                        ),
+//                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+//                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+//                    ],
+//                    [
+//                        'output' => $this->createValidationOutput(
+//                            'file:/tmp/invalid-hash.css',
+//                            new MessageList([
+//                                new ErrorMessage('title content', 2, '.foo', ''),
+//                            ])
+//                        ),
+//                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+//                        'expectedResourceUrl' => 'file:/tmp/invalid-hash.css'
+//                    ],
+//                ]),
+//                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+//                'sourceFixture' => $singleStylesheetHtml,
+//                'sourceUrl' => 'http://example.com/',
+//                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+//                'outputParserConfiguration' => $outputParserConfiguration,
+//                'expectedMessages' => [
+//                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
+//                ],
+//                'expectedWarningCount' => 0,
+//                'expectedErrorCount' => 1,
+//            ],
+//            'linked stylesheet with import, error in linked stylesheet, error in import' => [
+//                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+//                    new SourceMap(),
+//                    $singleStylesheetWithImportsSourceMap,
+//                    [
+//                        'http://example.com/style.css',
+//                        'http://example.com/one.css',
+//                    ],
+//                    new SourceMap([
+//                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
+//                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+//                    ]),
+//                    str_replace(
+//                        [
+//                            '<link href="/style.css" rel="stylesheet">',
+//                        ],
+//                        [
+//                            '<link href="file:/tmp/invalid-link-hash.css" rel="stylesheet">',
+//                        ],
+//                        $singleStylesheetHtml
+//                    ),
+//                    new SourceMap([
+//                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
+//                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+//                    ]),
+//                    new SourceMap([
+//                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+//                        new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
+//                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+//                    ])
+//                ),
+//                'commandFactory' => $this->createCommandFactory([
+//                    [
+//                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+//                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+//                    ],
+//                    [
+//                        'expectedUrl' => 'file:/tmp/invalid-import-hash.css',
+//                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+//                    ],
+//                ]),
+//                'commandExecutor' => $this->createCommandExecutor([
+//                    [
+//                        'output' => $this->createValidationOutput(
+//                            'file:/tmp/web-page-hash.html',
+//                            new MessageList([
+//                                new ErrorMessage('title content', 1, '.bar', 'file:/tmp/invalid-link-hash.css'),
+//                            ])
+//                        ),
+//                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+//                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+//                    ],
+//                    [
+//                        'output' => $this->createValidationOutput(
+//                            'file:/tmp/invalid-import-hash.css',
+//                            new MessageList([
+//                                new ErrorMessage('title content', 2, '.foo', ''),
+//                            ])
+//                        ),
+//                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+//                        'expectedResourceUrl' => 'file:/tmp/invalid-import-hash.css'
+//                    ],
+//                ]),
+//                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+//                'sourceFixture' => $singleStylesheetHtml,
+//                'sourceUrl' => 'http://example.com/',
+//                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+//                'outputParserConfiguration' => $outputParserConfiguration,
+//                'expectedMessages' => [
+//                    new ErrorMessage('title content', 1, '.bar', 'http://example.com/style.css'),
+//                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
+//                ],
+//                'expectedWarningCount' => 0,
+//                'expectedErrorCount' => 2,
+//            ],
         ];
     }
 

@@ -8,6 +8,7 @@ use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfigura
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
 use webignition\ResourceStorage\SourcePurger;
+use webignition\Uri\Uri;
 use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\ContentEncodingValidator;
 use webignition\WebResource\WebPage\WebPage;
@@ -89,7 +90,16 @@ class Wrapper
         $output = $this->commandExecutor->execute($command, $outputParserConfiguration);
 
         if ($output instanceof ValidationOutput) {
+            $domainsToIgnore = [];
+            if ($outputParserConfiguration) {
+                $domainsToIgnore = $outputParserConfiguration->getRefDomainsToIgnore();
+            }
+
             foreach ($importedStylesheetUrls as $importedStylesheetUrl) {
+                if ($this->isUrlIgnored($importedStylesheetUrl, $domainsToIgnore)) {
+                    continue;
+                }
+
                 $stylesheetLocalSource = $localSources->getByUri($importedStylesheetUrl);
 
                 $command = $this->commandFactory->create(
@@ -121,5 +131,13 @@ class Wrapper
         $sourcePurger->purgeLocalResources($localSources);
 
         return $output;
+    }
+
+    private function isUrlIgnored(string $url, array $domainsToIgnore): bool
+    {
+        $uri = new Uri($url);
+        $host = $uri->getHost();
+
+        return in_array($host, $domainsToIgnore);
     }
 }
