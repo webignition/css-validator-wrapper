@@ -130,30 +130,13 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $singleStylesheetHtml
         );
 
-        $noStylesheetsSourceMap = new SourceMap([
-            new Source('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
-        ]);
+        $emptySourceMap = new SourceMap();
 
         $singleStylesheetValidNoMessagesSourceMap = new SourceMap([
-            new Source(
-                'http://example.com/',
-                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
-            ),
             new Source('http://example.com/style.css', 'file:' . $cssNoMessagesPath),
         ]);
 
-        $singleStylesheetLackingStylesheetSourceMap = new SourceMap([
-            new Source(
-                'http://example.com/',
-                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
-            ),
-        ]);
-
         $singleStylesheetWithImportsSourceMap = new SourceMap([
-            new Source(
-                'http://example.com/',
-                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
-            ),
             new Source('http://example.com/style.css', 'file:' . $cssWithImportPath),
             new Source(
                 'http://foo.example.com/import.css',
@@ -163,18 +146,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         ]);
 
         $singleStylesheetWithImportsImportDomainIgnoredSourceMap = new SourceMap([
-            new Source(
-                'http://example.com/',
-                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
-            ),
             new Source('http://example.com/style.css', 'file:' . $cssWithImportPath),
         ]);
 
         $singleStylesheetUnavailableSourceMap = new SourceMap([
-            new Source(
-                'http://example.com/',
-                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
-            ),
             new Source('http://example.com/style.css'),
         ]);
 
@@ -182,7 +157,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             'no CSS' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
                     new SourceMap(),
-                    $noStylesheetsSourceMap,
+                    $emptySourceMap,
                     [],
                     new SourceMap(),
                     $noStylesheetsHtml,
@@ -207,7 +182,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
-                'sourceMap' => $noStylesheetsSourceMap,
+                'sourceMap' => $emptySourceMap,
                 'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
@@ -273,7 +248,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             'linked stylesheet, not in source map, url domain is ignored' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
                     new SourceMap(),
-                    $singleStylesheetLackingStylesheetSourceMap,
+                    $emptySourceMap,
                     [
                         'http://foo.example.com/style.css',
                     ],
@@ -313,7 +288,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
-                'sourceMap' => $singleStylesheetLackingStylesheetSourceMap,
+                'sourceMap' => $emptySourceMap,
                 'sourceFixture' => $singleStylesheetHtmlIgnoredDomain,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
@@ -422,7 +397,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             'in-document CSS, single error' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
                     new SourceMap(),
-                    $noStylesheetsSourceMap,
+                    $emptySourceMap,
                     [],
                     new SourceMap(),
                     $noStylesheetsHtml,
@@ -449,7 +424,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
-                'sourceMap' => $noStylesheetsSourceMap,
+                'sourceMap' => $emptySourceMap,
                 'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
