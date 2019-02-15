@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "51918439210d95241a07d72fbe465335",
+    "content-hash": "7302c1ce3dea03bff1762f4bab22fff2",
     "packages": [
         {
             "name": "etechnika/idna-convert",
@@ -635,16 +635,16 @@
         },
         {
             "name": "webignition/css-validator-output-parser",
-            "version": "5.1",
+            "version": "5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webignition/css-validator-output-parser.git",
-                "reference": "c7fd93edced9a54ec774c7d2c873715c79e8eade"
+                "reference": "66cb21ca1c340ed017fe3bf29d1d99f0a1992acd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/c7fd93edced9a54ec774c7d2c873715c79e8eade",
-                "reference": "c7fd93edced9a54ec774c7d2c873715c79e8eade",
+                "url": "https://api.github.com/repos/webignition/css-validator-output-parser/zipball/66cb21ca1c340ed017fe3bf29d1d99f0a1992acd",
+                "reference": "66cb21ca1c340ed017fe3bf29d1d99f0a1992acd",
                 "shasum": ""
             },
             "require": {
@@ -653,6 +653,7 @@
                 "webignition/url": ">=2,<3"
             },
             "require-dev": {
+                "phpstan/phpstan": "^0.11.2",
                 "phpunit/phpunit": "^7",
                 "squizlabs/php_codesniffer": "^3"
             },
@@ -679,7 +680,7 @@
                 "parser",
                 "validator"
             ],
-            "time": "2019-01-03T12:34:51+00:00"
+            "time": "2019-02-15T14:54:30+00:00"
         },
         {
             "name": "webignition/disallowed-character-terminated-string",
