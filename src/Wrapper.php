@@ -7,6 +7,7 @@ use webignition\CssValidatorOutput\Model\ValidationOutput;
 use webignition\CssValidatorOutput\Parser\Flags;
 use webignition\CssValidatorOutput\Parser\InvalidValidatorOutputException;
 use webignition\CssValidatorWrapper\Exception\UnknownSourceException;
+use webignition\IgnoredUrlVerifier\IgnoredUrlVerifier;
 use webignition\ResourceStorage\SourcePurger;
 use webignition\UrlSourceMap\SourceMap;
 use webignition\WebResource\WebPage\ContentEncodingValidator;
