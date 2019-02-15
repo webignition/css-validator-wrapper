@@ -90,7 +90,10 @@ class Wrapper
         $output = $this->commandExecutor->execute($command, $outputParserConfiguration);
 
         if ($output instanceof ValidationOutput) {
-            $domainsToIgnore = $outputParserConfiguration->getRefDomainsToIgnore();
+            $domainsToIgnore = [];
+            if ($outputParserConfiguration) {
+                $domainsToIgnore = $outputParserConfiguration->getRefDomainsToIgnore();
+            }
 
             foreach ($importedStylesheetUrls as $importedStylesheetUrl) {
                 if ($this->isUrlIgnored($importedStylesheetUrl, $domainsToIgnore)) {
