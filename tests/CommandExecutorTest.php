@@ -6,7 +6,7 @@ namespace webignition\CssValidatorWrapper\Tests;
 
 use phpmock\mockery\PHPMockery;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
-use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
+use webignition\CssValidatorOutput\Parser\Flags;
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandExecutor;
 
@@ -29,7 +29,7 @@ class CommandExecutorTest extends \PHPUnit\Framework\TestCase
      */
     public function testExecute(
         string $cssValidatorFixture,
-        OutputParserConfiguration $outputParserConfiguration,
+        int $outputParserFlags,
         int $expectedWarningCount,
         int $expectedErrorCount
     ) {
@@ -38,7 +38,7 @@ class CommandExecutorTest extends \PHPUnit\Framework\TestCase
         $command = 'non-blank string';
 
         /* @var ValidationOutput $output */
-        $output = $this->commandExecutor->execute($command, $outputParserConfiguration);
+        $output = $this->commandExecutor->execute($command, $outputParserFlags);
 
         $this->assertInstanceOf(ValidationOutput::class, $output);
 
@@ -54,68 +54,55 @@ class CommandExecutorTest extends \PHPUnit\Framework\TestCase
         return [
             'ignore false image data url messages' => [
                 'cssValidatorFixture' => 'incorrect-data-url-background-image-errors',
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_FALSE_DATA_URL_MESSAGES => true,
-                ]),
+                'outputParserFlags' => Flags::IGNORE_FALSE_IMAGE_DATA_URL_MESSAGES,
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'ignore warnings' => [
                 'cssValidatorFixture' => 'single-warning',
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                ]),
+                'outputParserFlags' => Flags::IGNORE_WARNINGS,
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension issues:warn and ignore warnings' => [
                 'cssValidatorFixture' => 'vendor-specific-at-rules',
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                    OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
-                ]),
+                'outputParserFlags' => Flags::IGNORE_WARNINGS | Flags::REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS,
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension warnings' => [
                 'cssValidatorFixture' => 'three-vendor-extension-warnings',
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_WARNINGS => true,
-                ]),
+                'outputParserFlags' => Flags::IGNORE_WARNINGS,
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'ignore vendor extension errors' => [
                 'cssValidatorFixture' => 'three-vendor-extension-errors',
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_IGNORE_VENDOR_EXTENSION_ISSUES => true,
-                ]),
+                'outputParserFlags' => Flags::IGNORE_VENDOR_EXTENSION_ISSUES,
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: default' => [
                 'cssValidatorFixture' => 'three-vendor-extension-warnings',
-                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'outputParserFlags' => Flags::NONE,
                 'expectedWarningCount' => 3,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: warn' => [
                 'cssValidatorFixture' => 'three-vendor-extension-warnings',
-                'outputParserConfiguration' => new OutputParserConfiguration(),
+                'outputParserFlags' => Flags::NONE,
                 'expectedWarningCount' => 3,
                 'expectedErrorCount' => 0,
             ],
             'vendor extension warnings: error' => [
                 'cssValidatorFixture' => 'three-vendor-extension-errors',
-                'outputParserConfiguration' => new OutputParserConfiguration([]),
+                'outputParserFlags' => Flags::NONE,
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 3,
             ],
             'vendor extension warnings: warn, with at-rule errors that should be warnings' => [
                 'cssValidatorFixture' => 'vendor-specific-at-rules',
-                'outputParserConfiguration' => new OutputParserConfiguration([
-                    OutputParserConfiguration::KEY_REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS => true,
-                ]),
+                'outputParserFlags' => Flags::REPORT_VENDOR_EXTENSION_ISSUES_AS_WARNINGS,
                 'expectedWarningCount' => 12,
                 'expectedErrorCount' => 0,
             ],

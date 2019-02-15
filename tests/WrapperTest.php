@@ -12,7 +12,7 @@ use webignition\CssValidatorOutput\Model\MessageList;
 use webignition\CssValidatorOutput\Model\ObservationResponse;
 use webignition\CssValidatorOutput\Model\Options;
 use webignition\CssValidatorOutput\Model\ValidationOutput;
-use webignition\CssValidatorOutput\Parser\Configuration as OutputParserConfiguration;
+use webignition\CssValidatorOutput\Parser\Flags;
 use webignition\CssValidatorOutput\Parser\OutputParser;
 use webignition\CssValidatorWrapper\CommandExecutor;
 use webignition\CssValidatorWrapper\CommandFactory;
@@ -71,7 +71,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         string $sourceFixture,
         string $sourceUrl,
         string $vendorExtensionSeverityLevel,
-        OutputParserConfiguration $outputParserConfiguration,
+        array $domainsToIgnore,
+        int $outputParserFlags,
         array $expectedMessages,
         int $expectedWarningCount,
         int $expectedErrorCount,
@@ -85,7 +86,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $webPage,
             $sourceMap,
             $vendorExtensionSeverityLevel,
-            $outputParserConfiguration
+            $domainsToIgnore,
+            $outputParserFlags
         );
 
         $this->assertInstanceOf(ValidationOutput::class, $output);
@@ -122,6 +124,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             $singleStylesheetHtml
         );
 
+        $singleStylesheetHtmlIgnoredDomain = str_replace(
+            '<link href="/style.css" rel="stylesheet">',
+            '<link href="http://foo.example.com/style.css" rel="stylesheet">',
+            $singleStylesheetHtml
+        );
+
         $noStylesheetsSourceMap = new SourceMap([
             new Source('http://example.com/', 'file:' . FixtureLoader::getPath('Html/minimal-html5.html')),
         ]);
@@ -134,6 +142,13 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             new Source('http://example.com/style.css', 'file:' . $cssNoMessagesPath),
         ]);
 
+        $singleStylesheetLackingStylesheetSourceMap = new SourceMap([
+            new Source(
+                'http://example.com/',
+                'file:' . FixtureLoader::getPath('Html/minimal-html5-single-stylesheet.html')
+            ),
+        ]);
+
         $singleStylesheetWithImportsSourceMap = new SourceMap([
             new Source(
                 'http://example.com/',
@@ -141,7 +156,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             ),
             new Source('http://example.com/style.css', 'file:' . $cssWithImportPath),
             new Source(
-                'http://example.com/one.css',
+                'http://foo.example.com/import.css',
                 'file:' . FixtureLoader::getPath('Css/one.css'),
                 SourceType::TYPE_IMPORT
             ),
@@ -154,8 +169,6 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
             ),
             new Source('http://example.com/style.css'),
         ]);
-
-        $outputParserConfiguration = new OutputParserConfiguration();
 
         return [
             'no CSS' => [
@@ -182,7 +195,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -190,7 +203,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -234,7 +248,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -242,7 +256,63 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtmlRelBeforeHref,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'linked stylesheet, not in source map, url domain is ignored' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
+                    $singleStylesheetLackingStylesheetSourceMap,
+                    [
+                        'http://foo.example.com/style.css',
+                    ],
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="http://foo.example.com/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="http://foo.example.com/style.css">',
+                        ],
+                        $singleStylesheetHtmlIgnoredDomain
+                    ),
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ])
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => Flags::NONE,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetLackingStylesheetSourceMap,
+                'sourceFixture' => $singleStylesheetHtmlIgnoredDomain,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [
+                    'foo.example.com',
+                ],
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -279,7 +349,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -287,7 +357,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleEmptyHrefStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -326,7 +397,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -334,7 +405,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
@@ -365,7 +437,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 3, '.bar', ''),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
                     ],
                 ]),
@@ -373,7 +445,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $noStylesheetsHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 3, '.bar', ''),
                 ],
@@ -421,7 +494,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 2, '.foo', 'file:/tmp/style-hash.css'),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                 ]),
@@ -429,7 +502,8 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 2, '.foo', 'http://example.com/style.css'),
                 ],
@@ -442,11 +516,11 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     $singleStylesheetWithImportsSourceMap,
                     [
                         'http://example.com/style.css',
-                        'http://example.com/one.css',
+                        'http://foo.example.com/import.css',
                     ],
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     str_replace(
                         [
@@ -459,12 +533,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     ),
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ])
                 ),
                 'commandFactory' => $this->createCommandFactory([
@@ -483,7 +557,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                     [
@@ -491,7 +565,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/valid-no-messages-hash.css',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/valid-no-messages-hash.css'
                     ],
                 ]),
@@ -499,22 +573,23 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 0,
             ],
-            'linked stylesheet with import, error in import' => [
+            'linked stylesheet with import, import domain ignored, no messages' => [
                 'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
                     new SourceMap(),
                     $singleStylesheetWithImportsSourceMap,
                     [
                         'http://example.com/style.css',
-                        'http://example.com/one.css',
+                        'http://foo.example.com/import.css',
                     ],
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     str_replace(
                         [
@@ -527,12 +602,75 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     ),
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
                     ]),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ])
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                    [
+                        'expectedUrl' => 'file:/tmp/valid-no-messages-hash.css',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => Flags::NONE,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetWithImportsSourceMap,
+                'sourceFixture' => $singleStylesheetHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [
+                    'foo.example.com',
+                ],
+                'outputParserConfiguration' => Flags::NONE,
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
+            ],
+            'linked stylesheet with import, error in import' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
+                    $singleStylesheetWithImportsSourceMap,
+                    [
+                        'http://example.com/style.css',
+                        'http://foo.example.com/import.css',
+                    ],
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/invalid-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link href="/style.css" rel="stylesheet">',
+                        ],
+                        [
+                            '<link href="file:/tmp/valid-no-messages-hash.css" rel="stylesheet">',
+                        ],
+                        $singleStylesheetHtml
+                    ),
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/invalid-hash.css'),
+                    ]),
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/invalid-hash.css'),
                     ])
                 ),
                 'commandFactory' => $this->createCommandFactory([
@@ -551,7 +689,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                             'file:/tmp/web-page-hash.html',
                             new MessageList()
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                     [
@@ -561,7 +699,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 2, '.foo', ''),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/invalid-hash.css'
                     ],
                 ]),
@@ -569,9 +707,10 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [
-                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
+                    new ErrorMessage('title content', 2, '.foo', 'http://foo.example.com/import.css'),
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 1,
@@ -582,11 +721,11 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     $singleStylesheetWithImportsSourceMap,
                     [
                         'http://example.com/style.css',
-                        'http://example.com/one.css',
+                        'http://foo.example.com/import.css',
                     ],
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/invalid-import-hash.css'),
                     ]),
                     str_replace(
                         [
@@ -599,12 +738,12 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                     ),
                     new SourceMap([
                         new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/invalid-import-hash.css'),
                     ]),
                     new SourceMap([
                         new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
                         new Source('http://example.com/style.css', 'file:/tmp/invalid-link-hash.css'),
-                        new Source('http://example.com/one.css', 'file:/tmp/invalid-import-hash.css'),
+                        new Source('http://foo.example.com/import.css', 'file:/tmp/invalid-import-hash.css'),
                     ])
                 ),
                 'commandFactory' => $this->createCommandFactory([
@@ -625,7 +764,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 1, '.bar', 'file:/tmp/invalid-link-hash.css'),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/web-page-hash.html'
                     ],
                     [
@@ -635,7 +774,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                                 new ErrorMessage('title content', 2, '.foo', ''),
                             ])
                         ),
-                        'expectedOutputParserConfiguration' => $outputParserConfiguration,
+                        'expectedOutputParserConfiguration' => Flags::NONE,
                         'expectedResourceUrl' => 'file:/tmp/invalid-import-hash.css'
                     ],
                 ]),
@@ -643,10 +782,11 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 'sourceFixture' => $singleStylesheetHtml,
                 'sourceUrl' => 'http://example.com/',
                 'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
-                'outputParserConfiguration' => $outputParserConfiguration,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
                 'expectedMessages' => [
                     new ErrorMessage('title content', 1, '.bar', 'http://example.com/style.css'),
-                    new ErrorMessage('title content', 2, '.foo', 'http://example.com/one.css'),
+                    new ErrorMessage('title content', 2, '.foo', 'http://foo.example.com/import.css'),
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 2,
