@@ -146,6 +146,10 @@ class SourceInspector
             $hrefValueStartPosition
         );
 
+        if (null !== $hrefLinkPrefix && !$this->endsWithHrefAttribute($hrefLinkPrefix)) {
+            $hrefLinkPrefix = null;
+        }
+
         if (null === $hrefLinkPrefix) {
             return $this->findStylesheetUrlReference(
                 mb_substr($content, $hrefValueEndPosition, null, $encoding),
@@ -155,6 +159,13 @@ class SourceInspector
         }
 
         return $hrefLinkPrefix . $hrefValue;
+    }
+
+    private function endsWithHrefAttribute(string $hrefLinkPrefix)
+    {
+        $endsWithHrefEqualsPattern = '/href="?\'?$/';
+
+        return preg_match($endsWithHrefEqualsPattern, $hrefLinkPrefix) > 0;
     }
 
     private function findLinkElementHrefValues(WebPage $webPage): array

@@ -458,6 +458,15 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     '<link' . "\n            " . 'href="/style.css',
                 ],
             ],
+            'stylesheet url within text content' => [
+                'webPage' => WebPageFactory::create(
+                    FixtureLoader::load('Html/stylesheet-url-within-text-content.html'),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link rel="stylesheet" href="/style.css',
+                ],
+            ],
         ];
     }
 
