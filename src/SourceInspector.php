@@ -146,7 +146,7 @@ class SourceInspector
             $hrefValueStartPosition
         );
 
-        if (null !== $hrefLinkPrefix && !$this->endsWithHrefAttribute($hrefLinkPrefix)) {
+        if (null !== $hrefLinkPrefix && !$this->isValidLinkHrefPrefix($hrefLinkPrefix, $encoding)) {
             $hrefLinkPrefix = null;
         }
 
@@ -161,11 +161,18 @@ class SourceInspector
         return $hrefLinkPrefix . $hrefValue;
     }
 
-    private function endsWithHrefAttribute(string $hrefLinkPrefix)
+    private function isValidLinkHrefPrefix(string $hrefLinkPrefix, string $encoding): bool
     {
-        $endsWithHrefEqualsPattern = '/href="?\'?$/';
+        if (!$this->containsOnlyOneLeftAngledCaret($hrefLinkPrefix, $encoding)) {
+            return false;
+        }
 
-        return preg_match($endsWithHrefEqualsPattern, $hrefLinkPrefix) > 0;
+        return true;
+    }
+
+    private function containsOnlyOneLeftAngledCaret(string $hrefLinkPrefix, string $encoding): bool
+    {
+        return 1 === mb_substr_count($hrefLinkPrefix, '<', $encoding);
     }
 
     private function findLinkElementHrefValues(WebPage $webPage): array
