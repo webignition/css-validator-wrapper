@@ -458,6 +458,68 @@ class SourceInspectorTest extends \PHPUnit\Framework\TestCase
                     '<link' . "\n            " . 'href="/style.css',
                 ],
             ],
+            'stylesheet url within text content' => [
+                'webPage' => WebPageFactory::create(
+                    FixtureLoader::load('Html/stylesheet-url-within-text-content.html'),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link rel="stylesheet" href="/style.css',
+                ],
+            ],
+            'stylesheet url within text content; invalid link href prefix ends with href attribute, no quotation' => [
+                'webPage' => WebPageFactory::create(
+                    str_replace(
+                        '<span>theme=/style.css</span>',
+                        '<span>href=/style.css</span>',
+                        FixtureLoader::load('Html/stylesheet-url-within-text-content.html')
+                    ),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link rel="stylesheet" href="/style.css',
+                ],
+            ],
+            'stylesheet url within text content; invalid link href prefix ends with href attribute, single quoted' => [
+                'webPage' => WebPageFactory::create(
+                    str_replace(
+                        '<span>theme=/style.css</span>',
+                        '<span>href=\'/style.css</span>',
+                        FixtureLoader::load('Html/stylesheet-url-within-text-content.html')
+                    ),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link rel="stylesheet" href="/style.css',
+                ],
+            ],
+            'stylesheet url within text content; invalid link href prefix ends with href attribute, double quoted' => [
+                'webPage' => WebPageFactory::create(
+                    str_replace(
+                        '<span>theme=/style.css</span>',
+                        '<span>href="/style.css</span>',
+                        FixtureLoader::load('Html/stylesheet-url-within-text-content.html')
+                    ),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link rel="stylesheet" href="/style.css',
+                ],
+            ],
+            'stylesheet href attribute within text content' => [
+                'webPage' => WebPageFactory::create(
+                    str_replace(
+                        '',
+                        '',
+                        FixtureLoader::load('Html/stylesheet-href-attribute-within-text-content.html')
+                    ),
+                    new Uri('http://example.com/')
+                ),
+                'expectedStylesheetUrlReferences' => [
+                    '<link rel="stylesheet" href="/one.css',
+                    '<link rel="stylesheet" href="/two.css',
+                ],
+            ],
         ];
     }
 

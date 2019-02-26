@@ -115,6 +115,7 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
         $noStylesheetsHtml = FixtureLoader::load('Html/minimal-html5.html');
         $singleStylesheetHtml = FixtureLoader::load('Html/minimal-html5-single-stylesheet.html');
         $singleEmptyHrefStylesheetHtml = FixtureLoader::load('Html/minimal-html5-unavailable-stylesheet.html');
+        $cssUrlWithinTextContentHtml = FixtureLoader::load('Html/stylesheet-url-within-text-content.html');
         $cssNoMessagesPath = FixtureLoader::getPath('Css/valid-no-messages.css');
         $cssWithImportPath = FixtureLoader::getPath('Css/valid-with-import.css');
 
@@ -769,6 +770,59 @@ class WrapperTest extends \PHPUnit\Framework\TestCase
                 ],
                 'expectedWarningCount' => 0,
                 'expectedErrorCount' => 2,
+            ],
+            'stylesheet url with text content' => [
+                'sourceStorage' => $this->createSourceStorageWithValidateExpectationsFoo(
+                    new SourceMap(),
+                    $singleStylesheetValidNoMessagesSourceMap,
+                    [
+                        'http://example.com/style.css',
+                    ],
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    str_replace(
+                        [
+                            '<link rel="stylesheet" href="/style.css">',
+                        ],
+                        [
+                            '<link rel="stylesheet" href="file:/tmp/valid-no-messages-hash.css">',
+                        ],
+                        $cssUrlWithinTextContentHtml
+                    ),
+                    new SourceMap([
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ]),
+                    new SourceMap([
+                        new Source('http://example.com/', 'file:/tmp/web-page-hash.html'),
+                        new Source('http://example.com/style.css', 'file:/tmp/valid-no-messages-hash.css'),
+                    ])
+                ),
+                'commandFactory' => $this->createCommandFactory([
+                    [
+                        'expectedUrl' => 'file:/tmp/web-page-hash.html',
+                        'expectedVendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                    ],
+                ]),
+                'commandExecutor' => $this->createCommandExecutor([
+                    [
+                        'output' => $this->createValidationOutput(
+                            'file:/tmp/web-page-hash.html',
+                            new MessageList()
+                        ),
+                        'expectedOutputParserConfiguration' => Flags::NONE,
+                        'expectedResourceUrl' => 'file:/tmp/web-page-hash.html',
+                    ],
+                ]),
+                'sourceMap' => $singleStylesheetValidNoMessagesSourceMap,
+                'sourceFixture' => $cssUrlWithinTextContentHtml,
+                'sourceUrl' => 'http://example.com/',
+                'vendorExtensionSeverityLevel' => VendorExtensionSeverityLevel::LEVEL_WARN,
+                'domainsToIgnore' => [],
+                'outputParserConfiguration' => Flags::NONE,
+                'expectedMessages' => [],
+                'expectedWarningCount' => 0,
+                'expectedErrorCount' => 0,
             ],
         ];
     }

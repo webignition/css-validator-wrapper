@@ -146,6 +146,10 @@ class SourceInspector
             $hrefValueStartPosition
         );
 
+        if (null !== $hrefLinkPrefix && !$this->isValidLinkHrefPrefix($hrefLinkPrefix, $encoding)) {
+            $hrefLinkPrefix = null;
+        }
+
         if (null === $hrefLinkPrefix) {
             return $this->findStylesheetUrlReference(
                 mb_substr($content, $hrefValueEndPosition, null, $encoding),
@@ -155,6 +159,20 @@ class SourceInspector
         }
 
         return $hrefLinkPrefix . $hrefValue;
+    }
+
+    private function isValidLinkHrefPrefix(string $hrefLinkPrefix, string $encoding): bool
+    {
+        if (!$this->containsOnlyOneLeftAngledCaret($hrefLinkPrefix, $encoding)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function containsOnlyOneLeftAngledCaret(string $hrefLinkPrefix, string $encoding): bool
+    {
+        return 1 === mb_substr_count($hrefLinkPrefix, '<', $encoding);
     }
 
     private function findLinkElementHrefValues(WebPage $webPage): array
