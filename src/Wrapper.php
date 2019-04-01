@@ -42,7 +42,7 @@ class Wrapper
      * @param WebPage $webPage
      * @param SourceMap $remoteSources
      * @param string $vendorExtensionSeverityLevel
-     * @param array $domainsToIgnore
+     * @param array $hostsToExclude
      * @param int $outputParserFlags
      *
      * @return OutputInterface
@@ -54,7 +54,7 @@ class Wrapper
         WebPage $webPage,
         SourceMap $remoteSources,
         string $vendorExtensionSeverityLevel,
-        array $domainsToIgnore = [],
+        array $hostsToExclude = [],
         int $outputParserFlags = Flags::NONE
     ): OutputInterface {
         $contentEncodingValidator = new ContentEncodingValidator();
@@ -67,7 +67,9 @@ class Wrapper
 
         $embeddedStylesheetUrls = $this->sourceInspector->findStylesheetUrls($webPage);
         foreach ($embeddedStylesheetUrls as $stylesheetUrl) {
-            $isUrlIgnored = $ignoredUrlVerifier->isUrlIgnored($stylesheetUrl, $domainsToIgnore);
+            $isUrlIgnored = $ignoredUrlVerifier->isUrlIgnored($stylesheetUrl, [
+                IgnoredUrlVerifier::EXCLUSIONS_HOSTS => $hostsToExclude,
+            ]);
 
             if (!$isUrlIgnored && !$remoteSources->getByUri($stylesheetUrl)) {
                 throw new UnknownSourceException($stylesheetUrl);
@@ -96,7 +98,7 @@ class Wrapper
 
         if ($output instanceof ValidationOutput) {
             foreach ($importedStylesheetUrls as $importedStylesheetUrl) {
-                if ($ignoredUrlVerifier->isUrlIgnored($importedStylesheetUrl, $domainsToIgnore)) {
+                if ($ignoredUrlVerifier->isUrlIgnored($importedStylesheetUrl, $hostsToExclude)) {
                     continue;
                 }
 
